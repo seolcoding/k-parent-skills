@@ -1,0 +1,35 @@
+{
+  "name": "k-parent-quiz-core",
+  "version": "0.1.0",
+  "description": "Deterministic template quiz generator over the 2022 revised elementary achievement standards for K-Parent Skill",
+  "license": "MIT",
+  "main": "src/index.js",
+  "files": [
+    "src",
+    "data",
+    "scripts",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seolcoding/k-parent-skill.git"
+  },
+  "keywords": [
+    "k-parent",
+    "k-skill",
+    "quiz",
+    "achievement-standards",
+    "korea"
+  ],
+  "scripts": {
+    "lint": "node --check src/index.js && node --check src/rng.js && node --check src/standards.js && node --check src/generate.js && node --check scripts/sync-standards.mjs && node --check scripts/generate-quiz-bank.mjs && node --check test/index.test.js",
+    "test": "node --test",
+    "sync-standards": "node scripts/sync-standards.mjs"
+  }
+}

@@ -50,8 +50,10 @@ metadata:
 
 - 시간표·학교·학급·학사일정: `packages/k-parent-source-neis` (나이스 교육정보 개방 포털, `KEDU_INFO_KEY`). 엔드포인트 레퍼런스는 docs/neis_api_ref.md.
 - 학교 공시·평가계획 문서: 학교알리미 Open API(`SCHOOLINFO_API_KEY`)와 schoolinfo-mcp(MIT, https://github.com/chrisryugj/schoolinfo-mcp)의 평가계획 파싱 도구를 참고 구현으로 사용한다.
-- 교육과정 성취기준: 국가교육과정정보센터 자료 기반 로컬 번들(수집 예정).
-- 퀴즈 생성 LLM 호출은 proxy 뒤에서 수행하고 키를 클라이언트에 노출하지 않는다.
+- 교육과정 성취기준: `references/achievement-standards-elementary.json` (2022 개정 초등 국어·수학·사회·과학·영어 399건, 확인 기준일 2026-07-07). 이 파일이 성취기준 데이터의 SSOT다.
+- 결정적 템플릿 문항 생성: `packages/k-parent-quiz-core` — `loadStandards`, `gradeToBand`, `filterStandards`, `createSeededRng`, `generateQuestion`, `generateQuiz`(같은 인자·seed면 항상 같은 문항, OX/3지선다/빈칸). 성취기준 번들 복사본을 동봉하며 `scripts/sync-standards.mjs`로 SSOT와 동기화한다.
+- 문항 은행 전수 생성: `node packages/k-parent-quiz-core/scripts/generate-quiz-bank.mjs --out <경로>` (성취기준당 유형별 최대 3개 변형, 바이트 단위 재현 가능).
+- 퀴즈 생성 LLM 호출은 proxy 뒤에서 수행하고 키를 클라이언트에 노출하지 않는다. LLM 없이도 위 템플릿 생성기로 기본 문항을 만들 수 있다.
 
 ## 출력 형식
 
