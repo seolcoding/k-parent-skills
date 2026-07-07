@@ -9,8 +9,8 @@
 | 축 | 소스 | 상태 | 퀴즈 앱 역할 |
 | --- | --- | --- | --- |
 | 학교·학급·시간표·학사·급식·학원 | NEIS 교육정보 개방 포털 | **즉시 사용 가능** (`KEDU_INFO_KEY` 발급·검증 완료) | 오늘 어떤 과목을 배웠는지의 유일한 공개 소스 |
-| 학교 공시(학업성취·교육여건 등) | 학교알리미 Open API | 키 발급만 하면 사용 가능 (SNS 로그인) | 학교 맥락 보조 |
-| 유치원 공시 | 유치원알리미 Open API | 키 발급만 하면 사용 가능 (승인제) | 유아 확장 시 |
+| 학교 공시(학업성취·교육여건 등) | 학교알리미 Open API | **즉시 사용 가능** (`SCHOOLINFO_API_KEY` 발급·검증 완료 2026-07-07) | 학교 맥락 보조 + 평가계획 |
+| 유치원 공시 | 유치원알리미 Open API | **즉시 사용 가능** (`CHILDSCHOOLINFO_API_KEY` 발급·검증 완료 2026-07-07, 기본현황 14종) | 유아 확장 시 |
 | 교육과정·성취기준 | NCIC 자료실 (PDF/HWP) | API 없음 → 문서를 로컬 데이터로 번들 | 과목→학습내용 매핑의 핵심 |
 | 평가문항·평가도구 | 학생평가지원포털(STAS, KICE) | API 없음, 로그인 필요 | 퀴즈 문항 스타일 참고자료 |
 | 주제별 학습자료 | 에듀넷 티클리어 | 파일데이터는 제4유형(상업적 이용금지·변경금지) 링크 모음이라 번들 불가; 콘텐츠 API 신청 표면은 상세 미확인 | 출처 링크 안내만 |
@@ -38,7 +38,9 @@ Base `https://open.neis.go.kr/hub/<endpoint>`, 인증키 `KEDU_INFO_KEY`(발급 
 
 기존 구현: `packages/k-parent-source-neis`(fixture-first 어댑터), 300개 부모 시나리오 라이브 통과 기록(`docs/neis_parent_scenario_report.md`).
 
-## 축 2. 공시 포털 — 키 발급만 하면 사용 가능
+## 축 2. 공시 포털 — 키 발급·검증 완료 (2026-07-07)
+
+두 포털 모두 `SCHOOLINFO_API_KEY` / `CHILDSCHOOLINFO_API_KEY`로 발급을 마쳤고 실호출로 정상 응답을 확인했다. 엔드포인트 상세는 `docs/schoolinfo_api_ref.md`, `docs/childschoolinfo_api_ref.md` 참고.
 
 - **학교알리미 Open API** (<https://www.schoolinfo.go.kr/ng/go/pnnggo_a01_m0.do>): 네이버/카카오 SNS 로그인으로 인증키 발급. 학생·교원 현황, 시설, 급식, 학업성취 등 공시 항목. 공공데이터 정책상 상업적 이용 포함 자유 이용(출처표시). 개발자 가이드 PDF 제공. data.go.kr 등록본: [15098092](https://www.data.go.kr/data/15098092/openapi.do).
 - **유치원알리미 Open API** (<https://e-childschoolinfo.moe.go.kr/openApi/openApiIntro.do>): SNS 계정 인증, 개발/운영 계정 신청 후 담당자 승인으로 인증키 발급. data.go.kr 등록본: [15020786](https://www.data.go.kr/data/15020786/openapi.do).
@@ -48,7 +50,7 @@ Base `https://open.neis.go.kr/hub/<endpoint>`, 인증키 `KEDU_INFO_KEY`(발급 
 
 공개 REST API가 사실상 없는 축이므로, 퀴즈 앱은 "문서 → 로컬 데이터 번들" 전략을 쓴다.
 
-- **NCIC 국가교육과정정보센터** (<https://ncic.re.kr>): 2022 개정 교육과정 원문, 성취기준·성취수준 연구보고서를 자료실에서 PDF/HWP로 배포(<https://ncic.re.kr/bbs/standard/list.do>). API 없음. → 과목×학년(군)별 성취기준을 1회 추출해 JSON으로 번들하면 "오늘 3학년 수학" → "분수의 이해, 곱셈…" 수준의 학습내용 매핑이 가능해진다.
+- **NCIC 국가교육과정정보센터** (<https://ncic.re.kr>): 2022 개정 교육과정 원문·인벤토리(xlsx)·성취수준 자료 배포(원문 목록: <https://ncic.re.kr/inv/org/list.do>). API 없음. **robots.txt가 전체 크롤링 금지(`Disallow: /`)이므로 자동 수집은 하지 않는다**(수동 다운로드는 가능). 저작권 정책상 KICE 저작물은 공공누리 제2유형(출처표시·비상업·2차저작 허용)이라 상업 앱 번들에 부적합. → 성취기준 번들은 **교육부 고시 원문(별책)** 에서 추출한다: 고시·공고는 저작권법 제7조 2호로 보호 대상이 아니라 자유이용 가능하며, 법제처 국가법령정보센터(law.go.kr) 행정규칙이나 교육부 게시판에서 같은 문서를 받을 수 있다(2026-07-07 확인). 과목×학년(군)별 성취기준 JSON 번들이 있으면 "오늘 3학년 수학" → "분수의 이해, 곱셈…" 수준의 학습내용 매핑과 RAG 결합이 가능해진다.
 - **학생평가지원포털 STAS** (<https://stas.moe.go.kr>): 교육부·KICE 운영. 초·중·고 성취기준 검색과 수행평가/서·논술형 평가도구 제공. 로그인 필요, API 없음. → 문항 형식·난이도 설계의 참고자료.
 - **에듀넷 티클리어** (<https://www.edunet.net>): 주제별 학습자료. 콘텐츠 API 신청 폼(<https://www.edunet.net/nedu/eduapisvc/contApiRegisterForm.do?menu_id=1043>)이 존재하나 JS 렌더링 페이지라 조건 미확인 — 후속 확인 필요. data.go.kr 파일데이터 [15118987 주제별 학습자료](https://www.data.go.kr/data/15118987/fileData.do)는 PDF 링크 모음 1건에 **공공저작물 제4유형(출처표시·상업적 이용금지·변경금지)** 라 앱 콘텐츠로 번들할 수 없다(2026-07-07 확인). 출처 링크 안내 용도로만 쓴다.
 - **schoolinfo-mcp** (<https://github.com/chrisryugj/schoolinfo-mcp>, MIT, TypeScript): 학교알리미 35종 공시 + 나이스(학사일정/급식/시간표) + **교과별 평가계획 첨부파일(HWP/HWPX/PDF) 자동 다운로드·kordoc 파싱**을 `find_school`, `get_evaluation_plan`, `parse_evaluation_file`, `get_parent_digest` 등 13개 도구로 노출한다. 환경변수 `SCHOOLINFO_API_KEY`(필수), `NEIS_API_KEY`(선택). 시간표가 과목명 수준에 그치는 한계를 **평가계획 문서의 단원/영역 정보**로 보강할 수 있는 가장 빠른 참고 구현이다(2026-06 정비 확인).

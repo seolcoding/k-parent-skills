@@ -180,6 +180,9 @@
 - 학교알리미 OpenAPI 개발자 가이드 PDF: https://www.schoolinfo.go.kr/download/OpenAPI_Developer_Guide.pdf
 - 공공데이터포털 학교알리미 공시정보: https://www.data.go.kr/data/15098092/openapi.do
 - 유치원알리미 Open API 이용안내: https://e-childschoolinfo.moe.go.kr/openApi/openApiIntro.do
+- 유치원알리미 Open API 제공목록: https://e-childschoolinfo.moe.go.kr/openApi/openApiList.do
+- 유치원알리미 기본현황(신규) endpoint: https://e-childschoolinfo.moe.go.kr/api/notice/basicInfo2.do
+- 학교알리미 Open API endpoint: https://www.schoolinfo.go.kr/openApi.do
 - 공공데이터포털 유치원 공시정보: https://www.data.go.kr/data/15020786/openapi.do
 - NCIC 국가교육과정정보센터 성취수준 자료실: https://ncic.re.kr/bbs/standard/list.do
 - 학생평가지원포털(STAS, 교육부/KICE): https://stas.moe.go.kr

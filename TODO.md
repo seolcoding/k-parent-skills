@@ -22,8 +22,9 @@
 - [x] `skills/k-parent-quiz-maker` concept `SKILL.md`를 저장소 authoring 규칙에 맞게 스캐폴딩한다.
 - [x] 안드로이드 MVP 화면 흐름(온보딩 학교/학년/반 → 오늘 시간표 → 퀴즈 5문항)과 proxy 계약 초안을 `docs/features/k-parent-quiz-maker.md`에 확정한다.
 - [ ] `packages/k-skill-proxy`에 NEIS 학교검색/학급/시간표/학사일정 allowlist 라우트와 일 단위 캐시를 추가한다.
-- [ ] 2022 개정 교육과정 성취기준 과목×학년 JSON 번들(초등 우선)을 수집하고 확인일을 기록한다.
-- [ ] 학교알리미 키(`SCHOOLINFO_API_KEY`) 발급과 schoolinfo-mcp 평가계획 파싱 채택 여부를 확정한다.
+- [~] 2022 개정 교육과정 성취기준 과목×학년 JSON 번들(초등 우선)을 수집하고 확인일을 기록한다. 소스는 교육부 고시 원문(저작권법 제7조 자유이용)만 사용하고, NCIC는 robots 금지·KICE 자료는 공공누리 2유형(비상업)이라 번들에서 제외한다.
+- [x] 학교알리미 키(`SCHOOLINFO_API_KEY`)와 유치원알리미 키(`CHILDSCHOOLINFO_API_KEY`)를 발급받아 `.env`에 저장하고 라이브 검증한다.
+- [ ] schoolinfo-mcp 평가계획 파싱 채택 여부를 확정한다.
 - [ ] 안드로이드 저장소를 별도 부트스트랩한다(Kotlin+Compose, 온보딩/오늘/퀴즈 3화면, proxy 연동).
 
 검증 기록:

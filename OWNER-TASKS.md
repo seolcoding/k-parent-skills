@@ -24,6 +24,8 @@ fixture(공개 스펙 기반 목 응답) 위에서 오프라인으로 동작합�
 | 7 | 네이버 개발자센터 | `KSKILL_NAVER_CLIENT_ID` / `KSKILL_NAVER_CLIENT_SECRET` | https://developers.naver.com | 앱 등록 → 검색 API 사용 설정. 헤더 인증 |
 | 8 | 쿠팡 파트너스 | `KSKILL_COUPANG_ACCESS_KEY` / `KSKILL_COUPANG_SECRET_KEY` | https://partners.coupang.com | 파트너 승인 후 키 발급. 어필리에이트(보조 수익) |
 | 9 | Google Cloud (YouTube Data API v3) | `KSKILL_YOUTUBE_KEY` | https://console.cloud.google.com | 프로젝트 → YouTube Data API v3 사용 설정 → API 키 |
+| 10 | 학교알리미 Open API | `SCHOOLINFO_API_KEY` | https://www.schoolinfo.go.kr/ng/go/pnnggo_a01_m0.do | 네이버/카카오 SNS 로그인 → 인증키 발급. **발급 완료(2026-07-07, 정상 확인)**. 35종 공시·평가계획 |
+| 11 | 유치원알리미 Open API | `CHILDSCHOOLINFO_API_KEY` | https://e-childschoolinfo.moe.go.kr/openApi/openApiIntro.do | SNS 로그인 → 개발계정 자동승인. **발급 완료(2026-07-07, 정상 확인)**. 유치원 기본현황 14종 |
 
 ### 2-1. `KSKILL_DATAGOKR_KEY`로 활용신청할 data.go.kr 서비스
 한 개의 data.go.kr 인증키로 아래를 각각 **활용신청**해야 합니다(승인까지 수 분~수 시간).
