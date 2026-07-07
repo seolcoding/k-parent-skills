@@ -187,7 +187,12 @@
 - NCIC 국가교육과정정보센터 성취수준 자료실: https://ncic.re.kr/bbs/standard/list.do
 - 학생평가지원포털(STAS, 교육부/KICE): https://stas.moe.go.kr
 - 에듀넷 티클리어 콘텐츠 API 신청 표면(상세 미확인): https://www.edunet.net/nedu/eduapisvc/contApiRegisterForm.do?menu_id=1043
-- 공공데이터포털 에듀넷티클리어 주제별 학습자료 파일데이터(제4유형, 상업적 이용금지): https://www.data.go.kr/data/15118987/fileData.do
+- 공공데이터포털 에듀넷티클리어 주제별 학습자료 파일데이터(교육부, 제4유형·상업금지, PDF 1행): https://www.data.go.kr/data/15118987/fileData.do
+- 공공데이터포털 KERIS 교과주제별 학습자료(과학) CSV(이용허락 제한없음, 467행): https://www.data.go.kr/data/15067105/fileData.do
+- KERIS 교과주제별 학습자료(과학) odcloud 오픈API swagger: https://infuser.odcloud.kr/oas/docs?namespace=15067105/v1
+- 에듀넷 콘텐츠 API 신청 폼(교사 로그인 전용): https://www.edunet.net/apiApply/contsApi/491
+- NCIC 국가교육과정정보센터 원문 및 해설서 목록(robots Disallow, 수동 다운로드): https://ncic.re.kr/inv/org/list.do
+- 법제처 국가법령정보센터 「초·중등학교 교육과정」 행정규칙(현행 고시 확인): https://www.law.go.kr/행정규칙/초ㆍ중등학교교육과정
 - schoolinfo-mcp (학교알리미 35종 공시+나이스+평가계획 파싱 MCP, MIT, chrisryugj): https://github.com/chrisryugj/schoolinfo-mcp
 
 - 도서관 정보나루 Open API 활용방법: https://www.data4library.kr/apiUtilization

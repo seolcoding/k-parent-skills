@@ -16,8 +16,9 @@
 | 나이스 개방 포털 (`packages/k-parent-source-neis`) | 학교 검색, 학급, 일자별 시간표, 학사일정 | 라이브 검증 완료 (`docs/neis_api_ref.md`) |
 | 학교알리미 Open API | 35종 공시, 교과별 평가계획 첨부(HWP/HWPX/PDF) | 키 발급 필요 (`SCHOOLINFO_API_KEY`) |
 | schoolinfo-mcp (MIT, chrisryugj) | 학교알리미+나이스+평가계획 파싱 참고 구현. `find_school`, `get_evaluation_plan`, `parse_evaluation_file` 등 | 채택 검토 — 평가계획 파싱이 단원 수준 퀴즈의 핵심 |
-| 2022 개정 성취기준 번들 | 과목×학년(군)→학습 내용 매핑 | 수집 예정 (국가교육과정정보센터 자료 기반, API 없음) |
-| 에듀넷 티클리어 파일데이터 | 주제별 학습자료 링크 모음 | 공공저작물 제4유형(상업적 이용금지·변경금지)이라 앱 번들 불가, 출처 링크 안내만 가능 |
+| 2022 개정 성취기준 번들 | 과목×학년(군)→학습 내용 매핑 | **수집 완료** — `references/achievement-standards-elementary.json`, 초등 5개 교과 399건, 현행 고시(국교위 2026-1호) 기준 |
+| KERIS 교과주제별 학습자료 | 퀴즈 주제·키워드 시드 | **사용 가능** — data.go.kr CSV/오픈API, 이용허락 제한 없음(상업 가능), 과학 467행 검증 |
+| 에듀넷 티클리어(교육부 PDF/신청폼) | 원본 게시물 | 교육부 PDF는 제4유형(상업 금지), 콘텐츠 API 신청 폼은 교사 전용 — 링크 안내만 |
 
 ## 안드로이드 앱 표면 계획
 
@@ -42,7 +43,8 @@ POST /api/quiz/generate   본문: 과목 목록, 학년, 문항 수, 이전 오�
 ## 다음 구현 후보
 
 - `packages/k-skill-proxy`에 나이스 학교검색/학급/시간표/학사일정 allowlist 라우트와 일 단위 캐시 추가
-- 2022 개정 성취기준 과목×학년 JSON 번들 1차 수집(초등 우선, 확인일 기록)
+- [x] 2022 개정 성취기준 과목×학년 JSON 번들 1차 수집(초등 5교과 399건, `references/achievement-standards-elementary.json`)
+- 통합교과·도덕·실과 등 미포함 교과와 중학교로 성취기준 커버리지 확장
 - 안드로이드 저장소 부트스트랩: 온보딩/오늘/퀴즈 3화면과 proxy 연동
 - 학교알리미 평가계획 문서 파싱 연동(schoolinfo-mcp 패턴, 단원 수준 정밀화)
 - 오답 기록 기반 재출제와 주간 복습 요약
