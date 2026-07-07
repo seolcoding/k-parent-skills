@@ -20,8 +20,8 @@ fixture 모드 데모: 학교 검색에 `미래` 입력 → 서울미래초등�
 - `QuizRepository` (추상) — `searchSchools` / `fetchToday` / `buildQuiz`
 - `FixtureQuizRepository` — `assets/fixtures/timetable.json`(NEIS fixture 미러) + 문항 은행
 - `ProxyQuizRepository` — `GET {base}/v1/neis/school-search|classes|timetable|schedule`, API 키 없음
-- 문항 은행 `assets/data/quiz_bank.json` — 현재 수기 스텁 10문항.
-  트랙 A 머지 후 재생성: `node packages/k-parent-quiz-core/scripts/generate-quiz-bank.mjs --out apps/k-parent-quiz-app/assets/data/quiz_bank.json`
+- 문항 은행 `assets/data/quiz_bank.json` — `packages/k-parent-quiz-core` 생성기로 전수 생성한 2,668문항(성취기준 399건, OX·3지선다·빈칸, 바이트 단위 재현).
+  재생성: `node packages/k-parent-quiz-core/scripts/generate-quiz-bank.mjs --out apps/k-parent-quiz-app/assets/data/quiz_bank.json`
 - 기기 측 로직은 선별만: subject+gradeBand 필터 → 날짜 seed 셔플 → 5문항 (재도전 시 attempt를 seed에 가산). `lib/data/quiz_selector.dart`
 
 ## 게이트

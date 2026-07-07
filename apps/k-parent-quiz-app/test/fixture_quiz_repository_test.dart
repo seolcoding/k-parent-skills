@@ -91,7 +91,7 @@ void main() {
       }
     });
 
-    test('수학 1학년: 1-2 문항 우선 + 3-4 fallback으로 5문항', () async {
+    test('수학 1학년: 1-2 학년군 문항을 우선해 5문항', () async {
       final quiz = await makeRepository().buildQuiz(
         subject: '수학',
         grade: 1,
@@ -104,15 +104,16 @@ void main() {
       }
     });
 
-    test('국어: 은행에 4문항뿐이라 있는 만큼만 나온다', () async {
+    test('국어 3학년: 재생성된 은행에서 5문항 전부 국어·3-4 학년군', () async {
       final quiz = await makeRepository().buildQuiz(
         subject: '국어',
         grade: 3,
         date: tuesday,
       );
-      expect(quiz.questions, hasLength(4));
+      expect(quiz.questions, hasLength(5));
       for (final question in quiz.questions) {
         expect(question.standard.subject, '국어');
+        expect(question.standard.gradeBand, '3-4');
       }
     });
 
