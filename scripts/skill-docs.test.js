@@ -446,6 +446,7 @@ if (readJson("package.json").name === "k-parent-skill") {
       "k-parent-travel-recommender",
       "k-parent-content-recommender",
       "k-parent-academy-connector",
+      "k-parent-quiz-maker",
     ]) {
       assert.match(readme, new RegExp(`\\[[^\\]]+ 기능 문서\\]\\(docs/features/${escapeRegex(skillName)}\\.md\\)`));
     }
@@ -453,13 +454,12 @@ if (readJson("package.json").name === "k-parent-skill") {
     for (const skillName of [
       "k-parent-knowledge-helper",
       "k-parent-mobile-agent",
-      "k-parent-quiz-maker",
     ]) {
       assert.match(readme, new RegExp(`\\[[^\\]]+ 컨셉 문서\\]\\(docs/features/${escapeRegex(skillName)}\\.md\\)`));
     }
 
-    assert.match(readme, /`knowledge-helper`·`mobile-agent`·`quiz-maker`는 아직 패키지 경계가 없는 컨셉/);
-    assert.doesNotMatch(readme, /`knowledge-helper`·`mobile-agent`는 아직 패키지 경계가 없는 컨셉/);
+    assert.match(readme, /`knowledge-helper`·`mobile-agent`는 아직 패키지 경계가 없는 컨셉/);
+    assert.doesNotMatch(readme, /`knowledge-helper`·`mobile-agent`·`quiz-maker`는 아직 패키지 경계가 없는 컨셉/);
     assert.doesNotMatch(readme, /`academy-connector`·`knowledge-helper`·`mobile-agent`는 아직 패키지 경계가 없는 컨셉/);
     assert.match(readme, /\| 놀이 \| 놀거리 \| `k-parent-play-finder` \|/);
     assert.match(readme, /\| 쇼핑 \| 준비물 쇼핑 \| `k-parent-shopping-recommender` \|/);
@@ -488,7 +488,7 @@ if (readJson("package.json").name === "k-parent-skill") {
       "k-parent-meal-planner": "p0",
       "k-parent-mobile-agent": "concept",
       "k-parent-play-finder": "p0",
-      "k-parent-quiz-maker": "concept",
+      "k-parent-quiz-maker": "p0",
       "k-parent-schedule-manager": "implemented",
       "k-parent-school-doc-capture": "implemented",
       "k-parent-school-info": "p0",
@@ -568,6 +568,7 @@ if (readJson("package.json").name === "k-parent-skill") {
       "k-parent-meal-planner": ["k-parent-source-neis", "k-parent-brief"],
       "k-parent-mobile-agent": ["k-parent-brief"],
       "k-parent-play-finder": ["k-parent-source-playground", "k-parent-source-tourapi"],
+      "k-parent-quiz-maker": ["k-parent-quiz-core", "k-parent-source-neis"],
       "k-parent-schedule-manager": ["k-parent-calendar"],
       "k-parent-school-doc-capture": ["k-parent-doc-extract", "k-parent-calendar"],
       "k-parent-school-info": [
@@ -835,6 +836,7 @@ if (readJson("package.json").name === "k-parent-skill") {
       "k-parent-kindergarten-info",
       "k-parent-meal-planner",
       "k-parent-play-finder",
+      "k-parent-quiz-maker",
       "k-parent-schedule-manager",
       "k-parent-school-doc-capture",
       "k-parent-school-info",

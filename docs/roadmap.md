@@ -8,7 +8,7 @@ K-Parent Skills는 `학교`, `학원`, `놀이`, `생활`, `트렌드`, `쇼핑`
 
 | 디파트먼트 | 현재 상태 | 구현 패키지 | 다음 후보 |
 | --- | --- | --- | --- |
-| 학교 | adapter(fixture): NEIS 학교/급식/학사일정/시간표 + Today Brief; 안내문 추출 logic | `packages/k-parent-source-neis`, `packages/k-parent-brief`, `packages/k-parent-doc-extract` | EDSS/KERIS 소재정보(학교알리미·NEIS·유치원알리미) 정밀화, 방과후 신청 흐름 |
+| 학교 | adapter(fixture): NEIS 학교/급식/학사일정/시간표 + Today Brief; 안내문 추출 logic; 성취기준 복습 퀴즈 logic | `packages/k-parent-source-neis`, `packages/k-parent-brief`, `packages/k-parent-doc-extract`, `packages/k-parent-quiz-core` | EDSS/KERIS 소재정보(학교알리미·NEIS·유치원알리미) 정밀화, 방과후 신청 흐름 |
 | 학원 | logic: 알림 텍스트 정규화(doc-extract) | `packages/k-parent-doc-extract` | 학원 앱/API 표면 조사, 문자/카카오 알림 파서 |
 | 놀이 | adapter(fixture): TourAPI 축제/관광지/주변, 놀이시설·도시공원, 서울예약·도서관·문화 | `packages/k-parent-source-tourapi`, `packages/k-parent-source-playground`, `packages/k-parent-source-seoul`, `packages/k-parent-source-library`, `packages/k-parent-source-culture` | 날씨 기반 후보 정렬, 평생교육 확대 |
 | 생활 | logic: 복지 카탈로그·딥링크, 캘린더 후보·ICS; adapter(fixture): 응급의료 야간/휴일 | `packages/k-parent-source-welfare`, `packages/k-parent-calendar`, `packages/k-parent-source-emergency` | 정부24/복지로 가이던스 확대, 예방접종 체크리스트 |
@@ -40,7 +40,7 @@ K-Parent Skills는 `학교`, `학원`, `놀이`, `생활`, `트렌드`, `쇼핑`
 - `k-parent-travel-recommender`: 아이 동반 여행지·체험·일정 추천
 - `k-parent-knowledge-helper`: 부모 일반 지식 질의응답 컨셉
 - `k-parent-content-recommender`: 유튜브 채널·영상, 교과 연계, 차 안 오디오형 콘텐츠, 대화 주제 추천
-- `k-parent-quiz-maker`: 오늘 배운 과목 기반 복습 퀴즈 생성 컨셉(안드로이드 앱 1차 표면)
+- `k-parent-quiz-maker`: 나이스 시간표로 오늘 배운 과목을 확인하고 성취기준 기반 결정적 복습 퀴즈 생성(`packages/k-parent-quiz-core`, 앱 표면 `apps/k-parent-quiz-app`)
 
 ## 지원 중인 hosted proxy 예제 표면
 

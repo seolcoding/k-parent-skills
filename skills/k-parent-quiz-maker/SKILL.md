@@ -1,11 +1,11 @@
 ---
 name: k-parent-quiz-maker
-description: 아이가 오늘 학교에서 배운 과목을 나이스 시간표로 확인하고 학년·과목·교육과정 성취기준에 맞는 복습 퀴즈를 만들어 주는 스킬. "오늘 배운 거 퀴즈 내줘", "3학년 수학 복습 문제 만들어줘", "오늘 시간표 보고 복습 시켜줘" 같은 요청에 사용. 학교 일정·공지·시간표 조회 자체는 k-parent-school-info, 교과 연계 영상 추천은 k-parent-content-recommender, 교과와 무관한 일반 지식 질문은 k-parent-knowledge-helper를 쓴다.
+description: 아이가 오늘 학교에서 배운 과목을 나이스 시간표로 확인하고 학년·과목·교육과정 성취기준에 맞는 복습 퀴즈를 만들어 주는 스킬. 시간표·학사일정은 나이스 공개데이터로 확정하고 문항은 성취기준 기반 결정적 템플릿으로 생성한다(packages/k-parent-quiz-core, packages/k-parent-source-neis). "오늘 배운 거 퀴즈 내줘", "3학년 수학 복습 문제 만들어줘", "오늘 시간표 보고 복습 시켜줘" 같은 요청에 사용. 학교 일정·공지·시간표 조회 자체는 k-parent-school-info, 교과 연계 영상 추천은 k-parent-content-recommender, 교과와 무관한 일반 지식 질문은 k-parent-knowledge-helper를 쓴다.
 license: MIT
 metadata:
   category: parenting
   locale: ko-KR
-  phase: concept
+  phase: p0
 ---
 
 # 오늘 배운 것 퀴즈

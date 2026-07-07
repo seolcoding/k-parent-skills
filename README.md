@@ -22,7 +22,7 @@ K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영합�
 
 ## 스킬 현황
 
-아래 스킬은 대부분 `packages/k-parent-source-*`(공식 API 어댑터) 또는 `packages/k-parent-*`(순수 로직) 패키지로 뒷받침됩니다. 각 소스 패키지는 **fixture-first**로 동작합니다: 공개 API 스펙 기반의 목 응답을 `test/fixtures/`에 캐시해 오프라인으로 정규화·테스트하고, 크레덴셜을 넣고 `npm run refresh:fixtures --workspace <package>`를 돌리면 라이브 데이터로 전환됩니다. 크레덴셜 발급은 [OWNER-TASKS.md](OWNER-TASKS.md)와 [.env.example](.env.example)을 참고하세요. `knowledge-helper`·`mobile-agent`·`quiz-maker`는 아직 패키지 경계가 없는 컨셉(워크플로우) 스킬입니다.
+아래 스킬은 대부분 `packages/k-parent-source-*`(공식 API 어댑터) 또는 `packages/k-parent-*`(순수 로직) 패키지로 뒷받침됩니다. 각 소스 패키지는 **fixture-first**로 동작합니다: 공개 API 스펙 기반의 목 응답을 `test/fixtures/`에 캐시해 오프라인으로 정규화·테스트하고, 크레덴셜을 넣고 `npm run refresh:fixtures --workspace <package>`를 돌리면 라이브 데이터로 전환됩니다. 크레덴셜 발급은 [OWNER-TASKS.md](OWNER-TASKS.md)와 [.env.example](.env.example)을 참고하세요. `knowledge-helper`·`mobile-agent`는 아직 패키지 경계가 없는 컨셉(워크플로우) 스킬입니다.
 
 | 디파트먼트 | 할 수 있는 일 | 스킬 이름 | 설명 | 사용자 로그인 | 문서 |
 | --- | --- | --- | --- | --- | --- |
@@ -42,7 +42,7 @@ K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영합�
 | 놀이 | 여행지 추천 | `k-parent-travel-recommender` | 아이 동반 여행지, 체험, 일정 추천 | 불필요 | [여행지 추천 기능 문서](docs/features/k-parent-travel-recommender.md) |
 | 생활 | 일반 지식 | `k-parent-knowledge-helper` | 부모가 묻는 일반 지식과 생활 판단 질문에 출처 기반 답변 | 불필요 | [일반 지식 컨셉 문서](docs/features/k-parent-knowledge-helper.md) |
 | 놀이 | 콘텐츠 추천 | `k-parent-content-recommender` | 차 안에서 듣기 좋은 유튜브 채널·영상, 교과 연계 콘텐츠, 부모-자녀 대화 주제 추천 | 불필요 | [콘텐츠 추천 기능 문서](docs/features/k-parent-content-recommender.md) |
-| 학교 | 오늘 배운 퀴즈 | `k-parent-quiz-maker` | 나이스 시간표로 오늘 배운 과목을 확인하고 학년·성취기준 맞춤 복습 퀴즈 생성 | 불필요 | [오늘 배운 퀴즈 컨셉 문서](docs/features/k-parent-quiz-maker.md) |
+| 학교 | 오늘 배운 퀴즈 | `k-parent-quiz-maker` | 나이스 시간표로 오늘 배운 과목을 확인하고 성취기준 기반 결정적 문항 은행으로 복습 퀴즈 생성(Flutter 앱 `apps/k-parent-quiz-app`) | 불필요 | [오늘 배운 퀴즈 기능 문서](docs/features/k-parent-quiz-maker.md) |
 
 ### 바로 쓸 수 있는 hosted proxy 예제
 

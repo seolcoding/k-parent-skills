@@ -21,18 +21,20 @@
 - [x] 신규 확인 출처(학교알리미/유치원알리미/NCIC/STAS/에듀넷)를 `docs/sources.md`에 반영한다.
 - [x] `skills/k-parent-quiz-maker` concept `SKILL.md`를 저장소 authoring 규칙에 맞게 스캐폴딩한다.
 - [x] 안드로이드 MVP 화면 흐름(온보딩 학교/학년/반 → 오늘 시간표 → 퀴즈 5문항)과 proxy 계약 초안을 `docs/features/k-parent-quiz-maker.md`에 확정한다.
-- [ ] `packages/k-skill-proxy`에 NEIS 학교검색/학급/시간표/학사일정 allowlist 라우트와 일 단위 캐시를 추가한다.
+- [x] `packages/k-skill-proxy`에 NEIS 학교검색/학급/시간표/학사일정 allowlist 라우트와 일 단위 캐시를 추가한다. (`/v1/neis/school-search·classes·timetable·schedule`, 빈 결과 포함 daily TTL 캐시)
 - [x] 2022 개정 교육과정 성취기준 과목×학년 JSON 번들(초등 5교과 399건)을 수집하고 확인일을 기록한다. 소스는 국가교육위원회 고시 제2026-1호 원문(저작권법 제7조 자유이용)만 사용, NCIC는 사용자 브라우저 수동 다운로드(robots 금지 준수), KICE 공공누리 2유형 자료는 제외. 3판 교차검증 완료.
+- [x] 결정적 템플릿 문항 생성 패키지 `packages/k-parent-quiz-core`(loadStandards/filterStandards/generateQuiz, OX·3지선다·빈칸)와 문항 은행 전수 생성 스크립트를 추가한다.
 - [ ] 성취기준 커버리지를 통합교과·도덕·실과·체육·예술과 중학교로 확장한다.
 - [ ] KERIS 교과주제별 학습자료(이용허락 제한없음)를 퀴즈 주제 시드로 연동한다.
 - [x] 학교알리미 키(`SCHOOLINFO_API_KEY`)와 유치원알리미 키(`CHILDSCHOOLINFO_API_KEY`)를 발급받아 `.env`에 저장하고 라이브 검증한다.
 - [ ] schoolinfo-mcp 평가계획 파싱 채택 여부를 확정한다.
-- [ ] 안드로이드 저장소를 별도 부트스트랩한다(Kotlin+Compose, 온보딩/오늘/퀴즈 3화면, proxy 연동).
+- [x] 앱 시작점을 부트스트랩한다 — 별도 Kotlin+Compose 저장소 대신 인-레포 `apps/k-parent-quiz-app`(Flutter)으로 결정. 온보딩/오늘/퀴즈/결과 4화면, proxy 연동, fixture-first 오프라인 데모.
 
 검증 기록:
 
 - [x] 2026-07-07: NEIS 12종 라이브 검증 자산 확인(`docs/neis_api_ref.md`), 학교알리미·유치원알리미 Open API 및 NCIC/STAS 학습자료 표면 웹 확인, e학습터 2026-02-28 종료 확인.
 - [x] 2026-07-07: schoolinfo-mcp(MIT, 학교알리미 35종+나이스+평가계획 kordoc 파싱) 확인, 에듀넷 파일데이터 제4유형(상업적 이용금지) 확인, `k-parent-quiz-maker` 컨셉 스킬 스캐폴딩.
+- [x] 2026-07-07: 트랙 A/B/C 머지 마감 — `packages/k-parent-quiz-core` 테스트 그린, proxy `/v1/neis/timetable·classes·schedule` 라우트 추가, `apps/k-parent-quiz-app`(Flutter) analyze 0건·테스트 30개 그린, 문항 은행 2,668문항 전량 재생성(재실행 드리프트 0), `k-parent-quiz-maker` phase p0 승격과 문서 표면(README·roadmap·기능 문서·계약 테스트) 동기화.
 
 ## Goal 179. 구현된 parent feature doc 공통 표준 회귀 테스트
 
