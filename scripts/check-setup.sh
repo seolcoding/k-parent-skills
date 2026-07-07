@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-secrets_file="${1:-$HOME/.config/k-skill/secrets.env}"
+secrets_file="${1:-$HOME/.config/k-parent-skill/secrets.env}"
 
 missing=0
 
@@ -19,8 +19,8 @@ fi
 if [[ "$missing" -ne 0 ]]; then
   cat <<EOF
 next steps:
-  1. create ~/.config/k-skill/secrets.env with your credentials
-  2. chmod 0600 ~/.config/k-skill/secrets.env
+  1. create ~/.config/k-parent-skill/secrets.env with your credentials
+  2. chmod 0600 ~/.config/k-parent-skill/secrets.env
   3. run this check again
 EOF
   exit 1

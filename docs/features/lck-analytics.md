@@ -6,7 +6,7 @@
 
 - Original reference skill: <https://github.com/jerjangmin/share/tree/main/SKILL/lck-analytics>
 - Original author: `jerjangmin`
-- k-skill adaptation: 이 저장소의 npm workspace / Changesets 배포 흐름에 맞춰 패키지와 문서를 정리한 버전
+- k-skill adaptation: 이 저장소의 npm workspace 구조에 맞춰 패키지와 문서를 정리한 버전
 
 ## 무엇을 할 수 있나
 
@@ -91,13 +91,7 @@ node ./lck-analytics/scripts/analyze-live-game.js \
 
 ## Release / publish note
 
-이 기능은 `packages/lck-analytics` workspace로 추가됐다. 따라서 `main` 에 기능 PR이 merge되면:
-
-1. `.changeset/*.md` 가 Version Packages PR을 생성하고
-2. 그 PR merge 뒤
-3. npm publish workflow가 `lck-analytics` 패키지를 배포한다
-
-즉, main merge 직후 바로 태그를 수동으로 만들지 말고 기존 Changesets 릴리스 흐름을 따른다.
+현재 `k-parent-skill` 저장소의 npm release workflow는 비활성 상태다. 이 패키지는 로컬 workspace와 `npm pack --workspace lck-analytics --dry-run`으로 검증하고, 실제 npm 배포가 필요해지면 `docs/releasing.md`에 따라 Changesets와 publish workflow를 같은 변경에서 재도입한다.
 
 ## Caveats
 

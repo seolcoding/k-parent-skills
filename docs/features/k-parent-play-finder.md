@@ -1,4 +1,4 @@
-# k-parent-play-finder
+# 아이 놀거리 찾기 기능 문서
 
 아이와 함께 갈 놀이 장소(어린이놀이시설, 도시공원, 어린이 관광지/문화시설/레포츠)를 찾아 부모가 바로 결정할 수 있도록 정리하는 스킬.
 
@@ -11,10 +11,10 @@
 
 | 패키지 | 함수 | 출력 |
 | --- | --- | --- |
-| `k-parent-source-playground` | `fetchPlaygrounds({ sido, sigungu })` | 어린이놀이시설 `{ name, address, latitude, longitude, facilities }` |
-| `k-parent-source-playground` | `fetchUrbanParks({ sido, sigungu })` | 도시공원 `{ name, address, latitude, longitude, facilities }` |
-| `k-parent-source-tourapi` | `areaBasedList({ areaCode, sigunguCode, contentTypeId })` | 지역 기반 장소 (12 관광지 / 14 문화시설 / 28 레포츠) |
-| `k-parent-source-tourapi` | `locationBasedList({ mapX, mapY, radius })` | 좌표 반경(m) 내 주변 장소, `dist` 포함 |
+| `packages/k-parent-source-playground` | `fetchPlaygrounds({ sido, sigungu })` | 어린이놀이시설 `{ name, address, latitude, longitude, facilities }` |
+| `packages/k-parent-source-playground` | `fetchUrbanParks({ sido, sigungu })` | 도시공원 `{ name, address, latitude, longitude, facilities }` |
+| `packages/k-parent-source-tourapi` | `areaBasedList({ areaCode, sigunguCode, contentTypeId })` | 지역 기반 장소 (12 관광지 / 14 문화시설 / 28 레포츠) |
+| `packages/k-parent-source-tourapi` | `locationBasedList({ mapX, mapY, radius })` | 좌표 반경(m) 내 주변 장소, `dist` 포함 |
 
 ## 환경변수
 
@@ -50,6 +50,12 @@
 ## 픽스처 갱신
 
 ```
-KSKILL_DATAGOKR_KEY=... node packages/k-parent-source-playground/scripts/refresh-fixtures.mjs
-KSKILL_TOURAPI_KEY=... node packages/k-parent-source-tourapi/scripts/refresh-fixtures.mjs
+KSKILL_DATAGOKR_KEY=... npm run refresh:fixtures --workspace k-parent-source-playground
+KSKILL_TOURAPI_KEY=... npm run refresh:fixtures --workspace k-parent-source-tourapi
 ```
+
+## 남은 확장 후보
+
+- 실내 키즈카페/박물관/체험관 source package 분리
+- 날씨·미세먼지·주차 가능성 기반 후보 재정렬
+- 유모차/수유실/화장실 같은 영유아 편의시설 보강

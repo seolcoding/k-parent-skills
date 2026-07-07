@@ -2,7 +2,7 @@
 // Refresh the YouTube search fixture from the live Data API v3.
 //
 // Usage:
-//   KSKILL_YOUTUBE_KEY=... node packages/k-parent-source-youtube/scripts/refresh-fixtures.mjs ["search query"]
+//   KSKILL_YOUTUBE_KEY=... npm run refresh:fixtures -- ["search query"]
 //
 // Requires a valid KSKILL_YOUTUBE_KEY (Google Cloud Console -> YouTube Data API v3).
 // Exits non-zero if the key is missing or the request fails.
@@ -17,6 +17,7 @@ const BASE_URL = "https://www.googleapis.com/youtube/v3";
 const apiKey = process.env[ENV_KEY];
 if (!apiKey) {
   console.error(`Missing ${ENV_KEY}. Set it to refresh live fixtures.`);
+  console.error("   KSKILL_YOUTUBE_KEY=... npm run refresh:fixtures -- \"검색어\"");
   process.exit(1);
 }
 

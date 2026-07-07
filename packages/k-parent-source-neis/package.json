@@ -6,6 +6,9 @@
   "main": "src/index.js",
   "files": [
     "src",
+    "scripts",
+    "test/fixtures",
+    "test/*.test.js",
     "README.md"
   ],
   "engines": {
@@ -28,8 +31,8 @@
     "k-parent-core": "0.1.0"
   },
   "scripts": {
-    "lint": "node --check src/index.js && node --check src/parse.js && node --check test/index.test.js",
+    "lint": "node --check src/index.js && node --check src/parse.js && node --check scripts/refresh-fixtures.mjs && node --check test/index.test.js",
     "test": "node --test",
-    "refresh-fixtures": "node scripts/refresh-fixtures.mjs"
+    "refresh:fixtures": "node scripts/refresh-fixtures.mjs"
   }
 }

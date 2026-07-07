@@ -1,6 +1,6 @@
 # lck-analytics
 
-`jerjangmin`님의 원본 [`lck-analytics` 스킬 팩](https://github.com/jerjangmin/share/tree/main/SKILL/lck-analytics)을 k-skill의 npm workspace / Changesets 배포 흐름에 맞춰 옮긴 LCK 전용 Node.js 클라이언트입니다.
+`jerjangmin`님의 원본 [`lck-analytics` 스킬 팩](https://github.com/jerjangmin/share/tree/main/SKILL/lck-analytics)을 k-skill의 npm workspace 구조에 맞춰 옮긴 LCK 전용 Node.js 클라이언트입니다.
 
 Riot 공식 LoL Esports 데이터와 Oracle's Elixir 스타일 historical row / CSV를 함께 사용해 날짜별 LCK 경기 결과, 현재 순위, live turning point, 밴픽 matchup / synergy, patch meta, 팀 파워 레이팅을 계산합니다.
 
@@ -20,7 +20,7 @@ npm install -g lck-analytics
 
 - Original skill + prototype package: <https://github.com/jerjangmin/share/tree/main/SKILL/lck-analytics>
 - Original author: `jerjangmin`
-- k-skill adaptation goal: same capability surface, but released through this repository's official npm/Changesets pipeline
+- k-skill adaptation goal: same capability surface, but packaged as this repository's local npm workspace while release automation is disabled
 
 ## Official surfaces
 
@@ -142,7 +142,7 @@ const {
 
 ## Release note
 
-이 패키지는 `packages/lck-analytics` workspace로 관리됩니다. `main` 에 머지되면 이 저장소의 Changesets 흐름이 **Version Packages PR** 을 만들고, 그 PR merge 후 npm publish가 실행됩니다.
+이 패키지는 `packages/lck-analytics` workspace로 관리됩니다. 현재 저장소의 npm release workflow는 비활성 상태이므로 로컬 workspace와 `npm pack --workspace lck-analytics --dry-run`으로 검증합니다. 실제 npm 배포가 필요해지면 `docs/releasing.md`에 따라 Changesets와 publish workflow를 같은 변경에서 재도입합니다.
 
 ## Notes
 

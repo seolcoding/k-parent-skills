@@ -50,7 +50,7 @@
 - corporate-registration-consulting skill: local://corporate-registration-consulting
 - 대법원 인터넷등기소: https://www.iros.go.kr
 - 온라인법인설립시스템: https://www.startbiz.go.kr
-- 등기부등본 자동화 참고 구현(`challengekim/iros-registry-automation`, MIT): https://github.com/challengekim/iros-registry-automation — 실행 가이드는 `iros-registry-automation/scripts/upstream.pin`의 reviewed SHA로 checkout한 버전을 기준으로 한다.
+- 등기부등본 자동화 참고 구현(`challengekim/iros-registry-automation`, MIT): https://github.com/challengekim/iros-registry-automation — 실행 가이드는 `examples/iros-registry-automation/scripts/upstream.pin`의 reviewed SHA로 checkout한 버전을 기준으로 한다.
 - 위택스 등록면허세 신고/납부: https://www.wetax.go.kr
 - 국가법령정보센터 지방세법/지방세법 시행령/상법/상업등기법/조세특례제한법: https://www.law.go.kr
 - 국세청 창업중소기업 세액감면 안내: https://www.nts.go.kr
@@ -142,6 +142,8 @@
 - Opinet 반경 내 주유소 API: https://www.opinet.co.kr/api/aroundAll.do
 - Opinet 주유소 상세정보 API: https://www.opinet.co.kr/api/detailById.do
 - Opinet 지역코드 API: https://www.opinet.co.kr/api/areaCode.do
+- 공공데이터포털 전국주차장정보표준데이터: https://www.data.go.kr/data/15012896/standard.do
+- 공공데이터포털 전국주차장정보표준데이터 Open API: https://www.data.go.kr/data/15012896/openapi.do
 - 공공데이터포털 공중화장실 표준데이터: https://www.data.go.kr/data/15012892/standard.do
 - 공중화장실정보 파일 소개: https://file.localdata.go.kr/file/public_restroom_info/info
 - 공중화장실정보 전국 CSV: https://file.localdata.go.kr/file/download/public_restroom_info/info
@@ -171,6 +173,8 @@
 
 - Naver Shopping public BFF JSON: `https://ns-portal.shopping.naver.com/api/v2/shopping-paged-slot?query=<검색어>&source=shp_gui` (네이버 쇼핑 가격비교 스킬의 no-key fallback)
 - Naver Developers Search API shopping docs: https://developers.naver.com/docs/serviceapi/search/shopping/shopping.md
+- Naver Developers Search API news docs: https://developers.naver.com/docs/serviceapi/search/news/news.md
+- Naver Search API news endpoint: https://openapi.naver.com/v1/search/news.json
 
 - 도서관 정보나루 Open API 활용방법: https://www.data4library.kr/apiUtilization
 - 도서관 정보나루 도서 검색 endpoint: https://data4library.kr/api/srchBooks

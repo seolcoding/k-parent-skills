@@ -10,7 +10,25 @@
 
 모든 함수는 `options.payload`를 받으면 HTTP 호출을 건너뜁니다(오프라인 테스트용).
 
-## Config
+## Usage
+
+```js
+const { searchFestival, areaBasedList, locationBasedList } = require("k-parent-source-tourapi");
+const festivalPayload = require("./test/fixtures/festival.json");
+const areaPayload = require("./test/fixtures/area-based.json");
+const locationPayload = require("./test/fixtures/location-based.json");
+
+async function main() {
+  const festivals = await searchFestival({ eventStartDate: "20260601", areaCode: "1", payload: festivalPayload });
+  const spots = await areaBasedList({ areaCode: "1", contentTypeId: "12", payload: areaPayload });
+  const nearby = await locationBasedList({ mapX: "126.9780", mapY: "37.5665", radius: 1000, payload: locationPayload });
+  return { festivals, spots, nearby };
+}
+
+main().then(console.log).catch(console.error);
+```
+
+## Configuration
 
 - Env: `KSKILL_TOURAPI_KEY` (data.go.kr serviceKey). `options.apiKey`로도 전달 가능.
 - BASE: `http://apis.data.go.kr/B551011/KorService2`
@@ -20,8 +38,20 @@
 
 `response.body.items.item` — 배열 또는 단일 객체로 올 수 있으며 `extractItems`가 둘 다 처리합니다.
 
+Outputs keep provenance/source metadata and freshness metadata so parent workflows can show origin and staleness.
+
+## Testing
+
+```bash
+npm test
+```
+
+테스트는 `test/fixtures/`의 목 응답으로 완전히 오프라인 실행됩니다.
+
 ## Fixtures refresh
 
-```
-KSKILL_TOURAPI_KEY=... node scripts/refresh-fixtures.mjs
+Run this command only when you are ready to call the live API and overwrite local fixtures.
+
+```bash
+KSKILL_TOURAPI_KEY=... npm run refresh:fixtures
 ```

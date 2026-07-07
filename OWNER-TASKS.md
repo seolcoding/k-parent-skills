@@ -2,7 +2,7 @@
 
 이 문서는 **사람(저장소 소유자)이 직접 처리해야 하는 일**만 모읍니다. 코드와 스킬은 이미
 fixture(공개 스펙 기반 목 응답) 위에서 오프라인으로 동작합니다. 아래 크레덴셜을 발급해
-환경변수에 넣고 각 패키지의 `refresh-fixtures` 스크립트를 돌리면 **라이브 데이터로 전환**됩니다.
+환경변수에 넣고 각 패키지의 `refresh:fixtures` npm script를 돌리면 **라이브 데이터로 전환**됩니다.
 
 > Claude/에이전트는 **로그인·결제·신청서 제출·예약 확정·취소·아동 개인정보 입력을 사용자 승인 없이 실행하지 않습니다.**
 > 이 문서의 작업(가입/키 발급/본인인증)은 전적으로 소유자 몫입니다.
@@ -28,12 +28,14 @@ fixture(공개 스펙 기반 목 응답) 위에서 오프라인으로 동작합�
 ### 2-1. `KSKILL_DATAGOKR_KEY`로 활용신청할 data.go.kr 서비스
 한 개의 data.go.kr 인증키로 아래를 각각 **활용신청**해야 합니다(승인까지 수 분~수 시간).
 - 어린이놀이시설 안전 정보 / 전국도시공원표준데이터 — `k-parent-source-playground`
+- 어린이보호구역·스쿨존 사고다발·옐로카펫 관련 서비스 — `k-parent-source-traffic-safety`
 - 어린이집 정보공개 / 유치원현황(유치원알리미) — `k-parent-source-childinfo`
 - 응급의료포털 e-gen(`ErmctInsttInfoInqireService`) — `k-parent-source-emergency`
 
 > ⚠️ **엔드포인트 경로·파라미터명 확인 필요**: data.go.kr 서비스는 버전별로 BASE/PATH와 파라미터명이
 > 다릅니다. 아래 파일의 **주석 처리된 상수**를 승인받은 서비스 상세페이지 값으로 바꿔주세요.
 > - `packages/k-parent-source-playground/src/index.js` (`PLAYGROUND_PATH`, `URBAN_PARK_PATH`)
+> - `packages/k-parent-source-traffic-safety/src/index.js` (`SCHOOLZONE_CHILD_ACCIDENT_PATH`, `GYEONGBUK_CHILD_PROTECTION_ZONE_PATH`, `SEONGNAM_YELLOW_CARPET_PATH`, `UIRYEONG_CHILD_PROTECTION_ZONE_PATH`)
 > - `packages/k-parent-source-childinfo/src/index.js` (`CHILDCARE_ENDPOINT`, `KINDERGARTEN_ENDPOINT`)
 > - `packages/k-parent-source-emergency/src/index.js` (`PHARMACY_ENDPOINT`, `EMERGENCY_ROOM_ENDPOINT`, `Q0`/`Q1` 파라미터)
 > 파서는 여러 후보 필드명을 방어적으로 매핑하므로, 경로/파라미터만 맞추면 정규화는 동작합니다.
@@ -51,29 +53,28 @@ fixture(공개 스펙 기반 목 응답) 위에서 오프라인으로 동작합�
 
 ```bash
 # 학교/영양 (NEIS)
-KEDU_INFO_KEY=...        node packages/k-parent-source-neis/scripts/refresh-fixtures.mjs
+KEDU_INFO_KEY=...        npm run refresh:fixtures --workspace k-parent-source-neis
 
 # 놀이/축제/여행
-KSKILL_TOURAPI_KEY=...   node packages/k-parent-source-tourapi/scripts/refresh-fixtures.mjs
-KSKILL_DATAGOKR_KEY=...  node packages/k-parent-source-playground/scripts/refresh-fixtures.mjs
+KSKILL_TOURAPI_KEY=...   npm run refresh:fixtures --workspace k-parent-source-tourapi
+KSKILL_DATAGOKR_KEY=...  npm run refresh:fixtures --workspace k-parent-source-playground
+KSKILL_DATAGOKR_KEY=...  npm run refresh:fixtures --workspace k-parent-source-traffic-safety
 
 # 문화
-KSKILL_SEOUL_KEY=...     node packages/k-parent-source-seoul/scripts/refresh-fixtures.mjs
-KSKILL_LIBRARY_KEY=...   node packages/k-parent-source-library/scripts/refresh-fixtures.mjs
-KSKILL_CULTURE_KEY=...   node packages/k-parent-source-culture/scripts/refresh-fixtures.mjs
+KSKILL_SEOUL_KEY=...     npm run refresh:fixtures --workspace k-parent-source-seoul
+KSKILL_LIBRARY_KEY=...   npm run refresh:fixtures --workspace k-parent-source-library
+KSKILL_CULTURE_KEY=...   npm run refresh:fixtures --workspace k-parent-source-culture
 
 # 유치원/응급
-KSKILL_DATAGOKR_KEY=...  node packages/k-parent-source-childinfo/scripts/refresh-fixtures.mjs
-KSKILL_DATAGOKR_KEY=...  node packages/k-parent-source-emergency/scripts/refresh-fixtures.mjs
+KSKILL_DATAGOKR_KEY=...  npm run refresh:fixtures --workspace k-parent-source-childinfo
+KSKILL_DATAGOKR_KEY=...  npm run refresh:fixtures --workspace k-parent-source-emergency
 
 # 쇼핑/트렌드
-KSKILL_NAVER_CLIENT_ID=... KSKILL_NAVER_CLIENT_SECRET=... \
-  node packages/k-parent-source-naver/scripts/refresh-fixtures.mjs
-KSKILL_COUPANG_ACCESS_KEY=... KSKILL_COUPANG_SECRET_KEY=... \
-  node packages/k-parent-source-coupang/scripts/refresh-fixtures.mjs
+KSKILL_NAVER_CLIENT_ID=... KSKILL_NAVER_CLIENT_SECRET=... npm run refresh:fixtures --workspace k-parent-source-naver
+KSKILL_COUPANG_ACCESS_KEY=... KSKILL_COUPANG_SECRET_KEY=... npm run refresh:fixtures --workspace k-parent-source-coupang
 
 # 콘텐츠
-KSKILL_YOUTUBE_KEY=...   node packages/k-parent-source-youtube/scripts/refresh-fixtures.mjs "검색어"
+KSKILL_YOUTUBE_KEY=...   npm run refresh:fixtures --workspace k-parent-source-youtube -- "검색어"
 ```
 
 재생성 후 `npm test`가 그대로 통과하면 fixture 구조와 실제 API 계약이 일치한다는 뜻입니다.
@@ -83,8 +84,8 @@ KSKILL_YOUTUBE_KEY=...   node packages/k-parent-source-youtube/scripts/refresh-f
 ## 3. 수동 검증 체크리스트 (키 발급 후)
 
 - [ ] `.env`에 위 변수들을 채우고 `cp .env.example .env` 후 값 입력
-- [ ] data.go.kr 서비스 3종 활용신청 승인 + 엔드포인트 상수 확정(2-1)
-- [ ] 각 `refresh-fixtures.mjs` 실행 → `npm test` 재통과 확인
+- [ ] data.go.kr 2-1 목록 전체 활용신청 승인 + 엔드포인트 상수 확정(2-1)
+- [ ] 각 `refresh:fixtures` npm script 실행 → `npm test` 재통과 확인
 - [ ] 쿠팡 노출 화면에 제휴 고지 문구 유지: "쿠팡 파트너스 활동의 일환으로 일정액의 수수료를 받을 수 있음"
 - [ ] welfare 카탈로그(아동수당/부모급여 등) 금액·자격요건은 연 1회 공식 사이트로 갱신 확인
 

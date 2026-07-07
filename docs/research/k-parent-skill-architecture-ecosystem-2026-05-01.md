@@ -10,7 +10,7 @@ Korean parents face repeated information overload across school notices, meals, 
 
 The project should preserve the `k-skill` skill-first repository shape while specializing the domain for Korean parent workflows:
 
-- root-level `SKILL.md` directories are the installable capability units
+- product `skills/<skill>/SKILL.md` directories are the installable capability units, while inherited upstream demos live under `examples/<skill>/SKILL.md`
 - feature docs explain source surfaces, output schemas, and limitations
 - helper scripts and packages are added only after repeated use proves deterministic logic is needed
 - proxy routes and cached datasets can reduce CORS, rate-limit, and latency problems

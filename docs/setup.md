@@ -1,6 +1,6 @@
 # 공통 설정 가이드
 
-`k-skill` 전체 스킬을 설치한 뒤, 인증 정보가 필요한 기능(SRT 예매, KTX 예매, 자연휴양림 빈 객실 조회, 한국 법령 검색의 로컬 CLI/MCP 경로용 `LAW_OC`, 한국 특허 정보 검색의 KIPRIS Plus 경로용 `KIPRIS_PLUS_API_KEY`, self-host 프록시 운영용 서울 지하철/한국 날씨/미세먼지/한강홍수통제소/식약처 upstream key, 또는 배포 확인이 끝난 proxy URL 공유)이 있으면 이 절차를 진행하면 된다. 미세먼지, 한강 수위, 주유소 가격, 부동산 실거래가, 한국 주식 정보 조회, 생활쓰레기 배출정보 조회, 학교 급식 식단 조회, 의약품 안전 체크, 식품 안전 체크는 기본 hosted proxy를 쓰므로 사용자 쪽 키가 불필요하다(단, hosted 프록시 운영 측에서 `DATA_GO_KR_API_KEY`·`KEDU_INFO_KEY`·`DATA4LIBRARY_AUTH_KEY`·`FOODSAFETYKOREA_API_KEY` 등은 서버에 설정되어 있어야 한다).
+`k-parent-skill` 전체 스킬을 설치한 뒤, 인증 정보가 필요한 기능(SRT 예매, KTX 예매, 자연휴양림 빈 객실 조회, 한국 법령 검색의 로컬 CLI/MCP 경로용 `LAW_OC`, 한국 특허 정보 검색의 KIPRIS Plus 경로용 `KIPRIS_PLUS_API_KEY`, self-host 프록시 운영용 서울 지하철/한국 날씨/미세먼지/한강홍수통제소/식약처 upstream key, 또는 배포 확인이 끝난 proxy URL 공유)이 있으면 이 절차를 진행하면 된다. 미세먼지, 한강 수위, 주유소 가격, 블루리본 맛집, 공영주차장, 부동산 실거래가, 한국 주식 정보 조회, 네이버 쇼핑/뉴스 검색, LH 청약 공고, 생활쓰레기 배출정보 조회, 학교 급식 식단 조회, 도서관 도서 조회, 의약품 안전 체크, 식품 안전 체크는 기본 hosted proxy를 쓰므로 사용자 쪽 키가 불필요하다(단, hosted 프록시 운영 측에서 `DATA_GO_KR_API_KEY`·`KEDU_INFO_KEY`·`DATA4LIBRARY_AUTH_KEY`·`FOODSAFETYKOREA_API_KEY`·`KRX_API_KEY`·`OPINET_API_KEY`·`NAVER_SEARCH_CLIENT_ID`·`NAVER_SEARCH_CLIENT_SECRET` 등은 서버에 설정되어 있어야 한다).
 
 ## Credential resolution order
 
@@ -8,7 +8,7 @@
 
 1. **이미 환경변수에 있으면** 그대로 사용한다.
 2. **에이전트가 자체 secret vault(1Password CLI, Bitwarden CLI, macOS Keychain 등)를 사용 중이면** 거기서 꺼내 환경변수로 주입해도 된다.
-3. **`~/.config/k-skill/secrets.env`** (기본 fallback) — plain dotenv 파일, 퍼미션 `0600`.
+3. **`~/.config/k-parent-skill/secrets.env`** (기본 fallback) — plain dotenv 파일, 퍼미션 `0600`.
 4. **아무것도 없으면** 유저에게 물어서 2 또는 3에 저장한다.
 
 에이전트가 자체 vault를 사용 중이라면 기본 경로 설정을 건너뛰어도 된다.
@@ -18,8 +18,8 @@
 에이전트가 별도 vault를 쓰지 않는 경우, 기본 fallback 파일을 만든다.
 
 ```bash
-mkdir -p ~/.config/k-skill
-cat > ~/.config/k-skill/secrets.env <<'EOF'
+mkdir -p ~/.config/k-parent-skill
+cat > ~/.config/k-parent-skill/secrets.env <<'EOF'
 KSKILL_SRT_ID=replace-me
 KSKILL_SRT_PASSWORD=replace-me
 KSKILL_KTX_ID=replace-me
@@ -31,12 +31,12 @@ KIPRIS_PLUS_API_KEY=replace-me
 AIR_KOREA_OPEN_API_KEY=replace-me
 KSKILL_PROXY_BASE_URL=https://your-proxy.example.com
 EOF
-chmod 0600 ~/.config/k-skill/secrets.env
+chmod 0600 ~/.config/k-parent-skill/secrets.env
 ```
 
 실제 값을 채운다.
 
-서울 지하철 도착정보와 한국 날씨 조회는 hosted public route rollout 이 끝나기 전까지 `KSKILL_PROXY_BASE_URL` 을 self-host 또는 배포 확인이 끝난 proxy URL 로 채워야 한다. 미세먼지, 한강 수위, 주유소 가격, 생활쓰레기 배출정보 조회, 학교 급식 식단 조회, 의약품 안전 체크, 식품 안전 체크는 `KSKILL_PROXY_BASE_URL` 을 비워 두면 기본 hosted path(`k-skill-proxy.nomadamas.org`)를 그대로 쓴다.
+서울 지하철 도착정보와 한국 날씨 조회는 hosted public route rollout 이 끝나기 전까지 `KSKILL_PROXY_BASE_URL` 을 self-host 또는 배포 확인이 끝난 proxy URL 로 채워야 한다. 미세먼지, 한강 수위, 주유소 가격, 블루리본 맛집, 공영주차장, 부동산 실거래가, 한국 주식 정보 조회, 네이버 쇼핑/뉴스 검색, LH 청약 공고, 생활쓰레기 배출정보 조회, 학교 급식 식단 조회, 도서관 도서 조회, 의약품 안전 체크, 식품 안전 체크는 `KSKILL_PROXY_BASE_URL` 을 비워 두면 기본 hosted path(`k-skill-proxy.nomadamas.org`)를 그대로 쓴다.
 
 한국 법령 검색의 로컬 CLI/MCP 경로용 `LAW_OC` 는 `korean-law-mcp` 로컬 실행에 쓴다. 로컬 CLI/MCP 경로는 `LAW_OC` 를 채운 뒤 `npm install -g korean-law-mcp` 와 `korean-law list` 로 설치 상태를 확인한다.
 
@@ -49,6 +49,8 @@ remote MCP endpoint는 사용자 `LAW_OC` 없이 `url`만으로 연결한다. �
 도서관 도서 조회는 기본 hosted proxy(`k-skill-proxy.nomadamas.org`)를 경유하므로 사용자 쪽 `DATA4LIBRARY_AUTH_KEY` 가 불필요하다. self-host proxy 운영자만 서버 환경변수 `DATA4LIBRARY_AUTH_KEY` 를 사용한다.
 
 근처 가장 싼 주유소 찾기는 기본 hosted proxy(`k-skill-proxy.nomadamas.org`)를 경유하므로 사용자 쪽 `OPINET_API_KEY` 가 불필요하다.
+
+블루리본 맛집, 근처 공영주차장, 네이버 쇼핑/뉴스 검색, LH 청약 공고도 기본 hosted proxy(`k-skill-proxy.nomadamas.org`)를 경유하므로 사용자 쪽 upstream API key가 불필요하다. self-host proxy 운영자만 서버 환경변수(`BLUE_RIBBON_SESSION_ID`, `DATA_GO_KR_API_KEY`, `NAVER_SEARCH_CLIENT_ID`, `NAVER_SEARCH_CLIENT_SECRET`)를 관리한다.
 
 한국 특허 정보 검색의 KIPRIS Plus 경로용 `KIPRIS_PLUS_API_KEY` 는 helper가 읽는 표준 변수명이다. 실제 HTTP 요청에서는 같은 값을 `ServiceKey` 쿼리 파라미터로 보낸다. 공공데이터포털에서 복사한 percent-encoded key도 helper가 한 번 정규화해서 그대로 쓸 수 있다.
 
@@ -79,6 +81,11 @@ bash scripts/check-setup.sh
 | 하이패스 영수증 발급 | 사용자 시크릿 불필요 (로그인된 브라우저 세션 필요) |
 | 한국 주식 정보 조회 | 사용자 시크릿 불필요 (기본 hosted proxy 사용, 운영자만 `KRX_API_KEY`) |
 | 근처 가장 싼 주유소 찾기 | 사용자 시크릿 불필요 (기본 hosted proxy 사용) |
+| 블루리본 맛집 조회 | 사용자 시크릿 불필요 (기본 hosted proxy 사용, 운영자만 `BLUE_RIBBON_SESSION_ID`) |
+| 근처 공영주차장 찾기 | 사용자 시크릿 불필요 (기본 hosted proxy 사용, 운영자만 `DATA_GO_KR_API_KEY`) |
+| 네이버 쇼핑 검색 | 사용자 시크릿 불필요 (기본 hosted proxy 사용, 공식 API 우선 경로는 운영자만 `NAVER_SEARCH_CLIENT_ID`/`NAVER_SEARCH_CLIENT_SECRET`) |
+| 네이버 뉴스 검색 | 사용자 시크릿 불필요 (기본 hosted proxy 사용, 운영자만 `NAVER_SEARCH_CLIENT_ID`/`NAVER_SEARCH_CLIENT_SECRET`) |
+| LH 청약 공고 조회 | 사용자 시크릿 불필요 (기본 hosted proxy 사용, 운영자만 `DATA_GO_KR_API_KEY`) |
 | 서울 지하철 도착정보 조회 | self-host 또는 배포 확인이 끝난 `KSKILL_PROXY_BASE_URL` |
 | 한국 날씨 조회 | self-host 또는 배포 확인이 끝난 `KSKILL_PROXY_BASE_URL` |
 | 사용자 위치 미세먼지 조회 | `KSKILL_PROXY_BASE_URL` 또는 `AIR_KOREA_OPEN_API_KEY` |
@@ -104,6 +111,11 @@ bash scripts/check-setup.sh
 - [하이패스 영수증 발급 가이드](features/hipass-receipt.md)
 - [한국 주식 정보 조회 가이드](features/korean-stock-search.md)
 - [근처 가장 싼 주유소 찾기 가이드](features/cheap-gas-nearby.md)
+- [블루리본 맛집 조회 가이드](features/blue-ribbon-nearby.md)
+- [근처 공영주차장 찾기 가이드](features/parking-lot-search.md)
+- [네이버 쇼핑 검색 가이드](features/naver-shopping-search.md)
+- [네이버 뉴스 검색 가이드](features/naver-news-search.md)
+- [LH 청약 공고 조회 가이드](features/lh-notice-search.md)
 - [근처 공중화장실 찾기 가이드](features/public-restroom-nearby.md)
 - [생활쓰레기 배출정보 조회 가이드](features/household-waste-info.md)
 - [학교 급식 식단 조회 가이드](features/k-schoollunch-menu.md)

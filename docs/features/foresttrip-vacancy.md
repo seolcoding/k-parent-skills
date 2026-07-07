@@ -22,7 +22,7 @@
 ```bash
 python3 -m pip install playwright
 python3 -m playwright install chromium
-python3 foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --check-deps
+python3 examples/foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --check-deps
 ```
 
 `--check-deps` 는 숲나들e 로그인이나 네트워크 조회를 수행하지 않고, 로컬 Python/Playwright Chromium 준비 상태만 확인한다.
@@ -40,7 +40,7 @@ python3 foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --check-deps
 
 1. **이미 환경변수에 있으면** 그대로 사용한다.
 2. **에이전트가 자체 secret vault(1Password CLI, Bitwarden CLI, macOS Keychain 등)를 사용 중이면** 거기서 꺼내 환경변수로 주입해도 된다.
-3. **`~/.config/k-skill/secrets.env`** (기본 fallback) — plain dotenv 파일, 퍼미션 `0600`.
+3. **`~/.config/k-parent-skill/secrets.env`** (기본 fallback) — plain dotenv 파일, 퍼미션 `0600`.
 4. **아무것도 없으면** 유저에게 물어서 2 또는 3에 저장한다.
 
 helper는 `KSKILL_FORESTTRIP_ID`, `KSKILL_FORESTTRIP_PASSWORD` 환경변수를 읽는다. secret vault나 `secrets.env` 는 에이전트/사용자가 값을 꺼내 실행 환경에 주입하기 위한 저장 위치이며, helper가 임의로 계정 정보를 다른 곳에 저장하지 않는다.
@@ -53,8 +53,8 @@ helper는 `KSKILL_FORESTTRIP_ID`, `KSKILL_FORESTTRIP_PASSWORD` 환경변수를 �
 export KSKILL_FORESTTRIP_ID="your-foresttrip-id"
 export KSKILL_FORESTTRIP_PASSWORD="your-foresttrip-password"
 
-python3 foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --check-deps
-python3 foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --forest-name 유명산 --text --dates 20260504
+python3 examples/foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --check-deps
+python3 examples/foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --forest-name 유명산 --text --dates 20260504
 ```
 
 성공 여부를 먼저 보려면 전체 조회보다 `--forest-name` 또는 `--forest-id` 로 범위를 좁혀 실행한다. JSON 결과가 필요하면 같은 조건에 `--json` 을 사용한다.
@@ -96,37 +96,37 @@ python3 foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --forest-name 유�
 전체 자연휴양림에서 하루 조회:
 
 ```bash
-python3 foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --all --text --dates 20260504
+python3 examples/foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --all --text --dates 20260504
 ```
 
 JSON으로 조회:
 
 ```bash
-python3 foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --all --json --dates 20260504
+python3 examples/foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --all --json --dates 20260504
 ```
 
 여러 날짜 조회:
 
 ```bash
-python3 foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --all --text --dates 20260504,20260505
+python3 examples/foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --all --text --dates 20260504,20260505
 ```
 
 야영/캠핑만 조회:
 
 ```bash
-python3 foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --all --text --dates 20260504 --categories 02
+python3 examples/foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --all --text --dates 20260504 --categories 02
 ```
 
 휴양림명으로 좁혀 조회:
 
 ```bash
-python3 foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --forest-name 유명산 --text --dates 20260504
+python3 examples/foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --forest-name 유명산 --text --dates 20260504
 ```
 
 로그인 세션 캐시를 무시하고 새로 조회:
 
 ```bash
-python3 foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --all --text --dates 20260504 --refresh-session
+python3 examples/foresttrip-vacancy/scripts/run_foresttrip_vacancy.py --all --text --dates 20260504 --refresh-session
 ```
 
 ## 주의할 점

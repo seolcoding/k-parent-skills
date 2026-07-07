@@ -2,7 +2,7 @@
 // Refresh TourAPI fixtures from the live data.go.kr KorService2 endpoints.
 // Requires KSKILL_TOURAPI_KEY in the environment.
 //
-//   KSKILL_TOURAPI_KEY=... node packages/k-parent-source-tourapi/scripts/refresh-fixtures.mjs
+//   KSKILL_TOURAPI_KEY=... npm run refresh:fixtures
 //
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -15,6 +15,7 @@ const { searchFestival, areaBasedList, locationBasedList } = require("../src/ind
 const apiKey = process.env.KSKILL_TOURAPI_KEY;
 if (!apiKey) {
   console.error("KSKILL_TOURAPI_KEY is required to refresh TourAPI fixtures.");
+  console.error("   KSKILL_TOURAPI_KEY=... npm run refresh:fixtures");
   process.exit(1);
 }
 

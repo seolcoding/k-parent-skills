@@ -6,7 +6,7 @@ This document describes how to move from the current documentation-first repo to
 
 Keep:
 
-- root-level skill directories with `SKILL.md`
+- container skill directories with `skills/<skill>/SKILL.md` for product skills and `examples/<skill>/SKILL.md` for inherited upstream demos
 - `docs/features/<skill>.md`
 - `docs/departments/*.md`
 - `docs/specs/*.md`
@@ -37,17 +37,16 @@ Exit criteria:
 
 ## Phase 1: Core Package Skeleton
 
-Future files:
+Current implemented files:
 
 ```text
 packages/k-parent-core/
 ├── package.json
 ├── src/
-│   ├── index.ts
-│   ├── schemas/
-│   ├── resolvers/
-│   ├── freshness.ts
-│   └── guardrails.ts
+│   ├── index.js
+│   ├── freshness.js
+│   ├── guardrails.js
+│   └── schemas.js
 └── test/
 ```
 
@@ -69,13 +68,19 @@ Required tests:
 
 ## Phase 2: Official Data Adapters
 
-Future files:
+Current implemented files:
 
 ```text
 packages/k-parent-source-neis/
-packages/k-parent-source-childcare/
-packages/k-parent-source-events/
-packages/k-parent-source-benefits/
+packages/k-parent-source-childinfo/
+packages/k-parent-source-tourapi/
+packages/k-parent-source-playground/
+packages/k-parent-source-traffic-safety/
+packages/k-parent-source-welfare/
+packages/k-parent-source-seoul/
+packages/k-parent-source-culture/
+packages/k-parent-source-library/
+packages/k-parent-source-emergency/
 ```
 
 Adapter rules:
@@ -96,19 +101,15 @@ Initial adapter order:
 5. TourAPI event/place lookup.
 6. Government24/Bokjiro guidance metadata.
 
-## Phase 3: Recommendation and Briefing Layer
+## Phase 3: Briefing and Ranking Logic
 
-Future files:
+Current and future files:
 
 ```text
-packages/k-parent-recommender/
-├── src/
-│   ├── daily-brief.ts
-│   ├── outing-ranker.ts
-│   ├── application-guidance.ts
-│   ├── content-recommender.ts
-│   └── explanations.ts
-└── test/
+packages/k-parent-brief/
+packages/k-parent-source-naver/
+packages/k-parent-source-youtube/
+docs/research/ranking-and-explanations.md
 ```
 
 Responsibilities:
@@ -128,11 +129,16 @@ Required tests:
 
 ## Phase 4: Document Capture and Calendar
 
-Future files:
+Current implemented files:
 
 ```text
-packages/k-parent-doc-capture/
+packages/k-parent-doc-extract/
 packages/k-parent-calendar/
+```
+
+Future candidate files:
+
+```text
 python-packages/k-parent-ocr-eval/
 ```
 
@@ -173,14 +179,16 @@ Product requirements:
 
 ## Phase 6: Private Source Workers
 
-Future files:
+Future surfaces:
 
 ```text
-packages/k-parent-source-culture-private/
+docs/research/culture-private-source-surface.md
 workers/culture-center-monitor/
 ```
 
-Only start after public-source MVP works.
+Only start after public-source MVP works. Do not create a `packages/k-parent-source-*`
+package for private surfaces until the source boundary, fixtures, tests, and terms review
+are clear.
 
 Rules:
 

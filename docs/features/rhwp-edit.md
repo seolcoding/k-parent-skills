@@ -128,4 +128,4 @@ WASM 은 첫 호출 때 한 번만 초기화되고, Node 기본 환경에서도 
 - `k-skill-rhwp` 패키지 소스: `packages/k-skill-rhwp/`
 - 업스트림 rhwp: https://github.com/edwardkim/rhwp
 - `@rhwp/core` npm: https://www.npmjs.com/package/@rhwp/core
-- 스킬 정의: [`rhwp-edit/SKILL.md`](../../rhwp-edit/SKILL.md)
+- 스킬 정의: [`examples/rhwp-edit/SKILL.md`](../../examples/rhwp-edit/SKILL.md)

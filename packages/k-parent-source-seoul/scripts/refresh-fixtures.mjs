@@ -7,6 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const KEY = process.env.KSKILL_SEOUL_KEY;
 if (!KEY) {
   console.error("KSKILL_SEOUL_KEY is required to refresh fixtures");
+  console.error("   KSKILL_SEOUL_KEY=... npm run refresh:fixtures");
   process.exit(1);
 }
 

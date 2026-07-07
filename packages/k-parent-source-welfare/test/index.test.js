@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
+const { SOURCE_FRESHNESS } = require("k-parent-core");
 const {
   listServices,
   getService,
@@ -18,6 +19,8 @@ const expected = JSON.parse(
 test("listServices returns the full curated catalog", () => {
   const result = listServices();
   assert.equal(result.ok, true);
+  assert.equal(result.metadata.sourceType, "curated");
+  assert.equal(result.metadata.freshness.status, SOURCE_FRESHNESS.FRESH);
   assert.equal(result.services.length, expected.serviceIds.length);
   assert.deepEqual(
     result.services.map((s) => s.serviceId).sort(),
@@ -44,6 +47,8 @@ test("getService returns one service or a not_found error", () => {
   const ok = getService("parental-benefit");
   assert.equal(ok.ok, true);
   assert.equal(ok.service.title, "부모급여");
+  assert.equal(ok.metadata.sourceType, "curated");
+  assert.equal(ok.metadata.freshness.status, SOURCE_FRESHNESS.FRESH);
 
   const missing = getService("does-not-exist");
   assert.equal(missing.ok, false);

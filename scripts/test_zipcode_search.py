@@ -88,7 +88,7 @@ class ZipcodeSearchCliShapeTest(unittest.TestCase):
         repo_root = Path(__file__).resolve().parent.parent
         for helper in (
             repo_root / "scripts" / "zipcode_search.py",
-            repo_root / "zipcode-search" / "scripts" / "zipcode_search.py",
+            repo_root / "examples" / "zipcode-search" / "scripts" / "zipcode_search.py",
         ):
             with self.subTest(helper=helper):
                 self.assertTrue(os.access(helper, os.X_OK), f"{helper} should be executable")

@@ -11,7 +11,7 @@ import urllib.parse
 from unittest import mock
 
 
-SKILL_ROOT = pathlib.Path(__file__).resolve().parents[1] / "korean-slang-writing"
+SKILL_ROOT = pathlib.Path(__file__).resolve().parents[1] / "examples" / "korean-slang-writing"
 SCRIPTS_DIR = SKILL_ROOT / "scripts"
 DATA_DIR = SKILL_ROOT / "data"
 

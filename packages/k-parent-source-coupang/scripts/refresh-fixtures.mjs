@@ -2,8 +2,7 @@
 // Refresh Coupang Partners product fixtures against the live API.
 // Requires KSKILL_COUPANG_ACCESS_KEY and KSKILL_COUPANG_SECRET_KEY in the env.
 //
-//   KSKILL_COUPANG_ACCESS_KEY=... KSKILL_COUPANG_SECRET_KEY=... \
-//     node packages/k-parent-source-coupang/scripts/refresh-fixtures.mjs
+//   KSKILL_COUPANG_ACCESS_KEY=... KSKILL_COUPANG_SECRET_KEY=... npm run refresh:fixtures
 
 import fs from "node:fs";
 import path from "node:path";
@@ -18,6 +17,7 @@ const secretKey = process.env.KSKILL_COUPANG_SECRET_KEY;
 
 if (!accessKey || !secretKey) {
   console.error("KSKILL_COUPANG_ACCESS_KEY and KSKILL_COUPANG_SECRET_KEY are required to refresh fixtures.");
+  console.error("   KSKILL_COUPANG_ACCESS_KEY=... KSKILL_COUPANG_SECRET_KEY=... npm run refresh:fixtures");
   process.exit(1);
 }
 

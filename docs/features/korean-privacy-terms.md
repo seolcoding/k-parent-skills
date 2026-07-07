@@ -27,7 +27,7 @@
 dual-install: `~/.claude/skills/korean-privacy-terms/upstream/` 와 `~/.agents/skills/korean-privacy-terms/upstream/` 양쪽에 pinned SHA 로 업스트림을 체크아웃한다.
 
 ```bash
-bash korean-privacy-terms/scripts/install.sh
+bash examples/korean-privacy-terms/scripts/install.sh
 ```
 
 설치 확인:
@@ -35,20 +35,20 @@ bash korean-privacy-terms/scripts/install.sh
 ```bash
 git -C ~/.claude/skills/korean-privacy-terms/upstream rev-parse HEAD
 git -C ~/.agents/skills/korean-privacy-terms/upstream rev-parse HEAD
-cat korean-privacy-terms/scripts/upstream.pin
+cat examples/korean-privacy-terms/scripts/upstream.pin
 ```
 
 세 값이 모두 동일한 40자리 SHA 여야 한다. AGENTS.md 규칙에 따라 레포 내부에 repo-local `.claude/` 또는 `.agents/` 디렉토리는 생성하지 않는다. `~/.agents/skills` 가 symlink 로 관리되는 환경에서는 그 indirection 을 존중한다.
 
 ## upstream pin 갱신
 
-법령 개정 / 업스트림 CHANGELOG 업데이트가 반영되면 `korean-privacy-terms/scripts/upstream.pin` 을 최신 tag SHA 로 수동 교체한 뒤 PR 을 올린다.
+법령 개정 / 업스트림 CHANGELOG 업데이트가 반영되면 `examples/korean-privacy-terms/scripts/upstream.pin` 을 최신 tag SHA 로 수동 교체한 뒤 PR 을 올린다.
 
 ```bash
 git ls-remote --tags https://github.com/kimlawtech/korean-privacy-terms.git
 ```
 
-새 SHA 를 `upstream.pin` 에 덮어쓰고 `bash korean-privacy-terms/scripts/install.sh` 를 다시 실행해 양쪽 홈 경로가 새 SHA 로 갱신되는지 확인한다. pin 만 올리지 말고 upstream CHANGELOG 를 함께 읽어 법률 개정 포인트를 PR 본문에 기록한다.
+새 SHA 를 `upstream.pin` 에 덮어쓰고 `bash examples/korean-privacy-terms/scripts/install.sh` 를 다시 실행해 양쪽 홈 경로가 새 SHA 로 갱신되는지 확인한다. pin 만 올리지 말고 upstream CHANGELOG 를 함께 읽어 법률 개정 포인트를 PR 본문에 기록한다.
 
 ## 인터뷰 게이트 (필수)
 
@@ -80,7 +80,7 @@ git ls-remote --tags https://github.com/kimlawtech/korean-privacy-terms.git
 ## 라이선스 / 출처
 
 - 업스트림: https://github.com/kimlawtech/korean-privacy-terms (Apache-2.0)
-- upstream pin 파일: `korean-privacy-terms/scripts/upstream.pin`
+- upstream pin 파일: `examples/korean-privacy-terms/scripts/upstream.pin`
 - 업스트림 저자 · 커뮤니티 attribution: `korean-privacy-terms/NOTICE` (@kimlawtech, SpeciAI community)
 - 법률 면책 전문 (한 / 영): `korean-privacy-terms/DISCLAIMER.md`
 - Apache-2.0 전문 (업스트림 `LICENSE` verbatim 복사): `korean-privacy-terms/LICENSE.upstream` — Apache License, Version 2.0 §4(a) 는 재배포자가 "give any other recipients of the Work or Derivative Works a copy of this License" 하도록 요구한다. `install.sh` 실행 전에도 레포 체크아웃 상태에서 이 요건이 충족되도록 번들해 두었다.

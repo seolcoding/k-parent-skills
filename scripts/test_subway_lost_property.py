@@ -113,7 +113,7 @@ class SubwayLostPropertyCliShapeTest(unittest.TestCase):
         repo_root = Path(__file__).resolve().parent.parent
         for helper in (
             repo_root / "scripts" / "subway_lost_property.py",
-            repo_root / "subway-lost-property" / "scripts" / "subway_lost_property.py",
+            repo_root / "examples" / "subway-lost-property" / "scripts" / "subway_lost_property.py",
         ):
             with self.subTest(helper=helper):
                 self.assertTrue(os.access(helper, os.X_OK), f"{helper} should be executable")

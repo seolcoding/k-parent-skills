@@ -2,8 +2,7 @@
 // Refresh Naver Search fixtures against the live API.
 // Requires KSKILL_NAVER_CLIENT_ID and KSKILL_NAVER_CLIENT_SECRET in the env.
 //
-//   KSKILL_NAVER_CLIENT_ID=... KSKILL_NAVER_CLIENT_SECRET=... \
-//     node packages/k-parent-source-naver/scripts/refresh-fixtures.mjs
+//   KSKILL_NAVER_CLIENT_ID=... KSKILL_NAVER_CLIENT_SECRET=... npm run refresh:fixtures
 
 import fs from "node:fs";
 import path from "node:path";
@@ -14,6 +13,7 @@ const clientSecret = process.env.KSKILL_NAVER_CLIENT_SECRET;
 
 if (!clientId || !clientSecret) {
   console.error("KSKILL_NAVER_CLIENT_ID and KSKILL_NAVER_CLIENT_SECRET are required to refresh fixtures.");
+  console.error("   KSKILL_NAVER_CLIENT_ID=... KSKILL_NAVER_CLIENT_SECRET=... npm run refresh:fixtures");
   process.exit(1);
 }
 

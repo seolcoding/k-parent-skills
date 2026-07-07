@@ -338,7 +338,7 @@ def build_report(
 def build_missing_secret_message() -> str:
     return (
         f"이 작업에는 {SECRET_NAME} 환경변수가 필요합니다.\n"
-        "환경변수가 설정되어 있지 않으면 ~/.config/k-skill/secrets.env 에 추가하거나\n"
+        "환경변수가 설정되어 있지 않으면 ~/.config/k-parent-skill/secrets.env 에 추가하거나\n"
         "에이전트의 secret vault에서 주입해 주세요."
     )
 

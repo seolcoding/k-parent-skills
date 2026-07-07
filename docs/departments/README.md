@@ -1,6 +1,6 @@
 # Department Index
 
-K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영한다. 디파트먼트는 제품/로드맵/문서 분류이며, 스킬 설치 단위는 계속 루트의 `<skill-name>/SKILL.md`다.
+K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영한다. 디파트먼트는 제품/로드맵/문서 분류이며, 제품 스킬 설치 단위는 `skills/<skill-name>/SKILL.md`다. 상속받은 upstream 예제는 `examples/<skill-name>/SKILL.md`에 둔다.
 
 | Department | Label | Scope | Doc |
 | --- | --- | --- | --- |
@@ -32,3 +32,15 @@ K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영한�
 | `k-parent-travel-recommender` | `play` | `trend`, `life` |
 | `k-parent-knowledge-helper` | `life` | `school`, `academy`, `nutrition` |
 | `k-parent-content-recommender` | `play` | `school`, `trend`, `life` |
+
+## Hosted Proxy Example Map
+
+아래 항목은 `examples/<skill-name>/SKILL.md`에 있는 보조 예제 스킬이다. 기본 hosted proxy로 사용자 API key 없이 바로 쓸 수 있는 표면이며, 반복 사용성이 확인되면 product skill 승격 후보로 검토한다.
+
+| Example skill | Primary department | Secondary departments | Path |
+| --- | --- | --- | --- |
+| `blue-ribbon-nearby` | `play` | `life`, `trend` | `examples/blue-ribbon-nearby` |
+| `parking-lot-search` | `play` | `life` | `examples/parking-lot-search` |
+| `naver-shopping-search` | `shopping` | `school`, `academy`, `play` | `examples/naver-shopping-search` |
+| `naver-news-search` | `trend` | `school`, `play`, `life` | `examples/naver-news-search` |
+| `lh-notice-search` | `life` | `school` | `examples/lh-notice-search` |

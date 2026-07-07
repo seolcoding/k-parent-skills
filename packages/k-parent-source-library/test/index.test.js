@@ -5,6 +5,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
+const { SOURCE_FRESHNESS } = require("k-parent-core");
 const { fetchLibraries, parseLibraries } = require("../src/index");
 
 function readFixture(name) {
@@ -64,7 +65,10 @@ test("fetchLibraries throws UPSTREAM_ERROR on non-ok", async () => {
 
 test("parseLibraries normalizes response.libs[].lib", () => {
   const payload = readFixture("libraries.json");
-  const result = parseLibraries(payload);
+  const result = parseLibraries(payload, {
+    fetchedAt: "2026-06-04T00:00:00.000Z",
+    now: "2026-06-04T12:00:00.000Z",
+  });
   assert.equal(result.items.length, 2);
   const first = result.items[0];
   assert.equal(first.libCode, "111001");
@@ -77,6 +81,8 @@ test("parseLibraries normalizes response.libs[].lib", () => {
   assert.equal(first.institution.name, "강남구립개포도서관");
   assert.equal(first.institution.address, "서울특별시 강남구 개포로 615");
   assert.equal(result.metadata.sourceName, "도서관정보나루 data4library");
+  assert.equal(result.metadata.freshness.status, SOURCE_FRESHNESS.FRESH);
+  assert.equal(result.metadata.freshness.checkedAt, "2026-06-04T00:00:00.000Z");
 });
 
 test("parseLibraries returns empty items for malformed payload", () => {

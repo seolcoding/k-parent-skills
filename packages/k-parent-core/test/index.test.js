@@ -3,13 +3,16 @@ const assert = require("node:assert/strict");
 
 const {
   ERROR_STATUS,
+  SENSITIVE_ACTION_TYPES,
   SOURCE_FRESHNESS,
   assessSourceFreshness,
   createErrorResult,
   guardActionCandidate,
+  isSensitiveActionType,
   normalizeChildProfile,
   normalizeMeal,
   normalizeSourceMetadata,
+  requiresOfficialSiteHandoff,
 } = require("../src/index");
 
 test("child profile accepts stage without exact birth date", () => {
@@ -49,6 +52,39 @@ test("sensitive actions require confirmation and are not executable", () => {
   assert.equal(action.requiresConfirmation, true);
   assert.equal(action.requiresOfficialSiteHandoff, true);
   assert.equal(action.executable, false);
+});
+
+test("all side-effect action types are confirmation-gated and non-executable", () => {
+  assert.deepEqual(SENSITIVE_ACTION_TYPES, [
+    "calendar_write",
+    "reservation",
+    "application",
+    "purchase",
+    "payment",
+    "message_send",
+    "cancellation",
+  ]);
+
+  for (const type of SENSITIVE_ACTION_TYPES) {
+    const action = guardActionCandidate({
+      type,
+      title: `${type} 후보`,
+      executable: true,
+    });
+
+    assert.equal(isSensitiveActionType(type), true, `${type} should be sensitive`);
+    assert.equal(action.requiresConfirmation, true, `${type} should require confirmation`);
+    assert.equal(action.executable, false, `${type} should not remain executable`);
+  }
+});
+
+test("official transaction actions are marked for official-site handoff", () => {
+  for (const type of ["reservation", "application", "payment", "purchase"]) {
+    const action = guardActionCandidate({ type, executable: true });
+
+    assert.equal(requiresOfficialSiteHandoff(type), true, `${type} should require handoff`);
+    assert.equal(action.requiresOfficialSiteHandoff, true, `${type} should be a handoff candidate`);
+  }
 });
 
 test("non-sensitive reminder candidates can remain executable", () => {

@@ -11,12 +11,47 @@ function read(relativePath) {
   return fs.readFileSync(path.join(repoRoot, relativePath), "utf8");
 }
 
+// Skills live under skills/ (product) and examples/ (inherited upstream demos).
+// Resolve a skill directory name to its container so path references stay
+// correct regardless of which container a given skill currently lives in.
+const SKILL_CONTAINER = (() => {
+  const map = new Map();
+  for (const container of ["skills", "examples"]) {
+    const dir = path.join(repoRoot, container);
+    if (!fs.existsSync(dir)) continue;
+    for (const name of fs.readdirSync(dir)) {
+      if (fs.existsSync(path.join(dir, name, "SKILL.md"))) map.set(name, container);
+    }
+  }
+  return map;
+})();
+
+function skillRel(name, ...rest) {
+  return path.join(SKILL_CONTAINER.get(name) ?? "skills", name, ...rest);
+}
+
+function skillAbs(name, ...rest) {
+  return path.join(repoRoot, skillRel(name, ...rest));
+}
+
 function readJson(relativePath) {
   return JSON.parse(read(relativePath));
 }
 
 function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function listMarkdownFiles(relativePath) {
+  const absolutePath = path.join(repoRoot, relativePath);
+  if (!fs.existsSync(absolutePath)) return [];
+  const stat = fs.statSync(absolutePath);
+  if (stat.isFile()) return relativePath.endsWith(".md") ? [relativePath] : [];
+
+  return fs
+    .readdirSync(absolutePath)
+    .filter((name) => ![".git", "node_modules"].includes(name))
+    .flatMap((name) => listMarkdownFiles(path.join(relativePath, name)));
 }
 
 function findSection(doc, heading) {
@@ -139,39 +174,232 @@ function assertKakaoBarNearbySadangSmokeSnapshot(smoke, label) {
 
 if (readJson("package.json").name === "k-parent-skill") {
   const runParentSkillTest = test;
+  const sourceCredentialRefs = {
+    "k-parent-source-neis": ["KEDU_INFO_KEY"],
+    "k-parent-source-tourapi": ["KSKILL_TOURAPI_KEY"],
+    "k-parent-source-playground": ["KSKILL_DATAGOKR_KEY"],
+    "k-parent-source-traffic-safety": ["KSKILL_DATAGOKR_KEY"],
+    "k-parent-source-seoul": ["KSKILL_SEOUL_KEY"],
+    "k-parent-source-library": ["KSKILL_LIBRARY_KEY"],
+    "k-parent-source-culture": ["KSKILL_CULTURE_KEY"],
+    "k-parent-source-childinfo": ["KSKILL_DATAGOKR_KEY"],
+    "k-parent-source-emergency": ["KSKILL_DATAGOKR_KEY"],
+    "k-parent-source-naver": ["KSKILL_NAVER_CLIENT_ID", "KSKILL_NAVER_CLIENT_SECRET"],
+    "k-parent-source-coupang": ["KSKILL_COUPANG_ACCESS_KEY", "KSKILL_COUPANG_SECRET_KEY"],
+    "k-parent-source-youtube": ["KSKILL_YOUTUBE_KEY"],
+    "k-parent-source-welfare": ["KSKILL_DATAGOKR_KEY"],
+  };
 
   runParentSkillTest("parent repository context documents the inherited architecture conventions", () => {
     const readme = read("README.md");
     const agents = read("AGENTS.md");
-    const claude = read("CLAUDE.md");
+    const claudePath = path.join(repoRoot, "CLAUDE.md");
     const architecture = read(path.join("docs", "architecture.md"));
+    const onboarding = read(path.join("docs", "onboarding.md"));
     const addingSkill = read(path.join("docs", "adding-a-skill.md"));
+    const roadmap = read(path.join("docs", "roadmap.md"));
+    const projectStructure = read(path.join("docs", "specs", "project-structure.md"));
     const departments = read(path.join("docs", "departments", "README.md"));
+    const planning = read(path.join("docs", "planning", "README.md"));
+    const scaffolding = read(path.join("docs", "planning", "scaffolding-plan.md"));
     const productization = read(path.join("docs", "productization-gstack.md"));
+    const briefing = read(path.join("docs", "briefing.html"));
 
     assert.match(readme, /NomaDamas\/k-skill/);
+    assert.match(readme, /^# 대한민국 부모 생활정보 스킬$/m);
+    assert.doesNotMatch(readme, /^# k-parent-skill$/m);
     assert.match(readme, /\[아키텍처 컨벤션\]\(docs\/architecture\.md\)/);
-    assert.match(agents, /root-level skill folders/);
+    assert.match(readme, /\[처음 사용자 온보딩\]\(docs\/onboarding\.md\).*저장소 목적, 기능 지형도, 설치 후 확인, fixture-first 동작, 검증 명령/);
+    assert.match(readme, /\[설치 방법\]\(docs\/install\.md\).*`k-parent-skill` 전체 설치, parent 제품 스킬 선택 설치, 예제 스킬 `--full-depth` 안내/);
+    assert.match(readme, /필요한 제품 스킬\(`skills\/\*`\) 또는 예제 스킬\(`examples\/\*`\)의 `SKILL\.md`/);
+    assert.doesNotMatch(readme, /필요한 데모 스킬/);
+    assert.match(agents, /container skill folders/);
+    assert.match(agents, /skills\/\*/);
+    assert.match(agents, /examples\/\*/);
+    assert.match(agents, /`SKILL\.md`-only concept docs/);
+    assert.match(agents, /Promote a concept doc to `packages\/\*` or `scripts\/\*`/);
+    assert.match(agents, /`skills\/<skill>\/references\/\*\.md` or `examples\/<skill>\/references\/\*\.md`/);
+    assert.doesNotMatch(agents, /in `<skill>\/references\/\*\.md`/);
+    assert.doesNotMatch(agents, /demo placeholders/);
     assert.match(agents, /Agent context conventions/);
-    assert.match(claude, /Read `AGENTS\.md` and `docs\/architecture\.md`/);
-    assert.match(architecture, /Skill-first pattern/);
-    assert.match(architecture, /Implementation promotion path/);
-    assert.match(architecture, /Department taxonomy/);
-    assert.match(architecture, /gstack development loop/);
+    assert.match(agents, /SKILL\.md authoring rules/);
+    assert.match(agents, /`## 데이터 소스` section/);
+    assert.doesNotMatch(agents, /## 데이터 소스 \(deterministic packages\)/);
+    assert.match(agents, /gstack productization/);
+    assert.equal(fs.lstatSync(claudePath).isSymbolicLink(), true, "CLAUDE.md should be a compatibility symlink");
+    assert.equal(fs.readlinkSync(claudePath), "AGENTS.md");
+    assert.match(architecture, /^# 아키텍처 컨벤션$/m);
+    assert.match(architecture, /^## 스킬 우선 패턴$/m);
+    assert.match(architecture, /^## 구현 승격 경로$/m);
+    assert.match(architecture, /^## 디파트먼트 분류$/m);
+    assert.match(architecture, /^## gstack 개발 루프$/m);
+    assert.doesNotMatch(
+      architecture,
+      /^## (?:Repository shape|Skill-first pattern|Progressive disclosure pattern|Department taxonomy|Implementation promotion path|Public data integration pattern|Normalization layer pattern|Cache and crawler pattern|Mobile agent product pattern|Document ingestion pattern|Commerce and affiliate pattern|Sensitive transaction boundary|gstack development loop|Parent-domain output schema|Safety and privacy|Agent context surfaces)$/m,
+    );
+    assert.match(architecture, /`SKILL\.md`-only concept docs for concept validation/);
+    assert.match(architecture, /`SKILL\.md` concept doc: instructions, examples, failure modes, and safety rules/);
+    assert.match(architecture, /`skills\/<skill>\/references\/\*\.md` or `examples\/<skill>\/references\/\*\.md`/);
+    assert.doesNotMatch(architecture, /in a `<skill>\/references\/\*\.md` file/);
+    assert.doesNotMatch(architecture, /placeholder docs/);
+    assert.match(architecture, /`CLAUDE\.md`: compatibility symlink to `AGENTS\.md`/);
+    assert.match(onboarding, /^# 처음 사용자 온보딩 가이드$/m);
+    assert.match(onboarding, /^## 2\. 기능 지형도$/m);
+    assert.match(onboarding, /^## 3\. 설치 후 첫 확인 흐름$/m);
+    assert.match(onboarding, /^## 4\. 데이터가 실제로 어떻게 동작하는지$/m);
+    assert.match(onboarding, /^## 7\. 개발자가 기능을 확인하는 방법$/m);
+    assert.match(onboarding, /fixture-first/);
+    assert.match(onboarding, /npm run ci/);
+    assert.match(onboarding, /node --test scripts\/skill-docs\.test\.js/);
+    assert.match(onboarding, /find \. \\?\( -name '\*\.tgz'/);
+    assert.match(onboarding, /명시적 사용자 승인 전 실행하지 않는다/);
+    assert.match(onboarding, /출처 URL/);
+    assert.match(onboarding, /freshness/);
+    assert.match(onboarding, /k-parent-school-info/);
+    assert.match(onboarding, /k-parent-shopping-recommender/);
+    assert.match(roadmap, /^# 로드맵$/m);
+    assert.match(roadmap, /^## 디파트먼트 로드맵$/m);
+    assert.match(roadmap, /^## 제품 스킬 상태$/m);
+    assert.match(roadmap, /^## v1 구현 후보$/m);
+    assert.match(roadmap, /^## 이후 후보$/m);
+    assert.doesNotMatch(
+      roadmap,
+      /^## (?:Department roadmap|Product skill status|v1 implementation candidates|Later candidates)$/m,
+    );
+    assert.match(addingSkill, /`AGENTS\.md` 참고; `CLAUDE\.md`는 호환 symlink/);
+    assert.match(addingSkill, /`CLAUDE\.md`는 `AGENTS\.md` symlink/);
+    assert.match(addingSkill, /\| \*\*SKILL\.md 전용\*\* \| [^\n]+ \| `k-parent-knowledge-helper`, `k-parent-mobile-agent` \|/);
+    assert.doesNotMatch(addingSkill, /\| \*\*SKILL\.md 전용\*\* \| [^\n]+ \| `k-parent-meal-planner`, `k-parent-school-info` \|/);
+    assert.match(addingSkill, /새 제품 스킬이면 `README\.md`, `docs\/skill-routing\.md`, `docs\/roadmap\.md`, `docs\/departments\/README\.md` 갱신/);
+    assert.match(addingSkill, /새 예제 스킬이면 `examples\/README\.md`/);
+    assert.match(addingSkill, /`packages\/k-skill-proxy\/README\.md`와 `docs\/features\/k-skill-proxy\.md`/);
+    assert.match(addingSkill, /`docs\/setup\.md`, `docs\/security-and-secrets\.md`, `docs\/sources\.md`, `\.env\.example`, `OWNER-TASKS\.md`/);
+    assert.match(addingSkill, /phase: p0/);
+    assert.match(addingSkill, /^  category: parenting$/m);
+    assert.doesNotMatch(addingSkill, /^  category: utility$/m);
+    assert.match(addingSkill, /`p0`\(핵심 제품 후보\), `implemented`\(runtime 패키지\/스크립트 구현 있음\), `concept`\(SKILL\.md-only 컨셉\)/);
+    assert.doesNotMatch(addingSkill, /`v1`\s*\(안정\)\s*\/\s*`v1\.5`/);
+    assert.match(addingSkill, /name: k-parent-my-new-skill/);
+    assert.match(addingSkill, /`skills\/k-parent-my-new-skill\/references\/\*\.md`/);
+    assert.match(addingSkill, /`skills\/k-parent-my-new-skill\/SKILL\.md`/);
+    assert.match(addingSkill, /`docs\/features\/k-parent-my-new-skill\.md`/);
+    assert.match(addingSkill, /scripts\/k_parent_my_new_skill\.py/);
+    assert.doesNotMatch(addingSkill, /`skills\/my-new-skill/);
+    assert.doesNotMatch(addingSkill, /scripts\/(?:my_new_skill|my_skill)\.py/);
+    assert.match(addingSkill, /`examples\/korean-scholarship-search\/references\/\*\.md`/);
+    assert.match(addingSkill, /해당 skill 폴더 내부 `references\/`/);
+    assert.match(addingSkill, /`skills\/k-parent-\*` 제품 스킬은 `license: MIT`/);
+    assert.match(addingSkill, /`metadata\.category: parenting`/);
+    assert.match(addingSkill, /허용된 `metadata\.phase`/);
+    assert.match(addingSkill, /^## 핵심 동작$/m);
+    assert.match(addingSkill, /^## 사용 시점$/m);
+    assert.match(addingSkill, /^## 전형적 흐름$/m);
+    assert.match(addingSkill, /^## 완료 조건$/m);
+    assert.match(addingSkill, /^## 실패 모드$/m);
+    assert.match(addingSkill, /^## 참고$/m);
+    assert.doesNotMatch(
+      addingSkill,
+      /^## (?:What this skill does|When to use|Workflow|Done when|Failure modes|Notes|Prerequisites)$/m,
+    );
+    assert.doesNotMatch(addingSkill, /## 데이터 소스 \(deterministic packages\)/);
+    assert.doesNotMatch(addingSkill, /\*\*`<skill>\/references\/\*\.md`\*\*/);
+    assert.match(addingSkill, /사용자\/client env와 proxy 운영자 env를 구분/);
+    assert.match(projectStructure, /`AGENTS\.md` is the source of truth; `CLAUDE\.md` is a compatibility symlink/);
+    assert.match(projectStructure, /The runtime layer is partially implemented/);
+    assert.match(projectStructure, /Do not create additional packages from this outline until their implementation starts with fixtures/);
+    assert.match(projectStructure, /skills\/[\s\S]*<skill-name>\/[\s\S]*SKILL\.md/);
+    assert.match(projectStructure, /examples\/[\s\S]*<skill-name>\/[\s\S]*SKILL\.md/);
+    assert.match(projectStructure, /Product skill directories under `skills\/` are the installable unit/);
+    assert.match(projectStructure, /Inherited upstream demos live under `examples\/` and require `--full-depth`/);
+    assert.match(projectStructure, /k-parent-source-childinfo\/\s+# kindergarten and childcare disclosure adapters/);
+    assert.match(projectStructure, /k-parent-source-tourapi\/\s+# TourAPI event\/place adapters/);
+    assert.match(projectStructure, /k-parent-brief\/\s+# Today Brief composition/);
+    assert.match(projectStructure, /k-parent-calendar\/\s+# calendar candidates, dedupe, ICS/);
+    assert.match(projectStructure, /k-parent-doc-extract\/\s+# notice text extraction/);
+    assert.match(projectStructure, /k-parent-source-playground\/\s+# playground and urban park adapters/);
+    assert.match(projectStructure, /k-parent-source-traffic-safety\/\s+# school-zone safety adapters/);
+    assert.match(projectStructure, /k-parent-source-welfare\/\s+# Government24\/Bokjiro guidance adapters/);
+    assert.match(projectStructure, /k-parent-source-seoul\/\s+# Seoul reservation adapters/);
+    assert.match(projectStructure, /k-parent-source-emergency\/\s+# emergency\/pharmacy adapters/);
+    assert.match(projectStructure, /k-parent-source-naver\/\s+# Naver shopping\/blog and collector runner/);
+    assert.match(projectStructure, /k-parent-source-coupang\/\s+# Coupang Partners product adapter/);
+    assert.match(projectStructure, /k-parent-source-youtube\/\s+# YouTube safe-search content adapter/);
+    assert.match(projectStructure, /k-skill-proxy\/\s+# existing free\/public API proxy extended with parent-domain routes/);
+    assert.match(projectStructure, /scripts\/[\s\S]*validate-skills\.sh/);
+    assert.match(projectStructure, /scripts\/[\s\S]*data_portal_k_parent_\*\.mjs/);
+    assert.match(projectStructure, /scripts\/[\s\S]*neis_\*_probe\.py/);
+    assert.match(projectStructure, /python-packages\/[\s\S]*README\.md\s+# no Python package exists yet/);
+    assert.match(projectStructure, /Future candidate files:[\s\S]*scripts\/sync-region-codes\.\*/);
+    assert.match(projectStructure, /Future candidate files:[\s\S]*python-packages\/k-parent-etl\//);
+    assert.match(projectStructure, /source inventory in `docs\/sources\.md`/);
+    assert.match(projectStructure, /issue checklist per source/);
+    assert.match(projectStructure, /Product skill folders stay flat under `skills\/\*`; inherited reference skills stay under `examples\/\*`/);
+    assert.doesNotMatch(projectStructure, /Root-level skill directories remain the installable unit/);
+    assert.doesNotMatch(projectStructure, /Root skill folders stay flat/);
+    assert.doesNotMatch(projectStructure, /k-parent-proxy/);
+    assert.doesNotMatch(projectStructure, /k-parent-source-(childcare|events|benefits)/);
+    assert.doesNotMatch(projectStructure, /k-parent-recommender/);
+    assert.doesNotMatch(projectStructure, /future structure, not current code/i);
+    assert.doesNotMatch(projectStructure, /source inventory under future docs or issue tracker/);
     assert.match(departments, /`school`/);
     assert.match(departments, /`academy`/);
+    assert.match(departments, /skills\/<skill-name>\/SKILL\.md/);
+    assert.match(departments, /examples\/<skill-name>\/SKILL\.md/);
     assert.match(departments, /`play`/);
     assert.match(departments, /`life`/);
     assert.match(departments, /`trend`/);
     assert.match(departments, /`shopping`/);
     assert.match(departments, /`nutrition`/);
+    assert.match(planning, /flat inside `skills\/`/);
+    assert.match(planning, /under `examples\/`/);
+    assert.match(planning, /일부 `packages\/k-parent-\*` 런타임이 구현/);
+    assert.doesNotMatch(planning, /코드 변경 없이/);
+    assert.match(scaffolding, /skills\/<skill>\/SKILL\.md/);
+    assert.match(scaffolding, /examples\/<skill>\/SKILL\.md/);
+    assert.match(scaffolding, /Current implemented files:[\s\S]*packages\/k-parent-core\//);
+    assert.match(scaffolding, /Current implemented files:[\s\S]*packages\/k-parent-source-neis\//);
+    assert.match(scaffolding, /packages\/k-parent-source-childinfo\//);
+    assert.match(scaffolding, /packages\/k-parent-source-tourapi\//);
+    assert.match(scaffolding, /packages\/k-parent-source-playground\//);
+    assert.match(scaffolding, /packages\/k-parent-source-traffic-safety\//);
+    assert.match(scaffolding, /packages\/k-parent-source-welfare\//);
+    assert.match(scaffolding, /packages\/k-parent-source-seoul\//);
+    assert.match(scaffolding, /packages\/k-parent-source-emergency\//);
+    assert.match(scaffolding, /packages\/k-parent-brief\//);
+    assert.match(scaffolding, /packages\/k-parent-source-naver\//);
+    assert.match(scaffolding, /packages\/k-parent-source-youtube\//);
+    assert.match(scaffolding, /docs\/research\/ranking-and-explanations\.md/);
+    assert.match(scaffolding, /Current implemented files:[\s\S]*packages\/k-parent-doc-extract\//);
+    assert.match(scaffolding, /Current implemented files:[\s\S]*packages\/k-parent-calendar\//);
+    assert.match(scaffolding, /Future candidate files:[\s\S]*python-packages\/k-parent-ocr-eval\//);
+    assert.match(scaffolding, /Future files:[\s\S]*apps\/mobile-web\//);
+    assert.match(scaffolding, /Future files:[\s\S]*apps\/api\//);
+    assert.match(scaffolding, /docs\/research\/culture-private-source-surface\.md/);
+    assert.match(scaffolding, /Do not create a `packages\/k-parent-source-\*`/);
+    assert.doesNotMatch(scaffolding, /packages\/k-parent-source-culture-private\//);
+    assert.doesNotMatch(scaffolding, /packages\/k-parent-recommender\//);
+    assert.doesNotMatch(scaffolding, /packages\/k-parent-doc-capture\//);
+    assert.doesNotMatch(scaffolding, /packages\/k-parent-source-(childcare|events|benefits)\//);
     assert.match(productization, /gstack Operating Loop/i);
     assert.match(productization, /Mobile Parent Agent MVP/);
     assert.match(productization, /Coupang affiliate links are optional monetization/);
+    assert.match(productization, /product skill folders under `skills\/\*`, inherited example skills under `examples\/\*`/);
+    assert.match(read(path.join("docs", "planning", "omc-agent-plan.md")), /product skills under `skills\/\*`, inherited examples under `examples\/\*`/);
+    assert.match(read(path.join("docs", "planning", "omc-agent-plan.md")), /skill concept docs/);
+    assert.match(read(path.join("docs", "planning", "omc-agent-plan.md")), /Recommended current follow-up handoff/);
+    assert.match(read(path.join("docs", "planning", "omc-agent-plan.md")), /packages\/k-parent-source-neis\/test\/fixtures\//);
+    assert.doesNotMatch(productization, /root skill folders/i);
+    assert.doesNotMatch(read(path.join("docs", "planning", "omc-agent-plan.md")), /root skill folders/i);
+    assert.doesNotMatch(read(path.join("docs", "planning", "omc-agent-plan.md")), /skill placeholder docs/);
+    assert.doesNotMatch(read(path.join("docs", "planning", "omc-agent-plan.md")), /Recommended first implementation handoff/);
+    assert.doesNotMatch(read(path.join("docs", "planning", "omc-agent-plan.md")), /tests\/fixtures\/neis/);
+    assert.match(briefing, /부모용 제품 스킬과 컨셉 워크플로우/);
+    assert.match(briefing, /`application-helper`, `schedule-manager`, `academy-connector`, `mobile-agent`, `knowledge-helper`/);
+    assert.doesNotMatch(briefing, /부모용 데모 스킬 플레이스홀더/);
     assert.match(addingSkill, /k-parent-skill/);
   });
 
-  runParentSkillTest("parent placeholder skills are advertised and documented", () => {
+  runParentSkillTest("parent product skills are advertised and documented", () => {
     const readme = read("README.md");
     const architecture = read(path.join("docs", "architecture.md"));
     const parentSkills = [
@@ -195,19 +423,108 @@ if (readJson("package.json").name === "k-parent-skill") {
 
     for (const skillName of parentSkills) {
       assert.match(readme, new RegExp(`\\| [^\\n]+ \\| \`${escapeRegex(skillName)}\` \\|`));
-      assert.ok(fs.existsSync(path.join(repoRoot, skillName, "SKILL.md")), `expected ${skillName}/SKILL.md`);
+      assert.ok(fs.existsSync(skillAbs(skillName, "SKILL.md")), `expected ${skillName}/SKILL.md`);
       assert.ok(
         fs.existsSync(path.join(repoRoot, "docs", "features", `${skillName}.md`)),
         `expected docs/features/${skillName}.md`,
       );
     }
 
+    for (const skillName of [
+      "k-parent-meal-planner",
+      "k-parent-school-info",
+      "k-parent-kindergarten-info",
+      "k-parent-play-finder",
+      "k-parent-festival-finder",
+      "k-parent-culture-center-events",
+      "k-parent-application-helper",
+      "k-parent-school-doc-capture",
+      "k-parent-shopping-recommender",
+      "k-parent-data-collector",
+      "k-parent-schedule-manager",
+      "k-parent-travel-recommender",
+      "k-parent-content-recommender",
+      "k-parent-academy-connector",
+    ]) {
+      assert.match(readme, new RegExp(`\\[[^\\]]+ 기능 문서\\]\\(docs/features/${escapeRegex(skillName)}\\.md\\)`));
+    }
+
+    for (const skillName of [
+      "k-parent-knowledge-helper",
+      "k-parent-mobile-agent",
+    ]) {
+      assert.match(readme, new RegExp(`\\[[^\\]]+ 컨셉 문서\\]\\(docs/features/${escapeRegex(skillName)}\\.md\\)`));
+    }
+
+    assert.match(readme, /`knowledge-helper`·`mobile-agent`는 아직 패키지 경계가 없는 컨셉/);
+    assert.doesNotMatch(readme, /`academy-connector`·`knowledge-helper`·`mobile-agent`는 아직 패키지 경계가 없는 컨셉/);
+    assert.match(readme, /\| 놀이 \| 놀거리 \| `k-parent-play-finder` \|/);
+    assert.match(readme, /\| 쇼핑 \| 준비물 쇼핑 \| `k-parent-shopping-recommender` \|/);
+    assert.doesNotMatch(readme, /\| 놀이 \| 놀것 \| `k-parent-play-finder` \|/);
+    assert.doesNotMatch(readme, /\| 쇼핑 \| 상품 추천 \| `k-parent-shopping-recommender` \|/);
+    assert.match(readme, /준비물 쇼핑 추천과 쿠팡 어필리에이트/);
+    assert.doesNotMatch(readme, /상품 추천과 쿠팡 어필리에이트/);
     assert.match(architecture, /child age or grade/);
     assert.match(architecture, /confirmation date/);
-    assert.match(architecture, /Document ingestion pattern/);
-    assert.match(architecture, /Mobile agent product pattern/);
-    assert.match(architecture, /Commerce and affiliate pattern/);
+    assert.match(architecture, /^## 문서 인입 패턴$/m);
+    assert.match(architecture, /^## 모바일 에이전트 제품 패턴$/m);
+    assert.match(architecture, /^## 커머스와 제휴 패턴$/m);
     assert.match(architecture, /Do not submit applications/);
+  });
+
+  runParentSkillTest("parent skill phase metadata distinguishes implemented and concept work", () => {
+    const expectedPhases = {
+      "k-parent-academy-connector": "implemented",
+      "k-parent-application-helper": "implemented",
+      "k-parent-content-recommender": "p0",
+      "k-parent-culture-center-events": "p0",
+      "k-parent-data-collector": "implemented",
+      "k-parent-festival-finder": "p0",
+      "k-parent-kindergarten-info": "p0",
+      "k-parent-knowledge-helper": "concept",
+      "k-parent-meal-planner": "p0",
+      "k-parent-mobile-agent": "concept",
+      "k-parent-play-finder": "p0",
+      "k-parent-schedule-manager": "implemented",
+      "k-parent-school-doc-capture": "implemented",
+      "k-parent-school-info": "p0",
+      "k-parent-shopping-recommender": "implemented",
+      "k-parent-travel-recommender": "p0",
+    };
+
+    for (const [skillName, phase] of Object.entries(expectedPhases)) {
+      const skill = read(skillRel(skillName, "SKILL.md"));
+      const featureDoc = read(path.join("docs", "features", `${skillName}.md`));
+      assert.match(skill, new RegExp(`phase:\\s*${escapeRegex(phase)}\\b`), `${skillName} should use phase: ${phase}`);
+      if (phase === "concept") {
+        assert.match(featureDoc, /^## 다음 구현 후보$/m, `${skillName} concept feature doc should document implementation candidates`);
+        assert.doesNotMatch(featureDoc, /^## 남은 확장 후보$/m, `${skillName} concept feature doc should not use runtime extension wording`);
+      } else {
+        assert.match(featureDoc, /^## 남은 확장 후보$/m, `${skillName} runtime feature doc should document remaining extension candidates`);
+        assert.doesNotMatch(featureDoc, /^## 다음 구현 후보$/m, `${skillName} runtime feature doc should not use concept implementation wording`);
+      }
+    }
+
+    const parentSkillNames = fs
+      .readdirSync(path.join(repoRoot, "skills"))
+      .filter((name) => name.startsWith("k-parent-") && fs.existsSync(skillAbs(name, "SKILL.md")))
+      .sort();
+
+    for (const skillName of parentSkillNames) {
+      const skill = read(skillRel(skillName, "SKILL.md"));
+      assert.ok(Object.hasOwn(expectedPhases, skillName), `${skillName} should be classified in expectedPhases`);
+      assert.match(skill, /^license:\s*MIT$/m, `${skillName} should declare MIT license`);
+      assert.match(skill, /^metadata:$/m, `${skillName} should declare metadata`);
+      assert.match(skill, /^  category:\s*parenting$/m, `${skillName} should use parenting category`);
+      assert.match(skill, /^  locale:\s*ko-KR$/m, `${skillName} should use ko-KR locale`);
+      assert.match(skill, /phase:\s*(p0|implemented|concept)\b/, `${skillName} should use an allowed parent phase`);
+      assert.doesNotMatch(skill, /phase:\s*demo\b/, `${skillName} should not use phase: demo`);
+      assert.match(
+        skill,
+        new RegExp(escapeRegex(`docs/features/${skillName}.md`)),
+        `${skillName} should link its parent-facing feature doc`,
+      );
+    }
   });
 
   runParentSkillTest("parent skill descriptions are Korean, give trigger examples, and cite backing packages", () => {
@@ -230,20 +547,31 @@ if (readJson("package.json").name === "k-parent-skill") {
       "k-parent-content-recommender",
     ];
 
-    // Backing source/logic package each skill must cite somewhere in its SKILL.md.
+    // Backing source/logic packages each skill must cite in its one-line description.
     const packageRefs = {
-      "k-parent-meal-planner": "k-parent-source-neis",
-      "k-parent-school-info": "k-parent-source-neis",
-      "k-parent-kindergarten-info": "k-parent-source-childinfo",
-      "k-parent-play-finder": "k-parent-source-playground",
-      "k-parent-festival-finder": "k-parent-source-tourapi",
-      "k-parent-culture-center-events": "k-parent-source-seoul",
-      "k-parent-shopping-recommender": "k-parent-source-naver",
-      "k-parent-content-recommender": "k-parent-source-youtube",
-      "k-parent-travel-recommender": "k-parent-source-tourapi",
-      "k-parent-schedule-manager": "k-parent-calendar",
-      "k-parent-school-doc-capture": "k-parent-doc-extract",
-      "k-parent-application-helper": "k-parent-source-welfare",
+      "k-parent-academy-connector": ["k-parent-doc-extract", "k-parent-calendar"],
+      "k-parent-application-helper": ["k-parent-source-welfare"],
+      "k-parent-content-recommender": ["k-parent-source-youtube"],
+      "k-parent-culture-center-events": [
+        "k-parent-source-seoul",
+        "k-parent-source-library",
+        "k-parent-source-culture",
+      ],
+      "k-parent-data-collector": ["k-parent-source-naver"],
+      "k-parent-festival-finder": ["k-parent-source-tourapi"],
+      "k-parent-kindergarten-info": ["k-parent-source-childinfo"],
+      "k-parent-meal-planner": ["k-parent-source-neis", "k-parent-brief"],
+      "k-parent-mobile-agent": ["k-parent-brief"],
+      "k-parent-play-finder": ["k-parent-source-playground", "k-parent-source-tourapi"],
+      "k-parent-schedule-manager": ["k-parent-calendar"],
+      "k-parent-school-doc-capture": ["k-parent-doc-extract", "k-parent-calendar"],
+      "k-parent-school-info": [
+        "k-parent-source-neis",
+        "k-parent-brief",
+        "k-parent-source-traffic-safety",
+      ],
+      "k-parent-shopping-recommender": ["k-parent-source-naver", "k-parent-source-coupang"],
+      "k-parent-travel-recommender": ["k-parent-source-tourapi"],
     };
 
     // Overlapping play-department skills must name a sibling in the description to disambiguate.
@@ -255,7 +583,7 @@ if (readJson("package.json").name === "k-parent-skill") {
     };
 
     for (const skillName of parentSkills) {
-      const skill = read(path.join(skillName, "SKILL.md"));
+      const skill = read(skillRel(skillName, "SKILL.md"));
       const descMatch = skill.match(/^description: (.+)$/m);
       assert.ok(descMatch, `${skillName} SKILL.md must have a description`);
       const description = descMatch[1];
@@ -274,10 +602,17 @@ if (readJson("package.json").name === "k-parent-skill") {
 
       if (packageRefs[skillName]) {
         assert.match(
-          skill,
-          new RegExp(escapeRegex(packageRefs[skillName])),
-          `${skillName} SKILL.md must cite its backing package ${packageRefs[skillName]}`,
+          description,
+          new RegExp(escapeRegex(`packages/${packageRefs[skillName][0]}`)),
+          `${skillName} description must cite its first backing package as a packages/ path`,
         );
+        for (const packageName of packageRefs[skillName]) {
+          assert.match(
+            description,
+            new RegExp(escapeRegex(`packages/${packageName}`)),
+            `${skillName} description must cite backing package packages/${packageName}`,
+          );
+        }
       }
 
       if (overlapSiblings[skillName]) {
@@ -286,6 +621,92 @@ if (readJson("package.json").name === "k-parent-skill") {
           overlapSiblings[skillName],
           `${skillName} description must name a sibling skill to disambiguate overlap`,
         );
+      }
+    }
+  });
+
+  runParentSkillTest("parent skill package references use packages paths", () => {
+    const parentSkillNames = fs
+      .readdirSync(path.join(repoRoot, "skills"))
+      .filter((name) => name.startsWith("k-parent-") && fs.existsSync(skillAbs(name, "SKILL.md")))
+      .sort();
+
+    for (const skillName of parentSkillNames) {
+      const skill = read(skillRel(skillName, "SKILL.md"));
+      const packageRefs = [...skill.matchAll(/`packages\/(k-parent-[a-z0-9-]+)`/g)].map((match) => match[1]);
+
+      assert.doesNotMatch(
+        skill,
+        /`k-parent-(?:source-[a-z-]+|brief|calendar|doc-extract|core)`/,
+        `${skillName} should cite backing packages as packages/ paths`,
+      );
+      assert.doesNotMatch(skill, /^## 사용하는 패키지$/m, `${skillName} should use the shared package section label`);
+      assert.doesNotMatch(skill, /^## 환경 변수$/m, `${skillName} should use the shared environment section label`);
+      assert.doesNotMatch(
+        skill,
+        /^## (?:What this skill does|When to use|Workflow|Done when|Failure modes|Notes|Guardrails|Data sources & functions)$/m,
+        `${skillName} should use Korean major section headings`,
+      );
+      assert.doesNotMatch(
+        skill,
+        /^# .*[A-Za-z].*$/m,
+        `${skillName} should use a Korean user-facing H1 while keeping the install name in frontmatter`,
+      );
+      assert.doesNotMatch(
+        skill,
+        /^## .*(?:deterministic packages?|approval|Generic runner|data contract|freshness|envelope|워크플로).*$/m,
+        `${skillName} should not use mixed-language legacy section headings`,
+      );
+      assert.doesNotMatch(
+        skill,
+        /^### .*[A-Za-z].*$/m,
+        `${skillName} should use Korean third-level step headings`,
+      );
+      for (const packageName of packageRefs) {
+        assert.ok(
+          fs.existsSync(path.join(repoRoot, "packages", packageName, "package.json")),
+          `${skillName} cites missing package ${packageName}`,
+        );
+      }
+    }
+  });
+
+  runParentSkillTest("parent skills publish practical parent-domain output fields", () => {
+    const parentSkills = [
+      "k-parent-meal-planner",
+      "k-parent-school-info",
+      "k-parent-kindergarten-info",
+      "k-parent-play-finder",
+      "k-parent-festival-finder",
+      "k-parent-culture-center-events",
+      "k-parent-application-helper",
+      "k-parent-academy-connector",
+      "k-parent-school-doc-capture",
+      "k-parent-shopping-recommender",
+      "k-parent-mobile-agent",
+      "k-parent-data-collector",
+      "k-parent-schedule-manager",
+      "k-parent-travel-recommender",
+      "k-parent-knowledge-helper",
+      "k-parent-content-recommender",
+    ];
+    const requiredSignals = [
+      /아이|대상/,
+      /지역|장소|기관/,
+      /날짜|기간|마감|확인 기준일/,
+      /출처|source/i,
+      /비용|지원금|무료/,
+      /준비물|필요 서류|후속 활동/,
+      /다음 행동|다음 질문|다음 수집/,
+    ];
+
+    for (const skillName of parentSkills) {
+      const skill = read(skillRel(skillName, "SKILL.md"));
+      assert.match(skill, /^## 출력 형식$/m, `${skillName} should use the shared Korean output section heading`);
+      assert.doesNotMatch(skill, /^## Output fields$/m, `${skillName} should not use the legacy English output heading`);
+      const outputSection = findSection(skill, "## 출력 형식");
+      for (const signal of requiredSignals) {
+        assert.match(outputSection, signal, `${skillName} output fields should include ${signal}`);
       }
     }
   });
@@ -315,10 +736,1330 @@ if (readJson("package.json").name === "k-parent-skill") {
     for (const skillName of parentSkills) {
       assert.match(routing, new RegExp(escapeRegex(skillName)), `routing index must list ${skillName}`);
     }
+    assert.match(routing, /공통 출력 신호/);
+    assert.match(routing, /출처 URL/);
+    assert.match(routing, /확인 기준일/);
+    assert.match(routing, /신청\/예약 마감/);
+    assert.match(routing, /비용/);
+    assert.match(routing, /필요 서류/);
+    assert.match(routing, /신청·예약·취소·결제·아이 개인정보 입력/);
     assert.match(readme, /\[스킬 라우팅 인덱스\]\(docs\/skill-routing\.md\)/);
   });
 
+  runParentSkillTest("skill routing index maps hosted proxy-backed example skills", () => {
+    const routing = read(path.join("docs", "skill-routing.md"));
+    const expectedRoutes = [
+      ["블루리본 맛집", "blue-ribbon-nearby"],
+      ["근처 공영주차장", "parking-lot-search"],
+      ["네이버 쇼핑", "naver-shopping-search"],
+      ["네이버 뉴스", "naver-news-search"],
+      ["LH 청약 공고", "lh-notice-search"],
+    ];
+
+    assert.match(routing, /보조 예제 스킬/);
+    assert.match(routing, /기본 hosted proxy/);
+    assert.match(routing, /사용자 API key 없이/);
+    for (const [signal, skillName] of expectedRoutes) {
+      assert.match(routing, new RegExp(escapeRegex(signal)), `routing should mention ${signal}`);
+      assert.match(routing, new RegExp(`\\\`${escapeRegex(skillName)}\\\``), `routing should mention ${skillName}`);
+    }
+    assert.match(routing, /위치를 먼저 묻/);
+    assert.match(routing, /기사 제목·요약·발행시각·링크/);
+    assert.match(routing, /공고 목록\/상세/);
+  });
+
+  runParentSkillTest("department index maps hosted proxy-backed example skills", () => {
+    const departments = read(path.join("docs", "departments", "README.md"));
+    const expectedExamples = [
+      ["blue-ribbon-nearby", "play", "examples/blue-ribbon-nearby"],
+      ["parking-lot-search", "play", "examples/parking-lot-search"],
+      ["naver-shopping-search", "shopping", "examples/naver-shopping-search"],
+      ["naver-news-search", "trend", "examples/naver-news-search"],
+      ["lh-notice-search", "life", "examples/lh-notice-search"],
+    ];
+
+    assert.match(departments, /Hosted Proxy Example Map/);
+    assert.match(departments, /기본 hosted proxy/);
+    assert.match(departments, /product skill 승격 후보/);
+    for (const [skillName, primaryDepartment, skillPath] of expectedExamples) {
+      assert.match(departments, new RegExp(`\\\`${escapeRegex(skillName)}\\\``), `departments should mention ${skillName}`);
+      assert.match(
+        departments,
+        new RegExp(`\\\`${escapeRegex(skillName)}\\\`\\s*\\|\\s*\\\`${escapeRegex(primaryDepartment)}\\\``),
+        `departments should map ${skillName} to ${primaryDepartment}`,
+      );
+      assert.match(departments, new RegExp(`\\\`${escapeRegex(skillPath)}\\\``), `departments should mention ${skillPath}`);
+    }
+  });
+
+  runParentSkillTest("parent feature docs do not expose source package fixture internals", () => {
+    const featureRoot = path.join(repoRoot, "docs", "features");
+    const featureDocs = fs
+      .readdirSync(featureRoot)
+      .filter((name) => name.startsWith("k-parent-") && name.endsWith(".md"))
+      .sort();
+
+    for (const name of featureDocs) {
+      const doc = read(path.join("docs", "features", name));
+      assert.doesNotMatch(
+        doc,
+        /packages\/k-parent-source-[^`\s]+\/test\/fixtures/,
+        `${name} should not expose source package fixture file paths in parent-facing docs`,
+      );
+      assert.doesNotMatch(doc, /플레이스홀더/, `${name} should use feature/concept doc status labels`);
+      assert.doesNotMatch(doc, /데모 스킬/, `${name} should use feature/concept doc status labels`);
+      assert.doesNotMatch(doc, /초기 데모/, `${name} should describe promoted runtime work from SKILL.md-only flow`);
+      assert.doesNotMatch(
+        doc,
+        /^# .*[A-Za-z].*$/m,
+        `${name} should use a Korean user-facing feature doc H1`,
+      );
+    }
+  });
+
+  runParentSkillTest("implemented parent feature docs keep shared package and runtime status sections", () => {
+    const runtimeDocs = [
+      "k-parent-academy-connector",
+      "k-parent-application-helper",
+      "k-parent-content-recommender",
+      "k-parent-culture-center-events",
+      "k-parent-data-collector",
+      "k-parent-festival-finder",
+      "k-parent-kindergarten-info",
+      "k-parent-meal-planner",
+      "k-parent-play-finder",
+      "k-parent-schedule-manager",
+      "k-parent-school-doc-capture",
+      "k-parent-school-info",
+      "k-parent-shopping-recommender",
+      "k-parent-travel-recommender",
+    ];
+
+    for (const skillName of runtimeDocs) {
+      const docName = `${skillName}.md`;
+      const doc = read(path.join("docs", "features", docName));
+      const packageRefs = [...doc.matchAll(/`packages\/(k-parent-[^`/\s]+)`/g)].map((match) => match[1]);
+
+      assert.match(doc, /^## 사용 패키지$/m, `${docName} should have a shared package table section`);
+      assert.match(doc, /^## 환경변수$/m, `${docName} should use the shared environment section heading`);
+      assert.match(doc, /^## 픽스처 갱신$/m, `${docName} should use the shared fixture refresh section heading`);
+      assert.match(doc, /^## 남은 확장 후보$/m, `${docName} should document remaining extension candidates`);
+      assert.ok(packageRefs.length > 0, `${docName} should cite at least one k-parent package path`);
+      assert.match(
+        doc,
+        /KSKILL_|KEDU_INFO_KEY|API key가 없다|필요한 API key가 없다|외부 API key 없이|외부 키 없이/,
+        `${docName} should document environment variable or no-key runtime status`,
+      );
+      assert.match(
+        doc,
+        /픽스처 갱신|fixture refresh|refresh:fixtures/,
+        `${docName} should document fixture refresh command or no-refresh status`,
+      );
+      assert.doesNotMatch(doc, /## 구현 패키지/, `${docName} should use the shared package section label`);
+      assert.doesNotMatch(doc, /다음 구현 후보/, `${docName} should use current-state extension wording`);
+      assert.doesNotMatch(doc, /초기 SKILL\.md-only/, `${docName} should not describe itself as SKILL.md-only`);
+      assert.doesNotMatch(
+        doc,
+        /^## .*(?:deterministic packages?|approval|Generic runner|data contract|[Ff]reshness|envelope|워크플로).*$/m,
+        `${docName} should not use mixed-language legacy section headings`,
+      );
+      assert.doesNotMatch(
+        doc,
+        /`k-parent-(?:source-[a-z-]+|brief|calendar|doc-extract|core)`/,
+        `${docName} should cite backing packages as packages/ paths`,
+      );
+
+      for (const packageName of packageRefs) {
+        assert.ok(
+          fs.existsSync(path.join(repoRoot, "packages", packageName, "package.json")),
+          `${docName} cites missing package ${packageName}`,
+        );
+      }
+    }
+  });
+
+  runParentSkillTest("culture center events feature doc documents implemented source packages", () => {
+    const doc = read(path.join("docs", "features", "k-parent-culture-center-events.md"));
+
+    for (const packageName of [
+      "k-parent-source-seoul",
+      "k-parent-source-library",
+      "k-parent-source-culture",
+    ]) {
+      assert.match(doc, new RegExp(escapeRegex(`packages/${packageName}`)), `culture doc should mention ${packageName}`);
+      assert.match(
+        doc,
+        new RegExp(`npm run refresh:fixtures --workspace ${escapeRegex(packageName)}`),
+        `culture doc should show refresh command for ${packageName}`,
+      );
+    }
+
+    for (const envName of ["KSKILL_SEOUL_KEY", "KSKILL_LIBRARY_KEY", "KSKILL_CULTURE_KEY"]) {
+      assert.match(doc, new RegExp(escapeRegex(envName)), `culture doc should mention ${envName}`);
+    }
+
+    assert.match(doc, /남은 확장 후보/);
+    assert.doesNotMatch(doc, /다음 구현 후보/);
+  });
+
+  runParentSkillTest("application helper feature doc documents implemented welfare package", () => {
+    const doc = read(path.join("docs", "features", "k-parent-application-helper.md"));
+
+    assert.match(
+      doc,
+      /packages\/k-parent-source-welfare/,
+      "application helper doc should mention the implemented welfare package",
+    );
+    assert.match(doc, /listServices\(\{ category \}\)/, "application helper doc should mention listServices");
+    assert.match(doc, /getService\(serviceId\)/, "application helper doc should mention getService");
+    assert.match(doc, /buildDeepLink\(service, params\)/, "application helper doc should mention buildDeepLink");
+    assert.match(doc, /KSKILL_DATAGOKR_KEY/, "application helper doc should mention the optional live lookup key");
+    assert.match(doc, /외부 API key 없이|외부 키 없이/, "application helper doc should document no-key curated catalog mode");
+    assert.match(
+      doc,
+      /refresh:fixtures[\s\S]*제공하지 않는다/,
+      "application helper doc should document that welfare has no refresh fixture command",
+    );
+    assert.match(doc, /남은 확장 후보/);
+    assert.doesNotMatch(doc, /다음 구현 후보/);
+  });
+
+  runParentSkillTest("schedule and school doc capture docs document pure logic packages", () => {
+    const scheduleDoc = read(path.join("docs", "features", "k-parent-schedule-manager.md"));
+    const captureDoc = read(path.join("docs", "features", "k-parent-school-doc-capture.md"));
+
+    assert.match(scheduleDoc, /packages\/k-parent-calendar/);
+    for (const apiName of ["calendarCandidate", "dedupeCandidates", "toICS"]) {
+      assert.match(scheduleDoc, new RegExp(`${apiName}\\(`), `schedule doc should mention ${apiName}`);
+    }
+    assert.match(scheduleDoc, /requiresConfirmation: true/);
+    assert.match(scheduleDoc, /executable: false/);
+    assert.match(scheduleDoc, /API key가 없다/);
+    assert.match(scheduleDoc, /fixture refresh 명령이 없다/);
+    assert.match(scheduleDoc, /남은 확장 후보/);
+    assert.doesNotMatch(scheduleDoc, /다음 구현 후보/);
+
+    for (const packageName of ["k-parent-doc-extract", "k-parent-calendar"]) {
+      assert.match(
+        captureDoc,
+        new RegExp(`packages/${escapeRegex(packageName)}`),
+        `school doc capture doc should mention ${packageName}`,
+      );
+    }
+    for (const apiName of ["extractEvents", "extractSupplies", "extractDeadlines", "calendarCandidate", "toICS"]) {
+      assert.match(captureDoc, new RegExp(`${apiName}\\(`), `school doc capture doc should mention ${apiName}`);
+    }
+    assert.match(captureDoc, /plain text/);
+    assert.match(captureDoc, /API key가 없다/);
+    assert.match(captureDoc, /fixture refresh 명령이 없다/);
+    assert.match(captureDoc, /자동 실행하지 않는다/);
+    assert.match(captureDoc, /남은 확장 후보/);
+    assert.doesNotMatch(captureDoc, /다음 구현 후보/);
+  });
+
+  runParentSkillTest("kindergarten info feature doc documents childinfo source package", () => {
+    const doc = read(path.join("docs", "features", "k-parent-kindergarten-info.md"));
+
+    assert.match(doc, /packages\/k-parent-source-childinfo/);
+    assert.match(doc, /fetchChildcareCenters\(\{ sidoCode, sigunguCode, name \}\)/);
+    assert.match(doc, /fetchKindergartens\(\{ sidoCode, sggCode, name \}\)/);
+    assert.match(doc, /KSKILL_DATAGOKR_KEY/);
+    assert.match(doc, /npm run refresh:fixtures --workspace k-parent-source-childinfo/);
+    assert.match(doc, /endpoint path와 파라미터명/);
+    assert.match(doc, /EDSS\/KERIS 소재정보 별도 source 후보/);
+    assert.match(doc, /남은 확장 후보/);
+    assert.doesNotMatch(doc, /다음 구현 후보/);
+  });
+
+  runParentSkillTest("content recommender feature doc documents youtube source package", () => {
+    const doc = read(path.join("docs", "features", "k-parent-content-recommender.md"));
+
+    assert.match(doc, /packages\/k-parent-source-youtube/);
+    assert.match(doc, /searchVideos\(\{ q, safeSearch: "strict" \}\)/);
+    assert.match(doc, /safeSearch: "strict"/);
+    assert.match(doc, /regionCode: "KR"/);
+    assert.match(doc, /relevanceLanguage: "ko"/);
+    assert.match(doc, /KSKILL_YOUTUBE_KEY/);
+    assert.match(doc, /npm run refresh:fixtures --workspace k-parent-source-youtube -- "검색어"/);
+    assert.match(doc, /https:\/\/youtu\.be\/<videoId>/);
+    assert.match(doc, /남은 확장 후보/);
+    assert.doesNotMatch(doc, /다음 구현 후보/);
+  });
+
+  runParentSkillTest("school info and meal planner docs document NEIS source packages", () => {
+    const schoolDoc = read(path.join("docs", "features", "k-parent-school-info.md"));
+    const mealDoc = read(path.join("docs", "features", "k-parent-meal-planner.md"));
+
+    for (const packageName of ["k-parent-source-neis", "k-parent-brief"]) {
+      assert.match(schoolDoc, new RegExp(`packages/${escapeRegex(packageName)}`));
+      assert.match(mealDoc, new RegExp(`packages/${escapeRegex(packageName)}`));
+    }
+    assert.match(schoolDoc, /packages\/k-parent-source-traffic-safety/);
+    assert.match(schoolDoc, /^## 결정형 구현$/m);
+    assert.doesNotMatch(schoolDoc, /^## 결정형 구현 \(deterministic\)$/m);
+    for (const apiName of ["resolveSchool", "getMeals", "getSchedule", "getTimetable", "composeTodayBrief"]) {
+      assert.match(schoolDoc, new RegExp(`${apiName}\\b`), `school info doc should mention ${apiName}`);
+    }
+    assert.match(schoolDoc, /KEDU_INFO_KEY/);
+    assert.match(schoolDoc, /KSKILL_DATAGOKR_KEY/);
+    assert.match(schoolDoc, /npm run refresh:fixtures --workspace k-parent-source-neis/);
+    assert.match(schoolDoc, /npm run refresh:fixtures --workspace k-parent-source-traffic-safety/);
+    assert.match(schoolDoc, /남은 확장 후보/);
+    assert.doesNotMatch(schoolDoc, /다음 구현 후보/);
+
+    for (const apiName of ["resolveSchool", "getMeals", "getSchedule", "getTimetable", "composeTodayBrief"]) {
+      assert.match(mealDoc, new RegExp(`${apiName}\\b`), `meal planner doc should mention ${apiName}`);
+    }
+    assert.match(mealDoc, /^## 결정형 구현$/m);
+    assert.doesNotMatch(mealDoc, /^## 결정형 구현 \(deterministic\)$/m);
+    assert.match(mealDoc, /KEDU_INFO_KEY/);
+    assert.match(mealDoc, /npm run refresh:fixtures --workspace k-parent-source-neis/);
+    assert.match(mealDoc, /남은 확장 후보/);
+    assert.doesNotMatch(mealDoc, /다음 구현 후보/);
+  });
+
+  runParentSkillTest("data collector and shopping recommender docs describe promoted source packages", () => {
+    const dataCollectorDoc = read(path.join("docs", "features", "k-parent-data-collector.md"));
+    const shoppingDoc = read(path.join("docs", "features", "k-parent-shopping-recommender.md"));
+
+    assert.match(dataCollectorDoc, /packages\/k-parent-source-naver/);
+    assert.match(dataCollectorDoc, /runCollector\(tasks, options\)/);
+    assert.match(dataCollectorDoc, /KSKILL_NAVER_CLIENT_ID/);
+    assert.match(dataCollectorDoc, /KSKILL_NAVER_CLIENT_SECRET/);
+    assert.match(dataCollectorDoc, /npm run refresh:fixtures --workspace k-parent-source-naver/);
+    assert.doesNotMatch(dataCollectorDoc, /초기 SKILL\.md-only/);
+
+    for (const packageName of ["k-parent-source-naver", "k-parent-source-coupang"]) {
+      assert.match(shoppingDoc, new RegExp(`packages/${escapeRegex(packageName)}`));
+      assert.match(shoppingDoc, new RegExp(`npm run refresh:fixtures --workspace ${escapeRegex(packageName)}`));
+    }
+    for (const apiName of ["fetchShopping", "fetchBlog", "fetchProducts"]) {
+      assert.match(shoppingDoc, new RegExp(`${apiName}\\(`), `shopping doc should mention ${apiName}`);
+    }
+    for (const envName of [
+      "KSKILL_NAVER_CLIENT_ID",
+      "KSKILL_NAVER_CLIENT_SECRET",
+      "KSKILL_COUPANG_ACCESS_KEY",
+      "KSKILL_COUPANG_SECRET_KEY",
+    ]) {
+      assert.match(shoppingDoc, new RegExp(escapeRegex(envName)), `shopping doc should mention ${envName}`);
+    }
+    assert.match(shoppingDoc, /쿠팡 파트너스 활동의 일환으로 일정액의 수수료를 받을 수 있음/);
+    assert.doesNotMatch(shoppingDoc, /초기 SKILL\.md-only/);
+  });
+
+  runParentSkillTest("academy connector feature doc documents pure logic packages", () => {
+    const doc = read(path.join("docs", "features", "k-parent-academy-connector.md"));
+
+    for (const packageName of ["k-parent-doc-extract", "k-parent-calendar"]) {
+      assert.match(doc, new RegExp(`packages/${escapeRegex(packageName)}`));
+    }
+    for (const apiName of [
+      "extractAcademyNotice",
+      "extractDeadlines",
+      "calendarCandidate",
+      "dedupeCandidates",
+      "toICS",
+    ]) {
+      assert.match(doc, new RegExp(`${apiName}\\(`), `academy connector doc should mention ${apiName}`);
+    }
+    assert.match(doc, /필요한 API key가 없다/);
+    assert.match(doc, /fixture refresh 명령이 없다/);
+    assert.match(doc, /사용자 승인 전 실행하지 않는다/);
+    assert.match(doc, /남은 확장 후보/);
+    assert.doesNotMatch(doc, /## 구현 패키지/);
+  });
+
+  runParentSkillTest("validate-skills scans both product and example containers", () => {
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), "k-parent-validate-skills-"));
+    const tmpScripts = path.join(tmpRoot, "scripts");
+    const validator = path.join(tmpScripts, "validate-skills.sh");
+    fs.mkdirSync(tmpScripts, { recursive: true });
+    fs.cpSync(path.join(repoRoot, "scripts", "validate-skills.sh"), validator);
+    fs.chmodSync(validator, 0o755);
+
+    writeSkillFixture(tmpRoot, "skills", "product-skill", "product-skill");
+    writeParentSkillFixture(tmpRoot, "k-parent-good-skill", "p0");
+    writeSkillFixture(tmpRoot, "examples", "example-skill", "example-skill");
+
+    const ok = childProcess.spawnSync("bash", [validator], {
+      cwd: tmpRoot,
+      encoding: "utf8",
+    });
+    assert.equal(ok.status, 0, ok.stderr || ok.stdout);
+    assert.match(ok.stdout, /skill layout looks valid/);
+
+    writeSkillFixture(tmpRoot, "examples", "bad-example", "wrong-name");
+    const bad = childProcess.spawnSync("bash", [validator], {
+      cwd: tmpRoot,
+      encoding: "utf8",
+    });
+    assert.notEqual(bad.status, 0);
+    assert.match(bad.stdout, /examples\/bad-example\/SKILL\.md declares 'wrong-name'/);
+
+    writeParentSkillFixture(tmpRoot, "k-parent-missing-phase", "");
+    const badParent = childProcess.spawnSync("bash", [validator], {
+      cwd: tmpRoot,
+      encoding: "utf8",
+    });
+    assert.notEqual(badParent.status, 0);
+    assert.match(badParent.stdout, /missing or unsupported parent phase metadata/);
+  });
+
+  runParentSkillTest("parent source credential names stay aligned across owner docs and env template", () => {
+    const envTemplate = read(".env.example");
+    const ownerTasks = read("OWNER-TASKS.md");
+
+    for (const [packageName, vars] of Object.entries(sourceCredentialRefs)) {
+      const packageReadme = read(path.join("packages", packageName, "README.md"));
+      assert.match(ownerTasks, new RegExp(escapeRegex(packageName)), `OWNER-TASKS.md should mention ${packageName}`);
+      for (const envName of vars) {
+        assert.match(envTemplate, new RegExp(`^${escapeRegex(envName)}=`, "m"), `.env.example should define ${envName}`);
+        assert.match(ownerTasks, new RegExp(escapeRegex(envName)), `OWNER-TASKS.md should mention ${envName}`);
+        assert.match(packageReadme, new RegExp(escapeRegex(envName)), `${packageName} README should mention ${envName}`);
+        if (packageName !== "k-parent-source-welfare") {
+          assert.match(
+            packageReadme,
+            new RegExp(`${escapeRegex(envName)}[\\s\\S]*npm run refresh:fixtures`),
+            `${packageName} README should show ${envName} with the refresh:fixtures command`,
+          );
+        }
+      }
+    }
+
+    assert.doesNotMatch(ownerTasks, /data\.go\.kr 서비스 3종/);
+    assert.match(ownerTasks, /data\.go\.kr 2-1 목록 전체 활용신청 승인/);
+  });
+
+  runParentSkillTest("parent source packages expose refresh fixture scripts consistently", () => {
+    const sourceRoot = path.join(repoRoot, "packages");
+    const readme = read("README.md");
+    const ownerTasks = read("OWNER-TASKS.md");
+    const featureDocs = [
+      path.join("docs", "features", "k-parent-festival-finder.md"),
+      path.join("docs", "features", "k-parent-travel-recommender.md"),
+      path.join("docs", "features", "k-parent-play-finder.md"),
+      path.join("docs", "features", "k-parent-shopping-recommender.md"),
+      path.join("docs", "features", "k-parent-data-collector.md"),
+    ];
+    const packageDirs = fs
+      .readdirSync(sourceRoot)
+      .filter((name) => name.startsWith("k-parent-source-"))
+      .sort();
+
+    for (const packageName of packageDirs) {
+      const packageJsonPath = path.join("packages", packageName, "package.json");
+      const packageJson = readJson(packageJsonPath);
+      const packageReadme = read(path.join("packages", packageName, "README.md"));
+      const refreshScriptPath = path.join(repoRoot, "packages", packageName, "scripts", "refresh-fixtures.mjs");
+      const hasRefreshHelper = fs.existsSync(refreshScriptPath);
+      const refreshCommand = packageJson.scripts && packageJson.scripts["refresh:fixtures"];
+      const refreshHelper = hasRefreshHelper
+        ? read(path.join("packages", packageName, "scripts", "refresh-fixtures.mjs"))
+        : "";
+      const packageTestRoot = path.join(repoRoot, "packages", packageName, "test");
+      const usageSection = findSection(packageReadme, "## Usage");
+      const configurationSection = findSection(packageReadme, "## Configuration");
+      const testingSection = findSection(packageReadme, "## Testing");
+
+      assert.match(
+        packageReadme,
+        /npm test/,
+        `${packageName} README should document the package-local npm test command`,
+      );
+      assert.match(
+        packageReadme,
+        /## Testing/,
+        `${packageName} README should keep npm test in a dedicated Testing section`,
+      );
+      assert.match(
+        testingSection,
+        /```bash\nnpm test\n```/,
+        `${packageName} README Testing command should use a bash code fence`,
+      );
+      assert.match(
+        testingSection,
+        /fully offline|완전히 오프라인/,
+        `${packageName} README Testing section should say tests run fully offline`,
+      );
+      assert.match(
+        packageReadme,
+        /## Usage/,
+        `${packageName} README should document a minimal package usage example`,
+      );
+      assert.match(
+        packageReadme,
+        /## Configuration/,
+        `${packageName} README should keep credentials and optional live settings in a Configuration section`,
+      );
+      assert.doesNotMatch(
+        packageReadme,
+        /^## (?:Credentials|Config|Environment|환경변수|Optional live lookup)$/m,
+        `${packageName} README should not use legacy configuration section headings`,
+      );
+      assert.match(
+        packageReadme,
+        /provenance|source metadata|출처/,
+        `${packageName} README should document provenance/source metadata in normalized outputs`,
+      );
+      assert.match(
+        packageReadme,
+        /freshness|최신성|staleness/,
+        `${packageName} README should document freshness metadata in normalized outputs`,
+      );
+      if (configurationSection.includes("export ")) {
+        assert.match(
+          configurationSection,
+          /```bash\n[\s\S]*?export [\s\S]*?```/,
+          `${packageName} README Configuration shell examples should use a bash code fence`,
+        );
+      }
+      assert.match(
+        usageSection,
+        /```(?:js|javascript)\n[\s\S]*?```/,
+        `${packageName} README Usage should include a copyable JavaScript code block`,
+      );
+      assert.match(
+        usageSection,
+        new RegExp(`require\\("${escapeRegex(packageName)}"\\)`),
+        `${packageName} README Usage should require its own package name`,
+      );
+      if (packageReadme.includes("await ")) {
+        assert.match(
+          packageReadme,
+          /async function main\(\)|\(async \(\) =>/,
+          `${packageName} README should wrap await usage examples in an async function or IIFE`,
+        );
+      }
+      if (packageReadme.includes("async function main()")) {
+        assert.match(
+          packageReadme,
+          /main\(\)\.then\(console\.log\)\.catch/,
+          `${packageName} README should print async usage example results with main().then(console.log).catch(...)`,
+        );
+      }
+      assert.doesNotMatch(
+        packageReadme,
+        /[,{]\s*payload\s*[,}]/,
+        `${packageName} README should not use an undefined payload shorthand in examples`,
+      );
+      const readmeFixtureRequires = [...packageReadme.matchAll(/require\("\.\/(test\/fixtures\/[^"]+)"\)/g)];
+      for (const match of readmeFixtureRequires) {
+        assert.ok(
+          fs.existsSync(path.join(sourceRoot, packageName, match[1])),
+          `${packageName} README should only require fixture files that exist: ${match[1]}`,
+        );
+      }
+      if (readmeFixtureRequires.length > 0) {
+        assert.ok(
+          packageJson.files.includes("test/fixtures"),
+          `${packageName} files should include fixtures required by README Usage examples`,
+        );
+      }
+      for (const match of packageReadme.matchAll(/require\("(k-parent-source-[^"]+)"\)/g)) {
+        assert.equal(
+          match[1],
+          packageName,
+          `${packageName} README should require its own package name in Usage examples`,
+        );
+      }
+      assert.doesNotMatch(
+        packageReadme,
+        /node --test/,
+        `${packageName} README should not bypass the package npm test script`,
+      );
+      assert.ok(
+        packageJson.files.includes("test/*.test.js"),
+        `${packageName} files should include test files advertised by README npm test`,
+      );
+      if (fs.existsSync(packageTestRoot)) {
+        const testSources = fs
+          .readdirSync(packageTestRoot)
+          .filter((name) => name.endsWith(".test.js"))
+          .map((name) => read(path.join("packages", packageName, "test", name)))
+          .join("\n");
+        if (/fixtures/.test(testSources)) {
+          assert.ok(
+            packageJson.files.includes("test/fixtures"),
+            `${packageName} files should include fixtures required by package tests`,
+          );
+        }
+      }
+
+      if (packageName === "k-parent-source-welfare") {
+        assert.equal(hasRefreshHelper, false, "welfare is a curated catalog and should not require live fixture refresh");
+        assert.equal(refreshCommand, undefined, "welfare should not advertise a missing refresh:fixtures script");
+        assert.match(
+          packageReadme,
+          /No API key required/,
+          "welfare README should say the curated catalog requires no API key",
+        );
+        assert.match(
+          packageReadme,
+          /fully offline/,
+          "welfare README should say the curated catalog works fully offline",
+        );
+        assert.match(
+          packageReadme,
+          /optional/i,
+          "welfare README should describe KSKILL_DATAGOKR_KEY as optional",
+        );
+        assert.match(
+          ownerTasks,
+          /k-parent-source-welfare[\s\S]*외부 키 없이 동작[\s\S]*선택적으로 `KSKILL_DATAGOKR_KEY` 라이브 조회 stub/,
+          "OWNER-TASKS.md should document welfare as no-key by default with optional live lookup stub",
+        );
+        assert.doesNotMatch(
+          packageReadme,
+          /## Fixtures refresh/,
+          "welfare README should not document live fixture refresh for the curated catalog",
+        );
+        continue;
+      }
+
+      assert.equal(hasRefreshHelper, true, `${packageName} should ship scripts/refresh-fixtures.mjs`);
+      assert.equal(
+        refreshCommand,
+        "node scripts/refresh-fixtures.mjs",
+        `${packageName} should expose the standard refresh:fixtures command`,
+      );
+      assert.equal(
+        packageJson.scripts["refresh-fixtures"],
+        undefined,
+        `${packageName} should not expose the legacy refresh-fixtures script alias`,
+      );
+      assert.ok(packageJson.files.includes("scripts"), `${packageName} files should include refresh helpers`);
+      assert.ok(
+        packageJson.files.includes("test/fixtures"),
+        `${packageName} files should include fixture output targets for refresh helpers`,
+      );
+      assert.match(
+        ownerTasks,
+        new RegExp(`npm run refresh:fixtures --workspace ${escapeRegex(packageName)}`),
+        `OWNER-TASKS.md should document the workspace refresh command for ${packageName}`,
+      );
+      assert.match(
+        packageReadme,
+        /npm run refresh:fixtures/,
+        `${packageName} README should document the package-local refresh command`,
+      );
+      assert.doesNotMatch(
+        packageReadme,
+        /\\\n\s*npm run refresh:fixtures/,
+        `${packageName} README should keep refresh commands on one copyable env-prefixed line`,
+      );
+      assert.match(
+        packageReadme,
+        /## Fixtures refresh/,
+        `${packageName} README should keep live fixture refresh in a dedicated section`,
+      );
+      assert.match(
+        findSection(packageReadme, "## Fixtures refresh"),
+        /```bash\n[\s\S]*?npm run refresh:fixtures[\s\S]*?```/,
+        `${packageName} README fixture refresh command should use a bash code fence`,
+      );
+      assert.match(
+        findSection(packageReadme, "## Fixtures refresh"),
+        /live API|live fixture|실제|라이브/i,
+        `${packageName} README fixture refresh section should say the command calls live APIs`,
+      );
+      assert.doesNotMatch(
+        packageReadme,
+        /refresh-fixtures\.mjs/,
+        `${packageName} README should not bypass the package refresh:fixtures script`,
+      );
+      assert.doesNotMatch(
+        packageReadme,
+        /node --test packages\/k-parent-source-[^/]+\/test\//,
+        `${packageName} README should not publish root-relative package test commands`,
+      );
+      assert.match(
+        packageJson.scripts.lint,
+        /node --check scripts\/refresh-fixtures\.mjs/,
+        `${packageName} lint should syntax-check its refresh helper`,
+      );
+      assert.doesNotMatch(
+        refreshHelper,
+        /node packages\/k-parent-source-[^/]+\/scripts\/refresh-fixtures\.mjs/,
+        `${packageName} refresh helper should not document root-relative direct execution`,
+      );
+      for (const envName of sourceCredentialRefs[packageName] || []) {
+        assert.match(
+          refreshHelper,
+          new RegExp(`${escapeRegex(envName)}[\\s\\S]*npm run refresh:fixtures`),
+          `${packageName} refresh helper should print ${envName} with the refresh:fixtures command`,
+        );
+      }
+    }
+
+    assert.match(
+      ownerTasks,
+      /npm run refresh:fixtures --workspace k-parent-source-youtube -- "검색어"/,
+      "OWNER-TASKS.md should document npm argument forwarding for YouTube refresh queries",
+    );
+    assert.doesNotMatch(
+      ownerTasks,
+      /\\\n\s*npm run refresh:fixtures/,
+      "OWNER-TASKS.md should keep refresh commands on one copyable env-prefixed line",
+    );
+    assert.match(readme, /npm run refresh:fixtures --workspace <package>/);
+    assert.doesNotMatch(readme, /scripts\/refresh-fixtures\.mjs/);
+    assert.match(ownerTasks, /각 `refresh:fixtures` npm script 실행/);
+    assert.doesNotMatch(ownerTasks, /각 `refresh-fixtures\.mjs` 실행/);
+    assert.match(
+      read(path.join("packages", "k-parent-source-youtube", "README.md")),
+      /npm run refresh:fixtures -- "검색어"/,
+      "YouTube README should document package-local npm argument forwarding",
+    );
+    for (const docPath of featureDocs) {
+      const doc = read(docPath);
+      assert.doesNotMatch(doc, /node packages\/k-parent-source-[^ ]+\/scripts\/refresh-fixtures\.mjs/);
+      assert.doesNotMatch(doc, /node --test packages\/k-parent-source-[^/]+\/test\//);
+    }
+  });
+
+  runParentSkillTest("install docs match development home-directory skill install rules", () => {
+    const installDoc = read(path.join("docs", "install.md"));
+
+    assert.match(installDoc, /~\/\.claude\/skills\/<skill-name>/);
+    assert.match(installDoc, /~\/\.agents\/skills\/<skill-name>/);
+    assert.match(installDoc, /symlink 같은 indirection/);
+    assert.match(installDoc, /저장소 안에 `\.claude\/` 또는 `\.agents\/` 디렉터리를 만들지 않는다/);
+  });
+
+  runParentSkillTest("install docs name k-parent-skill as the repository install target", () => {
+    const installDoc = read(path.join("docs", "install.md"));
+    const proxyReadme = read(path.join("packages", "k-skill-proxy", "README.md"));
+
+    assert.match(installDoc, /`k-parent-skill` 전체 스킬을 먼저 설치한다/);
+    assert.match(installDoc, /k-parent-skill 전체 스킬을 먼저 설치해줘/);
+    assert.doesNotMatch(installDoc, /k-skill 전체 스킬을 먼저 설치/);
+    assert.match(installDoc, /제품 스킬은 표준 컨테이너 `skills\/<name>\/SKILL\.md` 에 있어 `--skill <name>` 으로 바로 설치된다/);
+    assert.match(installDoc, /예제 포함 선택 설치 블록에서만 `--full-depth` 를 함께 둔다/);
+    assert.match(installDoc, /parent 제품 스킬만 먼저 설치할 때:[\s\S]*npx --yes skills add <owner\/repo> \\\n  --skill k-parent-meal-planner/);
+    assert.match(installDoc, /상속 예제까지 포함한 선택 설치[\s\S]*npx --yes skills add <owner\/repo> \\\n  --full-depth/);
+    assert.match(proxyReadme, /`k-parent-skill`에서 부모용 무료\/공공 API를 중계/);
+  });
+
+  runParentSkillTest("install docs include every product skill in the selectable install examples", () => {
+    const installDoc = read(path.join("docs", "install.md"));
+    const listedSkills = new Set([...installDoc.matchAll(/--skill\s+([^\s\\]+)/g)].map((match) => match[1]));
+    const productSkills = fs
+      .readdirSync(path.join(repoRoot, "skills"))
+      .filter((name) => fs.existsSync(path.join(repoRoot, "skills", name, "SKILL.md")));
+
+    for (const skillName of productSkills) {
+      assert.ok(listedSkills.has(skillName), `${skillName} should appear in docs/install.md --skill examples`);
+    }
+  });
+
+  runParentSkillTest("install docs document newer hosted proxy-backed examples", () => {
+    const installDoc = read(path.join("docs", "install.md"));
+    const expectedSkills = [
+      "blue-ribbon-nearby",
+      "parking-lot-search",
+      "naver-shopping-search",
+      "naver-news-search",
+      "lh-notice-search",
+    ];
+    const expectedFeatureLinks = [
+      "features/blue-ribbon-nearby.md",
+      "features/parking-lot-search.md",
+      "features/naver-shopping-search.md",
+      "features/naver-news-search.md",
+      "features/lh-notice-search.md",
+    ];
+    const expectedOperatorKeys = [
+      "BLUE_RIBBON_SESSION_ID",
+      "DATA_GO_KR_API_KEY",
+      "NAVER_SEARCH_CLIENT_ID",
+      "NAVER_SEARCH_CLIENT_SECRET",
+    ];
+
+    for (const skillName of expectedSkills) {
+      assert.match(installDoc, new RegExp(`--skill ${escapeRegex(skillName)}`), `install docs should include --skill ${skillName}`);
+      assert.match(installDoc, new RegExp(`- \`${escapeRegex(skillName)}\``), `install docs setup list should include ${skillName}`);
+    }
+    for (const link of expectedFeatureLinks) {
+      assert.match(installDoc, new RegExp(escapeRegex(link)), `install docs should link ${link}`);
+    }
+    for (const envName of expectedOperatorKeys) {
+      assert.match(installDoc, new RegExp(envName), `install docs should mention proxy operator env ${envName}`);
+    }
+    assert.match(installDoc, /사용자 쪽 .*불필요|사용자 시크릿 불필요/u);
+    assert.match(installDoc, /기본 hosted proxy/);
+  });
+
+  runParentSkillTest("README advertises newer hosted proxy-backed example skills", () => {
+    const readme = read("README.md");
+    const expectedRows = [
+      ["블루리본 맛집 조회", "blue-ribbon-nearby", "docs/features/blue-ribbon-nearby.md"],
+      ["근처 공영주차장 찾기", "parking-lot-search", "docs/features/parking-lot-search.md"],
+      ["네이버 쇼핑 가격비교", "naver-shopping-search", "docs/features/naver-shopping-search.md"],
+      ["네이버 뉴스 검색", "naver-news-search", "docs/features/naver-news-search.md"],
+      ["LH 청약 공고 조회", "lh-notice-search", "docs/features/lh-notice-search.md"],
+    ];
+
+    assert.match(readme, /바로 쓸 수 있는 hosted proxy 예제/);
+    assert.match(readme, /k-skill-proxy\.nomadamas\.org/);
+    assert.match(readme, /사용자 쪽 API key 없이 바로 쓸 수/);
+    for (const [label, skillName, docPath] of expectedRows) {
+      assert.match(readme, new RegExp(escapeRegex(label)), `README should mention ${label}`);
+      assert.match(readme, new RegExp(`\\\`${escapeRegex(skillName)}\\\``), `README should mention ${skillName}`);
+      assert.match(readme, new RegExp(escapeRegex(docPath)), `README should link ${docPath}`);
+    }
+  });
+
+  runParentSkillTest("examples README lists newer hosted proxy-backed examples", () => {
+    const examplesReadme = read(path.join("examples", "README.md"));
+    const expectedRows = [
+      ["블루리본 맛집 조회", "blue-ribbon-nearby", "../docs/features/blue-ribbon-nearby.md"],
+      ["근처 공영주차장 찾기", "parking-lot-search", "../docs/features/parking-lot-search.md"],
+      ["네이버 쇼핑 가격비교", "naver-shopping-search", "../docs/features/naver-shopping-search.md"],
+      ["네이버 뉴스 검색", "naver-news-search", "../docs/features/naver-news-search.md"],
+      ["LH 청약 공고 조회", "lh-notice-search", "../docs/features/lh-notice-search.md"],
+    ];
+
+    assert.match(examplesReadme, /Hosted Proxy 예제/);
+    assert.match(examplesReadme, /k-skill-proxy\.nomadamas\.org/);
+    assert.match(examplesReadme, /일반 사용자 쪽 API key 없이/);
+    for (const [label, skillName, docPath] of expectedRows) {
+      assert.match(examplesReadme, new RegExp(escapeRegex(label)), `examples README should mention ${label}`);
+      assert.match(examplesReadme, new RegExp(`\\\`${escapeRegex(skillName)}\\\``), `examples README should mention ${skillName}`);
+      assert.match(examplesReadme, new RegExp(escapeRegex(docPath)), `examples README should link ${docPath}`);
+    }
+  });
+
+  runParentSkillTest("hosted proxy example skills document user secret boundaries", () => {
+    const expectedSkills = [
+      ["blue-ribbon-nearby", "BLUE_RIBBON_SESSION_ID", "/v1/blue-ribbon/nearby"],
+      ["parking-lot-search", "DATA_GO_KR_API_KEY", "/v1/parking-lots/search"],
+      ["naver-shopping-search", "NAVER_SEARCH_CLIENT_ID", "/v1/naver-shopping/search"],
+      ["naver-news-search", "NAVER_SEARCH_CLIENT_ID", "/v1/naver-news/search"],
+      ["lh-notice-search", "DATA_GO_KR_API_KEY", "/v1/lh-notice"],
+    ];
+
+    for (const [skillName, envName, routePrefix] of expectedSkills) {
+      const skill = read(path.join("examples", skillName, "SKILL.md"));
+      assert.match(skill, /k-skill-proxy\.nomadamas\.org|기본 hosted proxy|기본값은 public\/read-only\/no-auth hosted proxy/);
+      assert.match(skill, new RegExp(escapeRegex(routePrefix)), `${skillName} should mention ${routePrefix}`);
+      assert.match(skill, new RegExp(`\\b${escapeRegex(envName)}\\b`), `${skillName} should mention ${envName}`);
+      assert.match(skill, /사용자[^.\n]*(?:필요 없다|불필요|발급받지 않아도 된다|필요한 시크릿은 없다)/u);
+      assert.match(skill, /proxy 운영자|self-host proxy 운영자|프록시 서버에서만|서버 쪽에만/u);
+    }
+  });
+
+  runParentSkillTest("sources document newer hosted proxy-backed example surfaces", () => {
+    const sources = read(path.join("docs", "sources.md"));
+    const expectedSignals = [
+      "블루리본 메인",
+      "블루리본 지역 검색",
+      "블루리본 주변 맛집 JSON",
+      "전국주차장정보표준데이터",
+      "Naver Shopping public BFF JSON",
+      "Naver Developers Search API shopping docs",
+      "Naver Developers Search API news docs",
+      "openapi.naver.com/v1/search/news.json",
+      "LH 청약플러스 공고 목록",
+      "한국토지주택공사 임대공고문 정보 API",
+    ];
+
+    for (const signal of expectedSignals) {
+      assert.match(sources, new RegExp(escapeRegex(signal)), `sources should include ${signal}`);
+    }
+  });
+
+  runParentSkillTest("roadmap tracks newer hosted proxy-backed example surfaces", () => {
+    const roadmap = read(path.join("docs", "roadmap.md"));
+    const expectedRows = [
+      ["블루리본 맛집 조회", "blue-ribbon-nearby"],
+      ["근처 공영주차장 찾기", "parking-lot-search"],
+      ["네이버 쇼핑 가격비교", "naver-shopping-search"],
+      ["네이버 뉴스 검색", "naver-news-search"],
+      ["LH 청약 공고 조회", "lh-notice-search"],
+    ];
+
+    assert.match(roadmap, /^## 제품 스킬 상태$/m);
+    assert.match(roadmap, /`skills\/\*\/SKILL\.md` 지침을 유지/);
+    assert.match(roadmap, /package[s]?\/|`packages\/`/);
+    assert.match(roadmap, /concept workflow/);
+    assert.doesNotMatch(roadmap, /Demo placeholders/);
+    assert.doesNotMatch(roadmap, /플레이스홀더/);
+    assert.match(roadmap, /지원 중인 hosted proxy 예제 표면/);
+    assert.match(roadmap, /parent 제품 스킬 또는 `packages\/k-parent-\*` 구현으로 승격/);
+    for (const [surface, skillName] of expectedRows) {
+      assert.match(roadmap, new RegExp(escapeRegex(surface)), `roadmap should mention ${surface}`);
+      assert.match(roadmap, new RegExp(`\\\`${escapeRegex(skillName)}\\\``), `roadmap should mention ${skillName}`);
+      assert.match(roadmap, new RegExp(escapeRegex(`examples/${skillName}`)), `roadmap should mention examples/${skillName}`);
+    }
+  });
+
+  runParentSkillTest("roadmap department package references use real package paths", () => {
+    const roadmap = read(path.join("docs", "roadmap.md"));
+    const packageRefs = [...roadmap.matchAll(/`packages\/(k-parent-[a-z0-9-]+)`/g)].map((match) => match[1]);
+
+    assert.ok(packageRefs.length > 0, "roadmap should cite k-parent packages with packages/ paths");
+    assert.doesNotMatch(roadmap, /`\-[a-z][^`]*`/, "roadmap should not use abbreviated package suffixes");
+    assert.doesNotMatch(
+      roadmap,
+      /`k-parent-(?:source-[a-z-]+|brief|calendar|doc-extract)`/,
+      "roadmap should use packages/ paths for k-parent package references",
+    );
+    for (const packageName of packageRefs) {
+      assert.ok(
+        fs.existsSync(path.join(repoRoot, "packages", packageName, "package.json")),
+        `roadmap cites missing package ${packageName}`,
+      );
+    }
+  });
+
+  runParentSkillTest("setup product skill uses k-parent-skill repository branding", () => {
+    const setupSkill = read(path.join("skills", "k-skill-setup", "SKILL.md"));
+
+    assert.match(setupSkill, /After installing the full k-parent-skill bundle/);
+    assert.match(setupSkill, /# k-parent-skill Setup/);
+    assert.match(setupSkill, /전체 `k-parent-skill` 설치가 끝난 뒤/);
+    assert.match(setupSkill, /`k-parent-skill` 전체 스킬 설치가 끝난 뒤/);
+    assert.match(setupSkill, /gh repo star <owner>\/k-parent-skill/);
+    assert.doesNotMatch(setupSkill, /전체 `k-skill` 설치|`k-skill` 전체 스킬 설치|NomaDamas\/k-skill|gh repo star NomaDamas\/k-skill/);
+  });
+
+  runParentSkillTest("moved skill helper paths use current containers", () => {
+    const cleanerDoc = read(path.join("docs", "features", "k-skill-cleaner.md"));
+    const coupangDoc = read(path.join("docs", "features", "coupang-product-search.md"));
+    const coupangSkill = read(path.join("examples", "coupang-product-search", "SKILL.md"));
+    const foresttripDoc = read(path.join("docs", "features", "foresttrip-vacancy.md"));
+    const foresttripSkill = read(path.join("examples", "foresttrip-vacancy", "SKILL.md"));
+    const rhwpEditDoc = read(path.join("docs", "features", "rhwp-edit.md"));
+    const rhwpAdvancedDoc = read(path.join("docs", "features", "rhwp-advanced.md"));
+
+    assert.match(cleanerDoc, /python3 skills\/k-skill-cleaner\/scripts\/k_skill_cleaner\.py/);
+    assert.doesNotMatch(cleanerDoc, /python3 k-skill-cleaner\/scripts\/k_skill_cleaner\.py/);
+    assert.match(coupangDoc, /python3 examples\/coupang-product-search\/scripts\/coupang_partners_mcp\.py/);
+    assert.doesNotMatch(coupangDoc, /python3 coupang-product-search\/scripts\/coupang_partners_mcp\.py/);
+    assert.match(foresttripDoc, /python3 examples\/foresttrip-vacancy\/scripts\/run_foresttrip_vacancy\.py/);
+    assert.doesNotMatch(foresttripDoc, /python3 foresttrip-vacancy\/scripts\/run_foresttrip_vacancy\.py/);
+    assert.match(coupangSkill, /python3 scripts\/coupang_partners_mcp\.py/);
+    assert.doesNotMatch(coupangSkill, /python3 coupang-product-search\/scripts\/coupang_partners_mcp\.py/);
+    assert.match(foresttripSkill, /python3 scripts\/run_foresttrip_vacancy\.py/);
+    assert.doesNotMatch(foresttripSkill, /python3 foresttrip-vacancy\/scripts\/run_foresttrip_vacancy\.py/);
+    assert.match(rhwpEditDoc, /\.\.\/\.\.\/examples\/rhwp-edit\/SKILL\.md/);
+    assert.match(rhwpAdvancedDoc, /\.\.\/\.\.\/examples\/rhwp-advanced\/SKILL\.md/);
+  });
+
+  runParentSkillTest("thin-wrapper install and pin paths use current containers", () => {
+    const privacyDoc = read(path.join("docs", "features", "korean-privacy-terms.md"));
+    const privacySkill = read(path.join("examples", "korean-privacy-terms", "SKILL.md"));
+    const jangbuDoc = read(path.join("docs", "features", "korean-jangbu-for.md"));
+    const jangbuSkill = read(path.join("examples", "korean-jangbu-for", "SKILL.md"));
+    const installDoc = read(path.join("docs", "install.md"));
+    const irosDoc = read(path.join("docs", "features", "iros-registry-automation.md"));
+    const irosSkill = read(path.join("examples", "iros-registry-automation", "SKILL.md"));
+    const sources = read(path.join("docs", "sources.md"));
+
+    assert.match(privacyDoc, /bash examples\/korean-privacy-terms\/scripts\/install\.sh/);
+    assert.match(privacyDoc, /examples\/korean-privacy-terms\/scripts\/upstream\.pin/);
+    assert.match(privacySkill, /bash scripts\/install\.sh/);
+    assert.match(privacySkill, /scripts\/upstream\.pin/);
+    assert.match(jangbuDoc, /bash examples\/korean-jangbu-for\/scripts\/install\.sh/);
+    assert.match(jangbuDoc, /examples\/korean-jangbu-for\/scripts\/upstream\.pin/);
+    assert.match(jangbuSkill, /bash scripts\/install\.sh/);
+    assert.match(jangbuSkill, /scripts\/upstream\.pin/);
+    assert.match(installDoc, /bash examples\/korean-jangbu-for\/scripts\/install\.sh/);
+    assert.match(irosDoc, /examples\/iros-registry-automation\/scripts\/upstream\.pin/);
+    assert.match(sources, /examples\/iros-registry-automation\/scripts\/upstream\.pin/);
+    assert.match(irosSkill, /scripts\/upstream\.pin/);
+
+    for (const doc of [privacyDoc, jangbuDoc, installDoc, irosDoc, sources]) {
+      assert.doesNotMatch(doc, /(?:bash|cat) (?:korean-privacy-terms|korean-jangbu-for)\/scripts\//);
+      assert.doesNotMatch(doc, /`(?:korean-privacy-terms|korean-jangbu-for|iros-registry-automation)\/scripts\/upstream\.pin`/);
+    }
+    for (const skill of [privacySkill, jangbuSkill, irosSkill]) {
+      assert.doesNotMatch(skill, /(?:bash|cat) (?:korean-privacy-terms|korean-jangbu-for|iros-registry-automation)\/scripts\//);
+      assert.doesNotMatch(skill, /`(?:korean-privacy-terms|korean-jangbu-for|iros-registry-automation)\/scripts\//);
+    }
+  });
+
+  runParentSkillTest("parent proxy secret docs use the k-parent-skill secrets path", () => {
+    const parentSecretDocs = [
+      path.join("docs", "setup.md"),
+      path.join("docs", "security-and-secrets.md"),
+      path.join("docs", "adding-a-skill.md"),
+      path.join("docs", "features", "fine-dust-location.md"),
+      path.join("docs", "features", "foresttrip-vacancy.md"),
+      path.join("docs", "features", "ktx-booking.md"),
+      path.join("docs", "features", "srt-booking.md"),
+      path.join("examples", "foresttrip-vacancy", "SKILL.md"),
+      path.join("examples", "ktx-booking", "SKILL.md"),
+      path.join("examples", "srt-booking", "SKILL.md"),
+      path.join("packages", "k-skill-proxy", "README.md"),
+      path.join("scripts", "check-setup.sh"),
+      path.join("scripts", "fine_dust.py"),
+      path.join("scripts", "ktx_booking.py"),
+      path.join("scripts", "run-k-skill-proxy.sh"),
+      path.join("skills", "k-skill-setup", "SKILL.md"),
+    ];
+
+    for (const docPath of parentSecretDocs) {
+      const doc = read(docPath);
+      assert.match(
+        doc,
+        /~\/\.config\/k-parent-skill\/secrets\.env|\$HOME\/\.config\/k-parent-skill\/secrets\.env/,
+        `${docPath} should use the parent repository secrets path`,
+      );
+      assert.doesNotMatch(
+        doc,
+        /~\/\.config\/k-skill\/secrets\.env|\$HOME\/\.config\/k-skill\/secrets\.env/,
+        `${docPath} should not use the inherited k-skill secrets path for parent proxy setup`,
+      );
+    }
+  });
+
+  runParentSkillTest("security docs document newer hosted proxy-backed secret boundaries", () => {
+    const security = read(path.join("docs", "security-and-secrets.md"));
+    const expectedFeatures = [
+      "블루리본 맛집 조회",
+      "근처 공영주차장 찾기",
+      "네이버 쇼핑 가격비교",
+      "네이버 뉴스 검색",
+      "LH 청약 공고 조회",
+    ];
+    const expectedOperatorKeys = [
+      "BLUE_RIBBON_SESSION_ID",
+      "DATA_GO_KR_API_KEY",
+      "NAVER_SEARCH_CLIENT_ID",
+      "NAVER_SEARCH_CLIENT_SECRET",
+    ];
+
+    for (const feature of expectedFeatures) {
+      assert.match(security, new RegExp(feature), `security docs should mention ${feature}`);
+    }
+    for (const envName of expectedOperatorKeys) {
+      assert.match(security, new RegExp(`\\b${escapeRegex(envName)}\\b`), `security docs should mention ${envName}`);
+    }
+    assert.match(security, /일반 사용자\/client 쪽 secrets 파일에는/);
+    assert.match(security, /self-host proxy 운영자 문맥에서만 서버에 주입/);
+    assert.match(security, /기본 hosted path\(`k-skill-proxy\.nomadamas\.org`\)/);
+  });
+
+  runParentSkillTest("proxy docs document every public v1 GET route", () => {
+    const proxyDocs = [
+      ["proxy README", read(path.join("packages", "k-skill-proxy", "README.md"))],
+      ["proxy feature doc", read(path.join("docs", "features", "k-skill-proxy.md"))],
+    ];
+    const proxyServer = read(path.join("packages", "k-skill-proxy", "src", "server.js"));
+    const routeMatches = [...proxyServer.matchAll(/app\.get\("([^"]+)"/g)];
+    const publicV1Routes = routeMatches.map((match) => match[1]).filter((route) => route.startsWith("/v1/")).sort();
+
+    for (const [docName, doc] of proxyDocs) {
+      for (const route of publicV1Routes) {
+        assert.match(doc, new RegExp(`GET ${escapeRegex(route)}`), `${docName} should document ${route}`);
+      }
+    }
+  });
+
+  runParentSkillTest("proxy docs document every buildConfig environment variable", () => {
+    const proxyDocs = [
+      ["proxy README", read(path.join("packages", "k-skill-proxy", "README.md"))],
+      ["proxy feature doc", read(path.join("docs", "features", "k-skill-proxy.md"))],
+    ];
+    const proxyServer = read(path.join("packages", "k-skill-proxy", "src", "server.js"));
+    const buildConfigSource = proxyServer.match(/function buildConfig[\s\S]+?\n}\n/);
+    assert.ok(buildConfigSource, "proxy server should expose buildConfig");
+    const envNames = [...buildConfigSource[0].matchAll(/env\.([A-Z0-9_]+)/g)]
+      .map((match) => match[1])
+      .sort();
+    const uniqueEnvNames = [...new Set(envNames)];
+
+    for (const [docName, doc] of proxyDocs) {
+      for (const envName of uniqueEnvNames) {
+        assert.match(doc, new RegExp(`\\b${escapeRegex(envName)}\\b`), `${docName} should document ${envName}`);
+      }
+    }
+  });
+
+  runParentSkillTest("local markdown links resolve to files", () => {
+    const markdownFiles = ["README.md", "AGENTS.md", "CLAUDE.md", "docs", "skills", "examples"].flatMap(listMarkdownFiles);
+    const missingLinks = [];
+
+    for (const markdownFile of markdownFiles) {
+      const doc = read(markdownFile);
+      for (const match of doc.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
+        let target = match[1].trim();
+        if (!target || /^(?:https?:|mailto:|#)/.test(target) || target.startsWith("app://")) continue;
+        target = target.split("#")[0];
+        if (!target) continue;
+        if (target.includes("%")) {
+          try {
+            target = decodeURIComponent(target);
+          } catch {
+            // Keep the raw target if it is not valid percent-encoding.
+          }
+        }
+
+        const resolvedPath = path.normalize(path.join(path.dirname(markdownFile), target));
+        if (!fs.existsSync(path.join(repoRoot, resolvedPath))) {
+          missingLinks.push(`${markdownFile}: ${match[1]} -> ${resolvedPath}`);
+        }
+      }
+    }
+
+    assert.deepEqual(missingLinks, []);
+  });
+
+  runParentSkillTest("repository does not track local-only artifacts", () => {
+    const result = childProcess.spawnSync("git", ["ls-files", "-z"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+    });
+
+    assert.equal(result.status, 0, result.stderr);
+    const trackedFiles = result.stdout.split("\0").filter(Boolean);
+    const forbidden = [
+      /\.DS_Store$/,
+      /(?:^|\/)\.env(?:$|\.(?!example$).+)/,
+      /\.(?:dec|plaintext|log)$/,
+      /(?:^|\/)(?:data-go-kr-login-state|[^/]+-login-state)\.png$/,
+      /(?:^|\/)[^/]+\.session(?:\.json)?$/,
+      /\.(?:sqlite|sqlite3|db)(?:$|-)/,
+      /\.(?:bak|backup|tar|tar\.gz|tgz|zip|hwp)$/,
+    ];
+
+    for (const file of trackedFiles) {
+      for (const pattern of forbidden) {
+        assert.doesNotMatch(file, pattern, `${file} should not be tracked local/runtime state`);
+      }
+    }
+  });
+
+  runParentSkillTest("root pack:dry-run script covers every publishable workspace", () => {
+    const rootPackageJson = readJson("package.json");
+    const packScript = rootPackageJson.scripts["pack:dry-run"] || "";
+    const packageRoot = path.join(repoRoot, "packages");
+    const packageDirs = fs
+      .readdirSync(packageRoot)
+      .filter((name) => fs.existsSync(path.join(packageRoot, name, "package.json")))
+      .sort();
+
+    for (const packageDir of packageDirs) {
+      const packageJson = readJson(path.join("packages", packageDir, "package.json"));
+      if (packageJson.private === true || packageJson.publishConfig?.access !== "public") {
+        continue;
+      }
+      assert.match(
+        packScript,
+        new RegExp(`npm pack --workspace ${escapeRegex(packageJson.name)} --dry-run`),
+        `${packageJson.name} should be included in the root pack:dry-run script`,
+      );
+    }
+  });
+
+  runParentSkillTest("release automation stays disabled until publish targets exist", () => {
+    const rootPackageJson = readJson("package.json");
+    const packageScripts = rootPackageJson.scripts || {};
+    const packageDevDependencies = rootPackageJson.devDependencies || {};
+    const tracked = childProcess.execFileSync("git", ["ls-files"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+    });
+    const trackedFiles = tracked.split("\n").filter(Boolean);
+    const pythonPackageRoot = path.join(repoRoot, "python-packages");
+    const pythonPackageProjects = fs.existsSync(pythonPackageRoot)
+      ? fs
+          .readdirSync(pythonPackageRoot)
+          .filter((name) => fs.existsSync(path.join(pythonPackageRoot, name, "pyproject.toml")))
+      : [];
+
+    if (pythonPackageProjects.length === 0) {
+      assert.deepEqual(
+        trackedFiles
+          .filter((file) => file.startsWith(".github/release-please/"))
+          .filter((file) => fs.existsSync(path.join(repoRoot, file))),
+        [],
+        "release-please config should not be tracked before a real Python package exists",
+      );
+    }
+
+    assert.equal(packageScripts["version-packages"], undefined, "Changesets version script should be absent while release automation is disabled");
+    assert.equal(packageScripts["release:npm"], undefined, "npm publish script should be absent while release automation is disabled");
+    assert.equal(
+      packageDevDependencies["@changesets/cli"],
+      undefined,
+      "Changesets CLI should be reintroduced only with a real npm publish workflow",
+    );
+    assert.equal(
+      fs.existsSync(path.join(repoRoot, ".changeset", "config.json")),
+      false,
+      "Changesets config should be absent while npm release automation is disabled",
+    );
+
+    const workflowFiles = trackedFiles.filter((file) => file.startsWith(".github/workflows/"));
+    for (const file of workflowFiles) {
+      const workflow = read(file);
+      assert.doesNotMatch(workflow, /\bnpm publish\b|changeset publish|pypi|twine upload|release-please/i);
+      assert.doesNotMatch(workflow, /^on:\s*\n[\s\S]*?^\s*push:\s*[\s\S]*?\bpublish\b/im);
+    }
+
+    const releaseDisabledDocs = [
+      path.join("docs", "features", "lck-analytics.md"),
+      path.join("packages", "lck-analytics", "README.md"),
+      path.join("examples", "lck-analytics", "SKILL.md"),
+      path.join("examples", "lck-analytics", "README.md"),
+      path.join("examples", "kleague-results", "SKILL.md"),
+    ];
+    for (const docPath of releaseDisabledDocs) {
+      const doc = read(docPath);
+      assert.doesNotMatch(
+        doc,
+        /Version Packages PR|npm publish(?:\s*\([^)]*\))?(?:가| workflow가|이)?\s*실행|Changesets가 Version Packages/i,
+      );
+      assert.match(doc, /release workflow는 비활성 상태|release automation is disabled|release workflow is disabled/);
+    }
+  });
+
+  runParentSkillTest("setup docs document newer hosted proxy-backed skills", () => {
+    const setup = read(path.join("docs", "setup.md"));
+    const setupSkill = read(skillRel("k-skill-setup", "SKILL.md"));
+    const expectedFeatures = [
+      "블루리본 맛집",
+      "공영주차장",
+      "네이버 쇼핑",
+      "네이버 뉴스",
+      "LH 청약 공고",
+    ];
+    const expectedOperatorKeys = [
+      "BLUE_RIBBON_SESSION_ID",
+      "DATA_GO_KR_API_KEY",
+      "NAVER_SEARCH_CLIENT_ID",
+      "NAVER_SEARCH_CLIENT_SECRET",
+    ];
+
+    for (const doc of [setup, setupSkill]) {
+      for (const feature of expectedFeatures) {
+        assert.match(doc, new RegExp(feature), `setup docs should mention ${feature}`);
+      }
+      for (const envName of expectedOperatorKeys) {
+        assert.match(doc, new RegExp(envName), `setup docs should mention proxy operator env ${envName}`);
+      }
+      assert.match(doc, /사용자 시크릿 불필요/);
+      assert.match(doc, /기본 hosted proxy/);
+    }
+
+    assert.match(setup, /\[블루리본 맛집 조회 가이드\]\(features\/blue-ribbon-nearby\.md\)/);
+    assert.match(setup, /\[근처 공영주차장 찾기 가이드\]\(features\/parking-lot-search\.md\)/);
+    assert.match(setup, /\[네이버 쇼핑 검색 가이드\]\(features\/naver-shopping-search\.md\)/);
+    assert.match(setup, /\[네이버 뉴스 검색 가이드\]\(features\/naver-news-search\.md\)/);
+    assert.match(setup, /\[LH 청약 공고 조회 가이드\]\(features\/lh-notice-search\.md\)/);
+  });
+
+  runParentSkillTest("setup docs document core hosted proxy-backed skills", () => {
+    const setup = read(path.join("docs", "setup.md"));
+    const setupSkill = read(skillRel("k-skill-setup", "SKILL.md"));
+    const expectedFeatures = [
+      "미세먼지",
+      "한강 수위",
+      "주유소 가격",
+      "부동산 실거래가",
+      "한국 주식 정보 조회",
+      "생활쓰레기 배출정보 조회",
+      "학교 급식 식단 조회",
+      "도서관 도서 조회",
+      "의약품 안전 체크",
+      "식품 안전 체크",
+    ];
+    const expectedRoutes = [
+      "/v1/household-waste/info",
+      "/v1/neis/school-search",
+      "/v1/neis/school-meal",
+      "/v1/data4library/",
+      "/v1/mfds/drug-safety/lookup",
+      "/v1/mfds/food-safety/search",
+    ];
+    const expectedOperatorKeys = [
+      "DATA_GO_KR_API_KEY",
+      "KEDU_INFO_KEY",
+      "DATA4LIBRARY_AUTH_KEY",
+      "FOODSAFETYKOREA_API_KEY",
+      "KRX_API_KEY",
+      "OPINET_API_KEY",
+    ];
+
+    for (const doc of [setup, setupSkill]) {
+      for (const feature of expectedFeatures) {
+        assert.match(doc, new RegExp(feature), `setup docs should mention ${feature}`);
+      }
+      for (const envName of expectedOperatorKeys) {
+        assert.match(doc, new RegExp(envName), `setup docs should mention proxy operator env ${envName}`);
+      }
+      assert.match(doc, /사용자 시크릿 불필요/);
+    }
+
+    for (const route of expectedRoutes) {
+      assert.match(setupSkill, new RegExp(escapeRegex(route)), `k-skill-setup should mention ${route}`);
+    }
+
+    assert.match(setup, /\[생활쓰레기 배출정보 조회 가이드\]\(features\/household-waste-info\.md\)/);
+    assert.match(setup, /\[학교 급식 식단 조회 가이드\]\(features\/k-schoollunch-menu\.md\)/);
+    assert.match(setup, /\[도서관 도서 조회 가이드\]\(features\/library-book-search\.md\)/);
+    assert.match(setup, /\[의약품 안전 체크 가이드\]\(features\/mfds-drug-safety\.md\)/);
+    assert.match(setup, /\[식품 안전 체크 가이드\]\(features\/mfds-food-safety\.md\)/);
+  });
+
+  runParentSkillTest("productization plan pins the first mobile Today Brief quality gate", () => {
+    const productization = read(path.join("docs", "productization-gstack.md"));
+
+    assert.match(productization, /Mobile MVP Acceptance Criteria/);
+    assert.match(productization, /"이번 주 챙길 것"/);
+    assert.match(productization, /child switcher/);
+    assert.match(productization, /source freshness strip/);
+    assert.match(productization, /calendar candidate confirmation modal/);
+    assert.match(productization, /Today Brief Contract/);
+    assert.match(productization, /guardActionCandidate/);
+    assert.match(productization, /gstack Mobile QA Checklist/);
+    assert.match(productization, /mobile text does not overlap/);
+    assert.match(productization, /Canary Smoke Paths/);
+    assert.match(productization, /never direct submission\/payment/);
+  });
+
   test = test.skip;
+}
+
+function writeSkillFixture(root, container, dirName, declaredName) {
+  const skillDir = path.join(root, container, dirName);
+  fs.mkdirSync(skillDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(skillDir, "SKILL.md"),
+    [
+      "---",
+      `name: ${declaredName}`,
+      "description: 테스트용 스킬입니다.",
+      "license: MIT",
+      "---",
+      "",
+      "# Test Skill",
+      "",
+    ].join("\n"),
+  );
+}
+
+function writeParentSkillFixture(root, dirName, phase) {
+  const skillDir = path.join(root, "skills", dirName);
+  const phaseLines = phase ? ["metadata:", "  category: parenting", "  locale: ko-KR", `  phase: ${phase}`] : [];
+  fs.mkdirSync(skillDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(skillDir, "SKILL.md"),
+    [
+      "---",
+      `name: ${dirName}`,
+      "description: 테스트용 부모 스킬입니다.",
+      "license: MIT",
+      ...phaseLines,
+      "---",
+      "",
+      "# Test Parent Skill",
+      "",
+    ].join("\n"),
+  );
 }
 
 test("root npm test script includes the skill docs regression suite", () => {
@@ -337,11 +2078,11 @@ test("README advertises OpenClaw among the supported coding agents", () => {
 });
 
 test("hwp skill documents kordoc-based parsing and supported operations", () => {
-  const skillPath = path.join(repoRoot, "hwp", "SKILL.md");
+  const skillPath = skillAbs("hwp", "SKILL.md");
 
-  assert.ok(fs.existsSync(skillPath), "expected hwp/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/hwp/SKILL.md to exist");
 
-  const skill = read(path.join("hwp", "SKILL.md"));
+  const skill = read(skillRel("hwp", "SKILL.md"));
 
   assert.match(skill, /^name: hwp$/m);
   assert.match(skill, /\bkordoc\b/);
@@ -362,7 +2103,7 @@ test("hwp skill documents kordoc-based parsing and supported operations", () => 
 });
 
 test("hwp docs match the published kordoc install and runtime contract", () => {
-  const skill = read(path.join("hwp", "SKILL.md"));
+  const skill = read(skillRel("hwp", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "hwp.md"));
   const install = read(path.join("docs", "install.md"));
   const readme = read("README.md");
@@ -429,10 +2170,10 @@ test("repository docs advertise the used-car-price-search skill", () => {
   const readme = read("README.md");
   const install = read(path.join("docs", "install.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "used-car-price-search.md");
-  const skillPath = path.join(repoRoot, "used-car-price-search", "SKILL.md");
+  const skillPath = skillAbs("used-car-price-search", "SKILL.md");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/used-car-price-search.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected used-car-price-search/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/used-car-price-search/SKILL.md to exist");
   assert.match(readme, /\| 중고차 가격 조회 \|/);
   assert.match(readme, /\[중고차 가격 조회 가이드\]\(docs\/features\/used-car-price-search\.md\)/);
   assert.match(install, /--skill used-car-price-search/);
@@ -446,10 +2187,10 @@ test("repository docs advertise the public-restroom-nearby skill", () => {
   const readme = read("README.md");
   const install = read(path.join("docs", "install.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "public-restroom-nearby.md");
-  const skillPath = path.join(repoRoot, "public-restroom-nearby", "SKILL.md");
+  const skillPath = skillAbs("public-restroom-nearby", "SKILL.md");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/public-restroom-nearby.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected public-restroom-nearby/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/public-restroom-nearby/SKILL.md to exist");
   assert.match(readme, /\| 근처 공중화장실 찾기 \|/);
   assert.match(readme, /\[근처 공중화장실 찾기 가이드\]\(docs\/features\/public-restroom-nearby\.md\)/);
   assert.match(install, /--skill public-restroom-nearby/);
@@ -470,10 +2211,10 @@ test("repository docs advertise the lck-analytics skill and package", () => {
   const readme = read("README.md");
   const install = read(path.join("docs", "install.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "lck-analytics.md");
-  const skillPath = path.join(repoRoot, "lck-analytics", "SKILL.md");
+  const skillPath = skillAbs("lck-analytics", "SKILL.md");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/lck-analytics.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected lck-analytics/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/lck-analytics/SKILL.md to exist");
   assert.match(readme, /\| LCK 경기 분석 \|/);
   assert.match(readme, /\[LCK 경기 분석 가이드\]\(docs\/features\/lck-analytics\.md\)/);
   assert.match(install, /--skill lck-analytics/);
@@ -481,7 +2222,7 @@ test("repository docs advertise the lck-analytics skill and package", () => {
 });
 
 test("lck-analytics docs and skill credit the original author and reference repo", () => {
-  const skill = read(path.join("lck-analytics", "SKILL.md"));
+  const skill = read(skillRel("lck-analytics", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "lck-analytics.md"));
   const packageReadme = read(path.join("packages", "lck-analytics", "README.md"));
   const sources = read(path.join("docs", "sources.md"));
@@ -499,14 +2240,14 @@ test("repository docs advertise the korean-spell-check skill and usage constrain
   const readme = read("README.md");
   const install = read(path.join("docs", "install.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "korean-spell-check.md");
-  const skillPath = path.join(repoRoot, "korean-spell-check", "SKILL.md");
+  const skillPath = skillAbs("korean-spell-check", "SKILL.md");
   const featureDoc = read(path.join("docs", "features", "korean-spell-check.md"));
-  const skill = read(path.join("korean-spell-check", "SKILL.md"));
+  const skill = read(skillRel("korean-spell-check", "SKILL.md"));
   const sources = read(path.join("docs", "sources.md"));
   const roadmap = read(path.join("docs", "roadmap.md"));
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/korean-spell-check.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected korean-spell-check/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/korean-spell-check/SKILL.md to exist");
   assert.match(readme, /\| 한국어 맞춤법 검사 \|/);
   assert.match(readme, /\[한국어 맞춤법 검사 가이드\]\(docs\/features\/korean-spell-check\.md\)/);
   assert.match(install, /--skill korean-spell-check/);
@@ -529,14 +2270,14 @@ test("repository docs advertise the MFDS public-health skills and mandatory symp
   const sources = read(path.join("docs", "sources.md"));
   const setup = read(path.join("docs", "setup.md"));
   const security = read(path.join("docs", "security-and-secrets.md"));
-  const setupSkill = read(path.join("k-skill-setup", "SKILL.md"));
-  const drugSkillPath = path.join(repoRoot, "mfds-drug-safety", "SKILL.md");
-  const foodSkillPath = path.join(repoRoot, "mfds-food-safety", "SKILL.md");
+  const setupSkill = read(skillRel("k-skill-setup", "SKILL.md"));
+  const drugSkillPath = skillAbs("mfds-drug-safety", "SKILL.md");
+  const foodSkillPath = skillAbs("mfds-food-safety", "SKILL.md");
   const drugFeaturePath = path.join(repoRoot, "docs", "features", "mfds-drug-safety.md");
   const foodFeaturePath = path.join(repoRoot, "docs", "features", "mfds-food-safety.md");
 
-  assert.ok(fs.existsSync(drugSkillPath), "expected mfds-drug-safety/SKILL.md to exist");
-  assert.ok(fs.existsSync(foodSkillPath), "expected mfds-food-safety/SKILL.md to exist");
+  assert.ok(fs.existsSync(drugSkillPath), "expected examples/mfds-drug-safety/SKILL.md to exist");
+  assert.ok(fs.existsSync(foodSkillPath), "expected examples/mfds-food-safety/SKILL.md to exist");
   assert.ok(fs.existsSync(drugFeaturePath), "expected docs/features/mfds-drug-safety.md to exist");
   assert.ok(fs.existsSync(foodFeaturePath), "expected docs/features/mfds-food-safety.md to exist");
   assert.match(readme, /\| 의약품 안전 체크 \|/);
@@ -557,8 +2298,8 @@ test("repository docs advertise the MFDS public-health skills and mandatory symp
   }
 
   for (const relativePath of [
-    path.join("mfds-drug-safety", "SKILL.md"),
-    path.join("mfds-food-safety", "SKILL.md"),
+    skillRel("mfds-drug-safety", "SKILL.md"),
+    skillRel("mfds-food-safety", "SKILL.md"),
     path.join("docs", "features", "mfds-drug-safety.md"),
     path.join("docs", "features", "mfds-food-safety.md")
   ]) {
@@ -571,7 +2312,7 @@ test("repository docs advertise the MFDS public-health skills and mandatory symp
   }
 });
 test("used-car-price-search docs document the provider survey and SK direct surface", () => {
-  const skill = read(path.join("used-car-price-search", "SKILL.md"));
+  const skill = read(skillRel("used-car-price-search", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "used-car-price-search.md"));
   const sources = read(path.join("docs", "sources.md"));
   const roadmap = read(path.join("docs", "roadmap.md"));
@@ -603,8 +2344,8 @@ test("seoul subway docs require an explicit proxy until the hosted route is live
   const setup = read(path.join("docs", "setup.md"));
   const install = read(path.join("docs", "install.md"));
   const security = read(path.join("docs", "security-and-secrets.md"));
-  const setupSkill = read(path.join("k-skill-setup", "SKILL.md"));
-  const skill = read(path.join("seoul-subway-arrival", "SKILL.md"));
+  const setupSkill = read(skillRel("k-skill-setup", "SKILL.md"));
+  const skill = read(skillRel("seoul-subway-arrival", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "seoul-subway-arrival.md"));
   const proxyDoc = read(path.join("docs", "features", "k-skill-proxy.md"));
   const proxyReadme = read(path.join("packages", "k-skill-proxy", "README.md"));
@@ -653,11 +2394,11 @@ test("repository docs advertise the korea-weather skill across the documented su
 });
 
 test("korea-weather docs route short-term forecast calls through the proxy without requiring a user API key", () => {
-  const skillPath = path.join(repoRoot, "korea-weather", "SKILL.md");
+  const skillPath = skillAbs("korea-weather", "SKILL.md");
 
-  assert.ok(fs.existsSync(skillPath), "expected korea-weather/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/korea-weather/SKILL.md to exist");
 
-  const skill = read(path.join("korea-weather", "SKILL.md"));
+  const skill = read(skillRel("korea-weather", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "korea-weather.md"));
   const proxyDoc = read(path.join("docs", "features", "k-skill-proxy.md"));
   const proxyReadme = read(path.join("packages", "k-skill-proxy", "README.md"));
@@ -682,14 +2423,14 @@ test("korea-weather docs route short-term forecast calls through the proxy witho
 });
 
 test("kakaotalk-mac skill documents safe macOS kakaocli usage", () => {
-  const skillPath = path.join(repoRoot, "kakaotalk-mac", "SKILL.md");
+  const skillPath = skillAbs("kakaotalk-mac", "SKILL.md");
   const helperPath = path.join(repoRoot, "scripts", "kakaotalk_mac.py");
   const featureDoc = read(path.join("docs", "features", "kakaotalk-mac.md"));
 
-  assert.ok(fs.existsSync(skillPath), "expected kakaotalk-mac/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/kakaotalk-mac/SKILL.md to exist");
   assert.ok(fs.existsSync(helperPath), "expected scripts/kakaotalk_mac.py to exist");
 
-  const skill = read(path.join("kakaotalk-mac", "SKILL.md"));
+  const skill = read(skillRel("kakaotalk-mac", "SKILL.md"));
 
   assert.match(skill, /^name: kakaotalk-mac$/m);
   assert.match(skill, /kakaocli/);
@@ -726,13 +2467,13 @@ test("repository docs advertise the KTX booking skill as supported", () => {
 });
 
 test("ktx-booking docs document the helper-based live Korail workflow", () => {
-  const skillPath = path.join(repoRoot, "ktx-booking", "SKILL.md");
+  const skillPath = skillAbs("ktx-booking", "SKILL.md");
   const helperPath = path.join(repoRoot, "scripts", "ktx_booking.py");
 
-  assert.ok(fs.existsSync(skillPath), "expected ktx-booking/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/ktx-booking/SKILL.md to exist");
   assert.ok(fs.existsSync(helperPath), "expected scripts/ktx_booking.py to exist");
 
-  const skill = read(path.join("ktx-booking", "SKILL.md"));
+  const skill = read(skillRel("ktx-booking", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "ktx-booking.md"));
   const helper = read(path.join("scripts", "ktx_booking.py"));
 
@@ -784,17 +2525,17 @@ test("repository docs advertise the geeknews-search skill across the documented 
   const readme = read("README.md");
   const install = read(path.join("docs", "install.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "geeknews-search.md");
-  const skillPath = path.join(repoRoot, "geeknews-search", "SKILL.md");
+  const skillPath = skillAbs("geeknews-search", "SKILL.md");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/geeknews-search.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected geeknews-search/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/geeknews-search/SKILL.md to exist");
   assert.match(readme, /\| 긱뉴스 조회 \|/);
   assert.match(readme, /\[긱뉴스 조회 가이드\]\(docs\/features\/geeknews-search\.md\)/);
   assert.match(install, /--skill geeknews-search/);
 });
 
 test("geeknews-search docs lock the RSS-first list-search-detail workflow", () => {
-  const skill = read(path.join("geeknews-search", "SKILL.md"));
+  const skill = read(skillRel("geeknews-search", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "geeknews-search.md"));
 
   for (const doc of [skill, featureDoc]) {
@@ -811,17 +2552,17 @@ test("repository docs advertise the subway-lost-property skill across the docume
   const readme = read("README.md");
   const install = read(path.join("docs", "install.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "subway-lost-property.md");
-  const skillPath = path.join(repoRoot, "subway-lost-property", "SKILL.md");
+  const skillPath = skillAbs("subway-lost-property", "SKILL.md");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/subway-lost-property.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected subway-lost-property/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/subway-lost-property/SKILL.md to exist");
   assert.match(readme, /\| 지하철 분실물 조회 \|/);
   assert.match(readme, /\[지하철 분실물 조회 가이드\]\(docs\/features\/subway-lost-property\.md\)/);
   assert.match(install, /--skill subway-lost-property/);
 });
 
 test("subway-lost-property docs lock the official LOST112 guidance flow", () => {
-  const skill = read(path.join("subway-lost-property", "SKILL.md"));
+  const skill = read(skillRel("subway-lost-property", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "subway-lost-property.md"));
 
   for (const doc of [skill, featureDoc]) {
@@ -849,11 +2590,11 @@ test("repository docs advertise the zipcode-search skill across the documented s
 });
 
 test("zipcode-search docs lock the official postcode plus English-address extraction flow", () => {
-  const skillPath = path.join(repoRoot, "zipcode-search", "SKILL.md");
+  const skillPath = skillAbs("zipcode-search", "SKILL.md");
 
-  assert.ok(fs.existsSync(skillPath), "expected zipcode-search/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/zipcode-search/SKILL.md to exist");
 
-  const skill = read(path.join("zipcode-search", "SKILL.md"));
+  const skill = read(skillRel("zipcode-search", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "zipcode-search.md"));
   const readme = read("README.md");
   const sources = read(path.join("docs", "sources.md"));
@@ -902,11 +2643,11 @@ test("repository docs advertise the delivery-tracking skill across the documente
 });
 
 test("delivery-tracking skill documents official CJ and ePost flows with extension guidance", () => {
-  const skillPath = path.join(repoRoot, "delivery-tracking", "SKILL.md");
+  const skillPath = skillAbs("delivery-tracking", "SKILL.md");
 
-  assert.ok(fs.existsSync(skillPath), "expected delivery-tracking/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/delivery-tracking/SKILL.md to exist");
 
-  const skill = read(path.join("delivery-tracking", "SKILL.md"));
+  const skill = read(skillRel("delivery-tracking", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "delivery-tracking.md"));
 
   assert.match(skill, /^name: delivery-tracking$/m);
@@ -934,7 +2675,7 @@ test("delivery-tracking skill documents official CJ and ePost flows with extensi
 });
 
 test("delivery-tracking published examples lock a shared normalized non-PII schema", () => {
-  const skill = read(path.join("delivery-tracking", "SKILL.md"));
+  const skill = read(skillRel("delivery-tracking", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "delivery-tracking.md"));
   const expectedTopLevelEntries = {
     cj: [
@@ -1054,7 +2795,7 @@ test("delivery-tracking docs publish aligned sample normalized outputs for both 
   const expectedSamples = readJson(
     path.join("scripts", "fixtures", "delivery-tracking-public-samples.json"),
   );
-  const skill = read(path.join("delivery-tracking", "SKILL.md"));
+  const skill = read(skillRel("delivery-tracking", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "delivery-tracking.md"));
   const cjSkillOutput = findJsonFenceAfterLabel(skill, "CJ 공개 출력 예시");
   const cjFeatureOutput = findJsonFenceAfterLabel(featureDoc, "CJ 공개 출력 예시");
@@ -1088,7 +2829,7 @@ test("delivery-tracking docs pin sample provenance to the verified smoke-test da
   const expectedProvenance = readJson(
     path.join("scripts", "fixtures", "delivery-tracking-public-provenance.json"),
   );
-  const skill = read(path.join("delivery-tracking", "SKILL.md"));
+  const skill = read(skillRel("delivery-tracking", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "delivery-tracking.md"));
 
   for (const [docLabel, doc] of [
@@ -1112,12 +2853,12 @@ test("repository docs advertise the daiso-product-search skill", () => {
 });
 
 test("daiso-product-search skill documents the official Daiso Mall lookup flow", () => {
-  const skillPath = path.join(repoRoot, "daiso-product-search", "SKILL.md");
+  const skillPath = skillAbs("daiso-product-search", "SKILL.md");
   const featureDoc = read(path.join("docs", "features", "daiso-product-search.md"));
 
-  assert.ok(fs.existsSync(skillPath), "expected daiso-product-search/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/daiso-product-search/SKILL.md to exist");
 
-  const skill = read(path.join("daiso-product-search", "SKILL.md"));
+  const skill = read(skillRel("daiso-product-search", "SKILL.md"));
 
   assert.match(skill, /^name: daiso-product-search$/m);
   assert.match(skill, /다이소몰/i);
@@ -1156,10 +2897,10 @@ test("repository docs advertise the market-kurly-search skill across the documen
   const roadmap = read(path.join("docs", "roadmap.md"));
   const sources = read(path.join("docs", "sources.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "market-kurly-search.md");
-  const skillPath = path.join(repoRoot, "market-kurly-search", "SKILL.md");
+  const skillPath = skillAbs("market-kurly-search", "SKILL.md");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/market-kurly-search.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected market-kurly-search/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/market-kurly-search/SKILL.md to exist");
   assert.match(readme, /\| 마켓컬리 상품 조회 \|/);
   assert.match(readme, /\[마켓컬리 상품 조회 가이드\]\(docs\/features\/market-kurly-search\.md\)/);
   assert.match(install, /--skill market-kurly-search/);
@@ -1171,7 +2912,7 @@ test("repository docs advertise the market-kurly-search skill across the documen
 });
 
 test("market-kurly-search skill and docs describe the unauthenticated Kurly search and detail flow", () => {
-  const skill = read(path.join("market-kurly-search", "SKILL.md"));
+  const skill = read(skillRel("market-kurly-search", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "market-kurly-search.md"));
 
   assert.match(skill, /^name: market-kurly-search$/m);
@@ -1231,12 +2972,12 @@ test("olive-young install docs warn about intermittent public endpoint failures 
 });
 
 test("olive-young-search skill documents the upstream daiso CLI flow for stores, products, and inventory", () => {
-  const skillPath = path.join(repoRoot, "olive-young-search", "SKILL.md");
+  const skillPath = skillAbs("olive-young-search", "SKILL.md");
   const featureDoc = read(path.join("docs", "features", "olive-young-search.md"));
 
-  assert.ok(fs.existsSync(skillPath), "expected olive-young-search/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/olive-young-search/SKILL.md to exist");
 
-  const skill = read(path.join("olive-young-search", "SKILL.md"));
+  const skill = read(skillRel("olive-young-search", "SKILL.md"));
   const featureTop = findSection(featureDoc, "## 가장 중요한 규칙");
   const featureFallback = findSection(featureDoc, "## 원본 저장소 clone fallback");
   const skillFallback = findSection(skill, "## Fallback: clone the original repository and run the same CLI locally");
@@ -1274,10 +3015,10 @@ test("repository docs advertise the bunjang-search skill across the documented s
   const roadmap = read(path.join("docs", "roadmap.md"));
   const sources = read(path.join("docs", "sources.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "bunjang-search.md");
-  const skillPath = path.join(repoRoot, "bunjang-search", "SKILL.md");
+  const skillPath = skillAbs("bunjang-search", "SKILL.md");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/bunjang-search.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected bunjang-search/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/bunjang-search/SKILL.md to exist");
   assert.match(readme, /\| 번개장터 검색 \|/);
   assert.match(readme, /\[번개장터 검색 가이드\]\(docs\/features\/bunjang-search\.md\)/);
   assert.match(install, /--skill bunjang-search/);
@@ -1288,7 +3029,7 @@ test("repository docs advertise the bunjang-search skill across the documented s
 });
 
 test("bunjang-search skill documents bunjang-cli search, detail, favorite, chat, and AI export flows", () => {
-  const skill = read(path.join("bunjang-search", "SKILL.md"));
+  const skill = read(skillRel("bunjang-search", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "bunjang-search.md"));
   const install = read(path.join("docs", "install.md"));
 
@@ -1345,15 +3086,15 @@ test("repository docs advertise the coupang-product-search skill", () => {
 });
 
 test("coupang-product-search skill and docs use retention-corp coupang_partners MCP layer", () => {
-  const skillPath = path.join(repoRoot, "coupang-product-search", "SKILL.md");
-  const wrapperPath = path.join(repoRoot, "coupang-product-search", "scripts", "coupang_partners_mcp.py");
+  const skillPath = skillAbs("coupang-product-search", "SKILL.md");
+  const wrapperPath = skillAbs("coupang-product-search", "scripts", "coupang_partners_mcp.py");
   const featureDoc = read(path.join("docs", "features", "coupang-product-search.md"));
   const sources = read(path.join("docs", "sources.md"));
 
-  assert.ok(fs.existsSync(skillPath), "expected coupang-product-search/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/coupang-product-search/SKILL.md to exist");
   assert.ok(fs.existsSync(wrapperPath), "expected retention-corp wrapper script to exist");
 
-  const skill = read(path.join("coupang-product-search", "SKILL.md"));
+  const skill = read(skillRel("coupang-product-search", "SKILL.md"));
 
   for (const doc of [skill, featureDoc]) {
     assert.match(doc, /retention-corp\/coupang_partners/);
@@ -1386,9 +3127,9 @@ test("coupang-product-search docs drop non-allowlisted coupang-mcp-fallback and 
   // retention-corp/coupang_partners) returns HTTP 200. Until Retention Corp
   // re-allowlists `coupang-mcp-fallback`, k-skill docs must not recommend it and
   // must document `openclaw-skill` as the value the hosted fallback path uses.
-  const skill = read(path.join("coupang-product-search", "SKILL.md"));
+  const skill = read(skillRel("coupang-product-search", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "coupang-product-search.md"));
-  const wrapper = read(path.join("coupang-product-search", "scripts", "coupang_partners_mcp.py"));
+  const wrapper = read(skillRel("coupang-product-search", "scripts", "coupang_partners_mcp.py"));
   const sources = read(path.join("docs", "sources.md"));
 
   for (const doc of [skill, featureDoc, wrapper, sources]) {
@@ -1420,10 +3161,10 @@ test("repository docs advertise the kbl-results skill across the documented surf
   const roadmap = read(path.join("docs", "roadmap.md"));
   const sources = read(path.join("docs", "sources.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "kbl-results.md");
-  const skillPath = path.join(repoRoot, "kbl-results", "SKILL.md");
+  const skillPath = skillAbs("kbl-results", "SKILL.md");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/kbl-results.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected kbl-results/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/kbl-results/SKILL.md to exist");
   assert.match(readme, /\| KBL 경기 결과 조회 \|/);
   assert.match(readme, /\[KBL 경기 결과 가이드\]\(docs\/features\/kbl-results\.md\)/);
   assert.match(install, /--skill kbl-results/);
@@ -1433,11 +3174,11 @@ test("repository docs advertise the kbl-results skill across the documented surf
 });
 
 test("kbl-results skill documents the official JSON flow for date, team, and standings lookups", () => {
-  const skillPath = path.join(repoRoot, "kbl-results", "SKILL.md");
+  const skillPath = skillAbs("kbl-results", "SKILL.md");
 
-  assert.ok(fs.existsSync(skillPath), "expected kbl-results/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/kbl-results/SKILL.md to exist");
 
-  const skill = read(path.join("kbl-results", "SKILL.md"));
+  const skill = read(skillRel("kbl-results", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "kbl-results.md"));
 
   assert.match(skill, /^name: kbl-results$/m);
@@ -1489,11 +3230,11 @@ test("repository docs advertise the kleague-results skill across the documented 
 });
 
 test("kleague-results skill documents the official JSON flow for date, team, and standings lookups", () => {
-  const skillPath = path.join(repoRoot, "kleague-results", "SKILL.md");
+  const skillPath = skillAbs("kleague-results", "SKILL.md");
 
-  assert.ok(fs.existsSync(skillPath), "expected kleague-results/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/kleague-results/SKILL.md to exist");
 
-  const skill = read(path.join("kleague-results", "SKILL.md"));
+  const skill = read(skillRel("kleague-results", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "kleague-results.md"));
 
   assert.match(skill, /^name: kleague-results$/m);
@@ -1547,11 +3288,11 @@ test("repository docs advertise the blue-ribbon-nearby skill across the document
 });
 
 test("blue-ribbon-nearby skill documents mandatory location prompting and official Blue Ribbon nearby search flow", () => {
-  const skillPath = path.join(repoRoot, "blue-ribbon-nearby", "SKILL.md");
+  const skillPath = skillAbs("blue-ribbon-nearby", "SKILL.md");
 
-  assert.ok(fs.existsSync(skillPath), "expected blue-ribbon-nearby/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/blue-ribbon-nearby/SKILL.md to exist");
 
-  const skill = read(path.join("blue-ribbon-nearby", "SKILL.md"));
+  const skill = read(skillRel("blue-ribbon-nearby", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "blue-ribbon-nearby.md"));
 
   assert.match(skill, /^name: blue-ribbon-nearby$/m);
@@ -1600,11 +3341,11 @@ test("repository docs advertise the kakao-bar-nearby skill across the documented
 });
 
 test("kakao-bar-nearby skill documents location-first Kakao Map search with open-now/menu/seating hints", () => {
-  const skillPath = path.join(repoRoot, "kakao-bar-nearby", "SKILL.md");
+  const skillPath = skillAbs("kakao-bar-nearby", "SKILL.md");
 
-  assert.ok(fs.existsSync(skillPath), "expected kakao-bar-nearby/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/kakao-bar-nearby/SKILL.md to exist");
 
-  const skill = read(path.join("kakao-bar-nearby", "SKILL.md"));
+  const skill = read(skillRel("kakao-bar-nearby", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "kakao-bar-nearby.md"));
 
   assert.match(skill, /^name: kakao-bar-nearby$/m);
@@ -1669,11 +3410,11 @@ test("repository docs advertise the fine-dust-location skill across the document
 });
 
 test("fine-dust-location skill documents the official two-api flow and fallback handling", () => {
-  const skillPath = path.join(repoRoot, "fine-dust-location", "SKILL.md");
+  const skillPath = skillAbs("fine-dust-location", "SKILL.md");
 
-  assert.ok(fs.existsSync(skillPath), "expected fine-dust-location/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/fine-dust-location/SKILL.md to exist");
 
-  const skill = read(path.join("fine-dust-location", "SKILL.md"));
+  const skill = read(skillRel("fine-dust-location", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "fine-dust-location.md"));
 
   assert.match(skill, /^name: fine-dust-location$/m);
@@ -1739,10 +3480,10 @@ test("repository docs advertise the hipass-receipt skill across the documented s
   const sources = read(path.join("docs", "sources.md"));
   const setup = read(path.join("docs", "setup.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "hipass-receipt.md");
-  const skillPath = path.join(repoRoot, "hipass-receipt", "SKILL.md");
+  const skillPath = skillAbs("hipass-receipt", "SKILL.md");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/hipass-receipt.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected hipass-receipt/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/hipass-receipt/SKILL.md to exist");
   assert.match(readme, /\| 하이패스 영수증 발급 \|/);
   assert.match(readme, /\[하이패스 영수증 발급 가이드\]\(docs\/features\/hipass-receipt\.md\)/);
   assert.match(install, /--skill hipass-receipt/);
@@ -1753,11 +3494,11 @@ test("repository docs advertise the hipass-receipt skill across the documented s
 });
 
 test("toss-securities skill documents the tossctl install, auth, and read-only workflow", () => {
-  const skillPath = path.join(repoRoot, "toss-securities", "SKILL.md");
+  const skillPath = skillAbs("toss-securities", "SKILL.md");
 
-  assert.ok(fs.existsSync(skillPath), "expected toss-securities/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/toss-securities/SKILL.md to exist");
 
-  const skill = read(path.join("toss-securities", "SKILL.md"));
+  const skill = read(skillRel("toss-securities", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "toss-securities.md"));
 
   assert.match(skill, /^name: toss-securities$/m);
@@ -1776,13 +3517,13 @@ test("toss-securities skill documents the tossctl install, auth, and read-only w
 });
 
 test("hipass-receipt skill documents the logged-in browser session contract", () => {
-  const skillPath = path.join(repoRoot, "hipass-receipt", "SKILL.md");
+  const skillPath = skillAbs("hipass-receipt", "SKILL.md");
   const packageReadmePath = path.join(repoRoot, "packages", "hipass-receipt", "README.md");
 
-  assert.ok(fs.existsSync(skillPath), "expected hipass-receipt/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/hipass-receipt/SKILL.md to exist");
   assert.ok(fs.existsSync(packageReadmePath), "expected packages/hipass-receipt/README.md to exist");
 
-  const skill = read(path.join("hipass-receipt", "SKILL.md"));
+  const skill = read(skillRel("hipass-receipt", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "hipass-receipt.md"));
   const packageReadme = read(path.join("packages", "hipass-receipt", "README.md"));
 
@@ -1891,7 +3632,7 @@ test("repository docs advertise the korean-law-search skill with mode-specific k
   const security = read(path.join("docs", "security-and-secrets.md"));
   const sources = read(path.join("docs", "sources.md"));
   const roadmap = read(path.join("docs", "roadmap.md"));
-  const setupSkill = read(path.join("k-skill-setup", "SKILL.md"));
+  const setupSkill = read(skillRel("k-skill-setup", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "korean-law-search.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "korean-law-search.md");
 
@@ -1920,14 +3661,14 @@ test("repository docs advertise the korean-law-search skill with mode-specific k
 });
 
 test("korean-law-search skill keeps korean-law-mcp-first guidance while documenting the approved Beopmang fallback", () => {
-  const skillPath = path.join(repoRoot, "korean-law-search", "SKILL.md");
+  const skillPath = skillAbs("korean-law-search", "SKILL.md");
   const featureDoc = read(path.join("docs", "features", "korean-law-search.md"));
   const examplesSecrets = read(path.join("examples", "secrets.env.example"));
   const packageJson = readJson("package.json");
 
-  assert.ok(fs.existsSync(skillPath), "expected korean-law-search/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/korean-law-search/SKILL.md to exist");
 
-  const skill = read(path.join("korean-law-search", "SKILL.md"));
+  const skill = read(skillRel("korean-law-search", "SKILL.md"));
   const doneSectionMatch = skill.match(/## Done when([\s\S]*?)## Notes/);
 
   assert.match(skill, /^name: korean-law-search$/m);
@@ -1980,13 +3721,13 @@ test("repository docs advertise the joseon-sillok-search skill and helper", () =
   const install = read(path.join("docs", "install.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "joseon-sillok-search.md");
   const featureDoc = read(path.join("docs", "features", "joseon-sillok-search.md"));
-  const skillPath = path.join(repoRoot, "joseon-sillok-search", "SKILL.md");
-  const skill = read(path.join("joseon-sillok-search", "SKILL.md"));
+  const skillPath = skillAbs("joseon-sillok-search", "SKILL.md");
+  const skill = read(skillRel("joseon-sillok-search", "SKILL.md"));
   const sources = read(path.join("docs", "sources.md"));
   const roadmap = read(path.join("docs", "roadmap.md"));
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/joseon-sillok-search.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected joseon-sillok-search/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/joseon-sillok-search/SKILL.md to exist");
   assert.match(readme, /\| 조선왕조실록 검색 \|/);
   assert.match(readme, /\[조선왕조실록 검색 가이드\]\(docs\/features\/joseon-sillok-search\.md\)/);
   assert.match(install, /--skill joseon-sillok-search/);
@@ -2008,7 +3749,7 @@ test("joseon-sillok-search install payload includes the documented helper comman
   const bundledHelperPath = path.join(installedSkillPath, "scripts", "sillok_search.py");
 
   try {
-    fs.cpSync(path.join(repoRoot, "joseon-sillok-search"), installedSkillPath, { recursive: true });
+    fs.cpSync(skillAbs("joseon-sillok-search"), installedSkillPath, { recursive: true });
 
     assert.ok(fs.existsSync(bundledHelperPath), "expected joseon-sillok-search/scripts/sillok_search.py to exist");
 
@@ -2030,18 +3771,18 @@ test("repository docs advertise the korean-patent-search skill and official KIPR
   const install = read(path.join("docs", "install.md"));
   const setup = read(path.join("docs", "setup.md"));
   const security = read(path.join("docs", "security-and-secrets.md"));
-  const setupSkill = read(path.join("k-skill-setup", "SKILL.md"));
+  const setupSkill = read(skillRel("k-skill-setup", "SKILL.md"));
   const examplesSecrets = read(path.join("examples", "secrets.env.example"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "korean-patent-search.md");
   const featureDoc = read(path.join("docs", "features", "korean-patent-search.md"));
-  const skillPath = path.join(repoRoot, "korean-patent-search", "SKILL.md");
-  const skill = read(path.join("korean-patent-search", "SKILL.md"));
+  const skillPath = skillAbs("korean-patent-search", "SKILL.md");
+  const skill = read(skillRel("korean-patent-search", "SKILL.md"));
   const sources = read(path.join("docs", "sources.md"));
   const roadmap = read(path.join("docs", "roadmap.md"));
   const packageJson = readJson("package.json");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/korean-patent-search.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected korean-patent-search/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/korean-patent-search/SKILL.md to exist");
 
   assert.match(readme, /\| 한국 특허 정보 검색 \|/);
   assert.match(readme, /\[한국 특허 정보 검색 가이드\]\(docs\/features\/korean-patent-search\.md\)/);
@@ -2081,7 +3822,7 @@ test("korean-patent-search install payload includes the documented helper comman
   const bundledHelperPath = path.join(installedSkillPath, "scripts", "patent_search.py");
 
   try {
-    fs.cpSync(path.join(repoRoot, "korean-patent-search"), installedSkillPath, { recursive: true });
+    fs.cpSync(skillAbs("korean-patent-search"), installedSkillPath, { recursive: true });
 
     assert.ok(fs.existsSync(bundledHelperPath), "expected korean-patent-search/scripts/patent_search.py to exist");
 
@@ -2103,17 +3844,17 @@ test("repository docs advertise the real-estate-search skill and proxy-based app
   const install = read(path.join("docs", "install.md"));
   const setup = read(path.join("docs", "setup.md"));
   const security = read(path.join("docs", "security-and-secrets.md"));
-  const setupSkill = read(path.join("k-skill-setup", "SKILL.md"));
+  const setupSkill = read(skillRel("k-skill-setup", "SKILL.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "real-estate-search.md");
   const featureDoc = read(path.join("docs", "features", "real-estate-search.md"));
-  const skillPath = path.join(repoRoot, "real-estate-search", "SKILL.md");
-  const skill = read(path.join("real-estate-search", "SKILL.md"));
+  const skillPath = skillAbs("real-estate-search", "SKILL.md");
+  const skill = read(skillRel("real-estate-search", "SKILL.md"));
   const sources = read(path.join("docs", "sources.md"));
   const roadmap = read(path.join("docs", "roadmap.md"));
   const packageJson = readJson("package.json");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/real-estate-search.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected real-estate-search/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/real-estate-search/SKILL.md to exist");
 
   assert.match(readme, /\| 한국 부동산 실거래가 조회 \|/);
   assert.match(readme, /\[한국 부동산 실거래가 조회 가이드\]\(docs\/features\/real-estate-search\.md\)/);
@@ -2152,18 +3893,18 @@ test("repository docs advertise the korean-scholarship-search skill and official
   const install = read(path.join("docs", "install.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "korean-scholarship-search.md");
   const featureDoc = read(path.join("docs", "features", "korean-scholarship-search.md"));
-  const skillPath = path.join(repoRoot, "korean-scholarship-search", "SKILL.md");
-  const skill = read(path.join("korean-scholarship-search", "SKILL.md"));
+  const skillPath = skillAbs("korean-scholarship-search", "SKILL.md");
+  const skill = read(skillRel("korean-scholarship-search", "SKILL.md"));
   const sources = read(path.join("docs", "sources.md"));
   const roadmap = read(path.join("docs", "roadmap.md"));
-  const helperPath = path.join(repoRoot, "korean-scholarship-search", "scripts", "scholarship_filter.py");
-  const plannerPath = path.join(repoRoot, "korean-scholarship-search", "scripts", "university_search_plan.py");
-  const searchCluesPath = path.join(repoRoot, "korean-scholarship-search", "references", "search-clues.md");
-  const reportFormatPath = path.join(repoRoot, "korean-scholarship-search", "references", "report-format.md");
+  const helperPath = skillAbs("korean-scholarship-search", "scripts", "scholarship_filter.py");
+  const plannerPath = skillAbs("korean-scholarship-search", "scripts", "university_search_plan.py");
+  const searchCluesPath = skillAbs("korean-scholarship-search", "references", "search-clues.md");
+  const reportFormatPath = skillAbs("korean-scholarship-search", "references", "report-format.md");
   const packageJson = readJson("package.json");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/korean-scholarship-search.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected korean-scholarship-search/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/korean-scholarship-search/SKILL.md to exist");
   assert.ok(fs.existsSync(helperPath), "expected korean-scholarship-search/scripts/scholarship_filter.py to exist");
   assert.ok(fs.existsSync(plannerPath), "expected korean-scholarship-search/scripts/university_search_plan.py to exist");
   assert.ok(fs.existsSync(searchCluesPath), "expected korean-scholarship-search/references/search-clues.md to exist");
@@ -2198,8 +3939,8 @@ test("repository docs advertise the korean-scholarship-search skill and official
 });
 
 test("korean-scholarship-search helper filters normalized records, renders reports, and returns eligibility verdicts", () => {
-  const helperPath = path.join(repoRoot, "korean-scholarship-search", "scripts", "scholarship_filter.py");
-  const plannerPath = path.join(repoRoot, "korean-scholarship-search", "scripts", "university_search_plan.py");
+  const helperPath = skillAbs("korean-scholarship-search", "scripts", "scholarship_filter.py");
+  const plannerPath = skillAbs("korean-scholarship-search", "scripts", "university_search_plan.py");
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "k-skill-scholarship-"));
 
   try {
@@ -2380,7 +4121,7 @@ test("korean-scholarship-search helper filters normalized records, renders repor
 
 test("real-estate-search skill uses proxy endpoints not MCP self-host", () => {
   const featureDoc = read(path.join("docs", "features", "real-estate-search.md"));
-  const skill = read(path.join("real-estate-search", "SKILL.md"));
+  const skill = read(skillRel("real-estate-search", "SKILL.md"));
 
   for (const doc of [skill, featureDoc]) {
     assert.match(doc, /k-skill-proxy\.nomadamas\.org\/v1\/real-estate/);
@@ -2398,11 +4139,11 @@ test("repository docs advertise the korean-stock-search skill and proxy-backed K
   const install = read(path.join("docs", "install.md"));
   const setup = read(path.join("docs", "setup.md"));
   const security = read(path.join("docs", "security-and-secrets.md"));
-  const setupSkill = read(path.join("k-skill-setup", "SKILL.md"));
+  const setupSkill = read(skillRel("k-skill-setup", "SKILL.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "korean-stock-search.md");
   const featureDoc = read(path.join("docs", "features", "korean-stock-search.md"));
-  const skillPath = path.join(repoRoot, "korean-stock-search", "SKILL.md");
-  const skill = read(path.join("korean-stock-search", "SKILL.md"));
+  const skillPath = skillAbs("korean-stock-search", "SKILL.md");
+  const skill = read(skillRel("korean-stock-search", "SKILL.md"));
   const sources = read(path.join("docs", "sources.md"));
   const roadmap = read(path.join("docs", "roadmap.md"));
   const proxyReadme = read(path.join("packages", "k-skill-proxy", "README.md"));
@@ -2410,7 +4151,7 @@ test("repository docs advertise the korean-stock-search skill and proxy-backed K
   const packageJson = readJson("package.json");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/korean-stock-search.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected korean-stock-search/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/korean-stock-search/SKILL.md to exist");
 
   assert.match(readme, /\| 한국 주식 정보 조회 \|/);
   assert.match(readme, /\[한국 주식 정보 조회 가이드\]\(docs\/features\/korean-stock-search\.md\)/);
@@ -2449,7 +4190,7 @@ test("repository docs advertise the korean-stock-search skill and proxy-backed K
 
 test("korean-stock-search skill stays proxy-first and does not require local MCP install", () => {
   const featureDoc = read(path.join("docs", "features", "korean-stock-search.md"));
-  const skill = read(path.join("korean-stock-search", "SKILL.md"));
+  const skill = read(skillRel("korean-stock-search", "SKILL.md"));
 
   for (const doc of [skill, featureDoc]) {
     assert.match(doc, /k-skill-proxy\.nomadamas\.org\/v1\/korean-stock/);
@@ -2479,14 +4220,14 @@ test("repository docs advertise the korean-character-count skill and determinist
   const install = read(path.join("docs", "install.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "korean-character-count.md");
   const featureDoc = read(path.join("docs", "features", "korean-character-count.md"));
-  const skillPath = path.join(repoRoot, "korean-character-count", "SKILL.md");
-  const skill = read(path.join("korean-character-count", "SKILL.md"));
+  const skillPath = skillAbs("korean-character-count", "SKILL.md");
+  const skill = read(skillRel("korean-character-count", "SKILL.md"));
   const sources = read(path.join("docs", "sources.md"));
   const roadmap = read(path.join("docs", "roadmap.md"));
   const packageJson = readJson("package.json");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/korean-character-count.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected korean-character-count/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/korean-character-count/SKILL.md to exist");
 
   assert.match(readme, /\| 한국어 글자 수 세기 \|/);
   assert.match(readme, /\[한국어 글자 수 세기 가이드\]\(docs\/features\/korean-character-count\.md\)/);
@@ -2548,7 +4289,7 @@ test("korean-character-count install payload includes the documented helper comm
   const bundledHelperPath = path.join(installedSkillPath, "scripts", "korean_character_count.js");
 
   try {
-    fs.cpSync(path.join(repoRoot, "korean-character-count"), installedSkillPath, { recursive: true });
+    fs.cpSync(skillAbs("korean-character-count"), installedSkillPath, { recursive: true });
 
     assert.ok(
       fs.existsSync(bundledHelperPath),
@@ -2576,10 +4317,10 @@ test("repository docs advertise the cheap-gas-nearby skill and Opinet key requir
   const security = read(path.join("docs", "security-and-secrets.md"));
   const sources = read(path.join("docs", "sources.md"));
   const roadmap = read(path.join("docs", "roadmap.md"));
-  const setupSkill = read(path.join("k-skill-setup", "SKILL.md"));
+  const setupSkill = read(skillRel("k-skill-setup", "SKILL.md"));
   const examplesSecrets = read(path.join("examples", "secrets.env.example"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "cheap-gas-nearby.md");
-  const skillPath = path.join(repoRoot, "cheap-gas-nearby", "SKILL.md");
+  const skillPath = skillAbs("cheap-gas-nearby", "SKILL.md");
 
   assert.equal(fs.existsSync(featureDocPath), true);
   assert.equal(fs.existsSync(skillPath), true);
@@ -2600,7 +4341,7 @@ test("repository docs advertise the cheap-gas-nearby skill and Opinet key requir
 });
 
 test("cheap-gas-nearby skill docs require location-first prompts and official Opinet surfaces", () => {
-  const skill = read(path.join("cheap-gas-nearby", "SKILL.md"));
+  const skill = read(skillRel("cheap-gas-nearby", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "cheap-gas-nearby.md"));
 
   for (const doc of [skill, featureDoc]) {
@@ -2624,13 +4365,13 @@ test("repository docs advertise the han-river-water-level skill and rollout-pend
   const proxyReadme = read(path.join("packages", "k-skill-proxy", "README.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "han-river-water-level.md");
   const featureDoc = read(path.join("docs", "features", "han-river-water-level.md"));
-  const skillPath = path.join(repoRoot, "han-river-water-level", "SKILL.md");
-  const skill = read(path.join("han-river-water-level", "SKILL.md"));
+  const skillPath = skillAbs("han-river-water-level", "SKILL.md");
+  const skill = read(skillRel("han-river-water-level", "SKILL.md"));
   const sources = read(path.join("docs", "sources.md"));
   const roadmap = read(path.join("docs", "roadmap.md"));
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/han-river-water-level.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected han-river-water-level/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/han-river-water-level/SKILL.md to exist");
 
   assert.match(readme, /\| 한강 수위 정보 조회 \|/);
   assert.match(readme, /\[한강 수위 정보 가이드\]\(docs\/features\/han-river-water-level\.md\)/);
@@ -2671,8 +4412,8 @@ test("repository docs advertise the MFDS drug and food safety skills", () => {
   const sources = read(path.join("docs", "sources.md"));
   const drugFeatureDocPath = path.join(repoRoot, "docs", "features", "mfds-drug-safety.md");
   const foodFeatureDocPath = path.join(repoRoot, "docs", "features", "mfds-food-safety.md");
-  const drugSkillPath = path.join(repoRoot, "mfds-drug-safety", "SKILL.md");
-  const foodSkillPath = path.join(repoRoot, "mfds-food-safety", "SKILL.md");
+  const drugSkillPath = skillAbs("mfds-drug-safety", "SKILL.md");
+  const foodSkillPath = skillAbs("mfds-food-safety", "SKILL.md");
 
   assert.equal(fs.existsSync(drugFeatureDocPath), true);
   assert.equal(fs.existsSync(foodFeatureDocPath), true);
@@ -2691,8 +4432,8 @@ test("repository docs advertise the MFDS drug and food safety skills", () => {
 });
 
 test("MFDS public-health skill docs require interview-first safety flow and official endpoints", () => {
-  const drugSkill = read(path.join("mfds-drug-safety", "SKILL.md"));
-  const foodSkill = read(path.join("mfds-food-safety", "SKILL.md"));
+  const drugSkill = read(skillRel("mfds-drug-safety", "SKILL.md"));
+  const foodSkill = read(skillRel("mfds-food-safety", "SKILL.md"));
   const drugFeatureDoc = read(path.join("docs", "features", "mfds-drug-safety.md"));
   const foodFeatureDoc = read(path.join("docs", "features", "mfds-food-safety.md"));
   const sources = read(path.join("docs", "sources.md"));
@@ -2737,22 +4478,22 @@ test("MFDS public-health skill docs require interview-first safety flow and offi
 
 test("docs/setup.md and k-skill-setup document hosted household waste proxy flow", () => {
   const setup = read(path.join("docs", "setup.md"));
-  const setupSkill = read(path.join("k-skill-setup", "SKILL.md"));
+  const setupSkill = read(skillRel("k-skill-setup", "SKILL.md"));
   
   assert.match(
     setup,
-    /한국 주식 정보 조회, 생활쓰레기 배출정보 조회, 학교 급식 식단 조회, 의약품 안전 체크, 식품 안전 체크는 기본 hosted proxy를 쓰므로/,
+    /한국 주식 정보 조회[\s\S]*생활쓰레기 배출정보 조회[\s\S]*학교 급식 식단 조회[\s\S]*의약품 안전 체크[\s\S]*식품 안전 체크는 기본 hosted proxy를 쓰므로/,
     "setup.md intro should list household waste, school lunch, and MFDS skills among hosted-proxy features with no user-side key",
   );
   assert.match(setup, /DATA_GO_KR_API_KEY.*서버에 설정/);
   assert.match(
     setup,
-    /미세먼지, 한강 수위, 주유소 가격, 생활쓰레기 배출정보 조회, 학교 급식 식단 조회, 의약품 안전 체크, 식품 안전 체크는 `KSKILL_PROXY_BASE_URL` 을 비워 두면 기본 hosted path\(`k-skill-proxy\.nomadamas\.org`\)/,
+    /미세먼지, 한강 수위, 주유소 가격[\s\S]*생활쓰레기 배출정보 조회[\s\S]*학교 급식 식단 조회[\s\S]*의약품 안전 체크[\s\S]*식품 안전 체크는 `KSKILL_PROXY_BASE_URL` 을 비워 두면 기본 hosted path\(`k-skill-proxy\.nomadamas\.org`\)/,
     "setup.md should list fine dust, Han River, gas, household waste, school lunch, and MFDS skills when KSKILL_PROXY_BASE_URL is unset",
   );
   assert.match(
     setupSkill,
-    /미세먼지, 한강 수위, 주유소 가격, 생활쓰레기 배출정보 조회, 학교 급식 식단 조회, 의약품 안전 체크, 식품 안전 체크는 `KSKILL_PROXY_BASE_URL`/,
+    /미세먼지, 한강 수위, 주유소 가격[\s\S]*생활쓰레기 배출정보 조회[\s\S]*학교 급식 식단 조회[\s\S]*의약품 안전 체크[\s\S]*식품 안전 체크는 `KSKILL_PROXY_BASE_URL`/,
     "k-skill-setup SKILL should mirror setup.md hosted-proxy unset-base-URL guidance including MFDS skills",
   );
 
@@ -2768,18 +4509,18 @@ test("docs/setup.md and k-skill-setup document hosted household waste proxy flow
 
 test("docs/setup.md and k-skill-setup document hosted school lunch proxy flow", () => {
   const setup = read(path.join("docs", "setup.md"));
-  const setupSkill = read(path.join("k-skill-setup", "SKILL.md"));
+  const setupSkill = read(skillRel("k-skill-setup", "SKILL.md"));
   const examplesSecrets = read(path.join("examples", "secrets.env.example"));
-  assert.match(setup, /학교 급식 식단 조회, 의약품 안전 체크, 식품 안전 체크는 기본 hosted proxy/);
+  assert.match(setup, /학교 급식 식단 조회[\s\S]*의약품 안전 체크[\s\S]*식품 안전 체크는 기본 hosted proxy/);
   assert.match(setup, /KEDU_INFO_KEY.*서버에 설정/);
   assert.match(
     setup,
-    /미세먼지, 한강 수위, 주유소 가격, 생활쓰레기 배출정보 조회, 학교 급식 식단 조회, 의약품 안전 체크, 식품 안전 체크는 `KSKILL_PROXY_BASE_URL` 을 비워 두면 기본 hosted path\(`k-skill-proxy\.nomadamas\.org`\)/,
+    /미세먼지, 한강 수위, 주유소 가격[\s\S]*생활쓰레기 배출정보 조회[\s\S]*학교 급식 식단 조회[\s\S]*의약품 안전 체크[\s\S]*식품 안전 체크는 `KSKILL_PROXY_BASE_URL` 을 비워 두면 기본 hosted path\(`k-skill-proxy\.nomadamas\.org`\)/,
     "setup.md should list fine dust, Han River, gas, household waste, school lunch, and MFDS skills when KSKILL_PROXY_BASE_URL is unset",
   );
   assert.match(
     setupSkill,
-    /미세먼지, 한강 수위, 주유소 가격, 생활쓰레기 배출정보 조회, 학교 급식 식단 조회, 의약품 안전 체크, 식품 안전 체크는 `KSKILL_PROXY_BASE_URL`/,
+    /미세먼지, 한강 수위, 주유소 가격[\s\S]*생활쓰레기 배출정보 조회[\s\S]*학교 급식 식단 조회[\s\S]*의약품 안전 체크[\s\S]*식품 안전 체크는 `KSKILL_PROXY_BASE_URL`/,
     "k-skill-setup SKILL should mirror setup.md hosted-proxy unset-base-URL guidance including MFDS skills",
   );
 
@@ -2805,13 +4546,13 @@ test("repository docs advertise the hola-poke-yeoksam skill", () => {
   const sources = read(path.join("docs", "sources.md"));
   const roadmap = read(path.join("docs", "roadmap.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "hola-poke-yeoksam.md");
-  const skillPath = path.join(repoRoot, "hola-poke-yeoksam", "SKILL.md");
+  const skillPath = skillAbs("hola-poke-yeoksam", "SKILL.md");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/hola-poke-yeoksam.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected hola-poke-yeoksam/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/hola-poke-yeoksam/SKILL.md to exist");
 
   const featureDoc = read(path.join("docs", "features", "hola-poke-yeoksam.md"));
-  const skill = read(path.join("hola-poke-yeoksam", "SKILL.md"));
+  const skill = read(skillRel("hola-poke-yeoksam", "SKILL.md"));
 
   assert.match(readme, /\| 올라포케 역삼 포케 \|/);
   assert.match(readme, /\[올라포케 역삼 포케 가이드\]\(docs\/features\/hola-poke-yeoksam\.md\)/);
@@ -2822,7 +4563,7 @@ test("repository docs advertise the hola-poke-yeoksam skill", () => {
 
 test("hola-poke-yeoksam docs pin the verified remote MCP contract snapshot and phone-only event flow", () => {
   const fixture = readJson(path.join("scripts", "fixtures", "hola-poke-yeoksam-contract-smoke.json"));
-  const skill = read(path.join("hola-poke-yeoksam", "SKILL.md"));
+  const skill = read(skillRel("hola-poke-yeoksam", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "hola-poke-yeoksam.md"));
   const snapshotLabels = [
     ["initialize 결과", "initialize", "initialize snapshot"],
@@ -2876,13 +4617,13 @@ test("repository docs advertise the library-book-search skill", () => {
   const sources = read(path.join("docs", "sources.md"));
   const proxyDoc = read(path.join("docs", "features", "k-skill-proxy.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "library-book-search.md");
-  const skillPath = path.join(repoRoot, "library-book-search", "SKILL.md");
+  const skillPath = skillAbs("library-book-search", "SKILL.md");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/library-book-search.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected library-book-search/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/library-book-search/SKILL.md to exist");
 
   const featureDoc = read(path.join("docs", "features", "library-book-search.md"));
-  const skill = read(path.join("library-book-search", "SKILL.md"));
+  const skill = read(skillRel("library-book-search", "SKILL.md"));
 
   assert.match(skill, /^name: library-book-search$/m);
   assert.match(readme, /\| 도서관 도서 조회 \|/);
@@ -2910,10 +4651,10 @@ test("repository docs advertise the korean-privacy-terms thin-wrapper skill", ()
   const roadmap = read(path.join("docs", "roadmap.md"));
   const sources = read(path.join("docs", "sources.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "korean-privacy-terms.md");
-  const skillPath = path.join(repoRoot, "korean-privacy-terms", "SKILL.md");
+  const skillPath = skillAbs("korean-privacy-terms", "SKILL.md");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/korean-privacy-terms.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected korean-privacy-terms/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/korean-privacy-terms/SKILL.md to exist");
   assert.match(readme, /\| 한국 개인정보처리방침·이용약관 자동 생성 \|/);
   assert.match(
     readme,
@@ -2926,11 +4667,11 @@ test("repository docs advertise the korean-privacy-terms thin-wrapper skill", ()
 });
 
 test("korean-privacy-terms skill is a thin wrapper that cites upstream and enforces a legal disclaimer", () => {
-  const skillPath = path.join(repoRoot, "korean-privacy-terms", "SKILL.md");
+  const skillPath = skillAbs("korean-privacy-terms", "SKILL.md");
 
-  assert.ok(fs.existsSync(skillPath), "expected korean-privacy-terms/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/korean-privacy-terms/SKILL.md to exist");
 
-  const skill = read(path.join("korean-privacy-terms", "SKILL.md"));
+  const skill = read(skillRel("korean-privacy-terms", "SKILL.md"));
 
   assert.match(skill, /^name: korean-privacy-terms$/m);
   assert.match(skill, /^license: Apache-2\.0$/m);
@@ -2958,8 +4699,8 @@ test("korean-privacy-terms skill is a thin wrapper that cites upstream and enfor
 });
 
 test("korean-privacy-terms preserves upstream NOTICE and DISCLAIMER for Apache-2.0 compliance", () => {
-  const noticePath = path.join(repoRoot, "korean-privacy-terms", "NOTICE");
-  const disclaimerPath = path.join(repoRoot, "korean-privacy-terms", "DISCLAIMER.md");
+  const noticePath = skillAbs("korean-privacy-terms", "NOTICE");
+  const disclaimerPath = skillAbs("korean-privacy-terms", "DISCLAIMER.md");
 
   assert.ok(fs.existsSync(noticePath), "expected korean-privacy-terms/NOTICE to exist");
   assert.ok(fs.existsSync(disclaimerPath), "expected korean-privacy-terms/DISCLAIMER.md to exist");
@@ -2981,8 +4722,8 @@ test("korean-privacy-terms preserves upstream NOTICE and DISCLAIMER for Apache-2
 });
 
 test("korean-privacy-terms ships an install.sh wrapper and a pinned upstream SHA", () => {
-  const pinPath = path.join(repoRoot, "korean-privacy-terms", "scripts", "upstream.pin");
-  const installPath = path.join(repoRoot, "korean-privacy-terms", "scripts", "install.sh");
+  const pinPath = skillAbs("korean-privacy-terms", "scripts", "upstream.pin");
+  const installPath = skillAbs("korean-privacy-terms", "scripts", "install.sh");
 
   assert.ok(fs.existsSync(pinPath), "expected korean-privacy-terms/scripts/upstream.pin to exist");
   assert.ok(fs.existsSync(installPath), "expected korean-privacy-terms/scripts/install.sh to exist");
@@ -3028,7 +4769,7 @@ test("korean-privacy-terms ships an install.sh wrapper and a pinned upstream SHA
 });
 
 test("korean-privacy-terms bundles the Apache-2.0 LICENSE per §4(a) redistribution requirement", () => {
-  const licensePath = path.join(repoRoot, "korean-privacy-terms", "LICENSE.upstream");
+  const licensePath = skillAbs("korean-privacy-terms", "LICENSE.upstream");
 
   assert.ok(
     fs.existsSync(licensePath),
@@ -3046,7 +4787,7 @@ test("korean-privacy-terms bundles the Apache-2.0 LICENSE per §4(a) redistribut
   assert.match(license, /APPENDIX: How to apply the Apache License/);
   assert.match(license, /Copyright 2026 kimlawtech/);
 
-  const skill = read(path.join("korean-privacy-terms", "SKILL.md"));
+  const skill = read(skillRel("korean-privacy-terms", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "korean-privacy-terms.md"));
 
   assert.match(
@@ -3082,10 +4823,10 @@ test("repository docs advertise the korean-jangbu-for thin-wrapper skill", () =>
   const install = read(path.join("docs", "install.md"));
   const sources = read(path.join("docs", "sources.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "korean-jangbu-for.md");
-  const skillPath = path.join(repoRoot, "korean-jangbu-for", "SKILL.md");
+  const skillPath = skillAbs("korean-jangbu-for", "SKILL.md");
 
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/korean-jangbu-for.md to exist");
-  assert.ok(fs.existsSync(skillPath), "expected korean-jangbu-for/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/korean-jangbu-for/SKILL.md to exist");
   assert.match(readme, /\| 한국 사업자 장부 자동화 \|/);
   assert.match(readme, /\[한국 사업자 장부 자동화 가이드\]\(docs\/features\/korean-jangbu-for\.md\)/);
   assert.match(install, /--skill korean-jangbu-for/);
@@ -3096,11 +4837,11 @@ test("repository docs advertise the korean-jangbu-for thin-wrapper skill", () =>
 });
 
 test("korean-jangbu-for skill cites upstream author and enforces accounting/tax disclaimers", () => {
-  const skillPath = path.join(repoRoot, "korean-jangbu-for", "SKILL.md");
+  const skillPath = skillAbs("korean-jangbu-for", "SKILL.md");
 
-  assert.ok(fs.existsSync(skillPath), "expected korean-jangbu-for/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/korean-jangbu-for/SKILL.md to exist");
 
-  const skill = read(path.join("korean-jangbu-for", "SKILL.md"));
+  const skill = read(skillRel("korean-jangbu-for", "SKILL.md"));
 
   assert.match(skill, /^name: korean-jangbu-for$/m);
   assert.match(skill, /^license: Apache-2\.0$/m);
@@ -3126,17 +4867,17 @@ test("korean-jangbu-for skill cites upstream author and enforces accounting/tax 
 });
 
 test("korean-jangbu-for preserves upstream attribution, disclaimer, and Apache license", () => {
-  const noticePath = path.join(repoRoot, "korean-jangbu-for", "NOTICE");
-  const disclaimerPath = path.join(repoRoot, "korean-jangbu-for", "DISCLAIMER.md");
-  const licensePath = path.join(repoRoot, "korean-jangbu-for", "LICENSE.upstream");
+  const noticePath = skillAbs("korean-jangbu-for", "NOTICE");
+  const disclaimerPath = skillAbs("korean-jangbu-for", "DISCLAIMER.md");
+  const licensePath = skillAbs("korean-jangbu-for", "LICENSE.upstream");
 
   assert.ok(fs.existsSync(noticePath), "expected korean-jangbu-for/NOTICE to exist");
   assert.ok(fs.existsSync(disclaimerPath), "expected korean-jangbu-for/DISCLAIMER.md to exist");
   assert.ok(fs.existsSync(licensePath), "expected korean-jangbu-for/LICENSE.upstream to exist");
 
-  const notice = read(path.join("korean-jangbu-for", "NOTICE"));
-  const disclaimer = read(path.join("korean-jangbu-for", "DISCLAIMER.md"));
-  const license = read(path.join("korean-jangbu-for", "LICENSE.upstream"));
+  const notice = read(skillRel("korean-jangbu-for", "NOTICE"));
+  const disclaimer = read(skillRel("korean-jangbu-for", "DISCLAIMER.md"));
+  const license = read(skillRel("korean-jangbu-for", "LICENSE.upstream"));
 
   assert.match(notice, /korean-jangbu-for/);
   assert.match(notice, /Copyright 2026 kimlawtech/);
@@ -3158,18 +4899,18 @@ test("korean-jangbu-for preserves upstream attribution, disclaimer, and Apache l
 });
 
 test("korean-jangbu-for ships an install.sh wrapper and a pinned upstream SHA", () => {
-  const pinPath = path.join(repoRoot, "korean-jangbu-for", "scripts", "upstream.pin");
-  const installPath = path.join(repoRoot, "korean-jangbu-for", "scripts", "install.sh");
+  const pinPath = skillAbs("korean-jangbu-for", "scripts", "upstream.pin");
+  const installPath = skillAbs("korean-jangbu-for", "scripts", "install.sh");
 
   assert.ok(fs.existsSync(pinPath), "expected korean-jangbu-for/scripts/upstream.pin to exist");
   assert.ok(fs.existsSync(installPath), "expected korean-jangbu-for/scripts/install.sh to exist");
 
-  const pin = read(path.join("korean-jangbu-for", "scripts", "upstream.pin")).trim();
+  const pin = read(skillRel("korean-jangbu-for", "scripts", "upstream.pin")).trim();
 
   assert.match(pin, /^[0-9a-f]{40}$/, "upstream.pin must contain a single 40-char git SHA");
   assert.notStrictEqual(pin, "0".repeat(40), "upstream.pin must not be a placeholder all-zero SHA");
 
-  const install = read(path.join("korean-jangbu-for", "scripts", "install.sh"));
+  const install = read(skillRel("korean-jangbu-for", "scripts", "install.sh"));
 
   assert.match(install, /^#!\/(?:usr\/bin\/env bash|bin\/bash)/m);
   assert.match(install, /set -euo pipefail/);
@@ -3189,7 +4930,7 @@ test("korean-jangbu-for installer registers upstream subskills for Claude and ag
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "korean-jangbu-for-install-"));
   const homeDir = path.join(tmpDir, "home");
   const upstreamDir = path.join(tmpDir, "upstream");
-  const installPath = path.join(repoRoot, "korean-jangbu-for", "scripts", "install.sh");
+  const installPath = skillAbs("korean-jangbu-for", "scripts", "install.sh");
   const upstreamSubskills = [
     "jangbu-connect",
     "jangbu-dash",
@@ -3304,7 +5045,7 @@ test("korean-jangbu-for installer preflights promoted subskill collisions before
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "korean-jangbu-for-collision-"));
   const homeDir = path.join(tmpDir, "home");
   const upstreamDir = path.join(tmpDir, "upstream");
-  const installPath = path.join(repoRoot, "korean-jangbu-for", "scripts", "install.sh");
+  const installPath = skillAbs("korean-jangbu-for", "scripts", "install.sh");
   const upstreamSubskills = [
     "jangbu-connect",
     "jangbu-dash",
@@ -3395,10 +5136,10 @@ test("korean-jangbu-for feature doc documents source-first use and mandatory att
 });
 
 test("corporate-registration-consulting skill covers court registry workflow, tax pitfalls, and rhwp automation", () => {
-  const skillPath = path.join(repoRoot, "corporate-registration-consulting", "SKILL.md");
+  const skillPath = skillAbs("corporate-registration-consulting", "SKILL.md");
   const featureDocPath = path.join(repoRoot, "docs", "features", "corporate-registration-consulting.md");
 
-  assert.ok(fs.existsSync(skillPath), "expected corporate-registration-consulting/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/corporate-registration-consulting/SKILL.md to exist");
   assert.ok(fs.existsSync(featureDocPath), "expected corporate-registration-consulting feature doc to exist");
   const articlesTemplatePath = path.join(
     "corporate-registration-consulting",
@@ -3422,7 +5163,7 @@ test("corporate-registration-consulting skill covers court registry workflow, ta
 
   const articlesTemplate = read(articlesTemplatePath);
   const documentPackTemplate = read(documentPackTemplatePath);
-  const skill = read(path.join("corporate-registration-consulting", "SKILL.md"));
+  const skill = read(skillRel("corporate-registration-consulting", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "corporate-registration-consulting.md"));
   const readme = read("README.md");
   const install = read(path.join("docs", "install.md"));
@@ -3522,17 +5263,17 @@ test("corporate-registration-consulting skill covers court registry workflow, ta
 
 
 test("iros-registry-automation skill documents safe IROS registry certificate automation and upstream credit", () => {
-  const skillPath = path.join(repoRoot, "iros-registry-automation", "SKILL.md");
+  const skillPath = skillAbs("iros-registry-automation", "SKILL.md");
   const featureDocPath = path.join(repoRoot, "docs", "features", "iros-registry-automation.md");
-  const upstreamPinPath = path.join(repoRoot, "iros-registry-automation", "scripts", "upstream.pin");
+  const upstreamPinPath = skillAbs("iros-registry-automation", "scripts", "upstream.pin");
 
-  assert.ok(fs.existsSync(skillPath), "expected iros-registry-automation/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected examples/iros-registry-automation/SKILL.md to exist");
   assert.ok(fs.existsSync(featureDocPath), "expected iros-registry-automation feature doc to exist");
   assert.ok(fs.existsSync(upstreamPinPath), "expected iros-registry-automation/scripts/upstream.pin to exist");
 
-  const skill = read(path.join("iros-registry-automation", "SKILL.md"));
+  const skill = read(skillRel("iros-registry-automation", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "iros-registry-automation.md"));
-  const upstreamPin = read(path.join("iros-registry-automation", "scripts", "upstream.pin")).trim();
+  const upstreamPin = read(skillRel("iros-registry-automation", "scripts", "upstream.pin")).trim();
   const readme = read("README.md");
   const install = read(path.join("docs", "install.md"));
   const sources = read(path.join("docs", "sources.md"));
@@ -3622,7 +5363,7 @@ test("iros-registry-automation skill documents safe IROS registry certificate au
 });
 
 test("rhwp-edit skill pins the k-skill-rhwp CLI as the editing engine and disclaims kordoc/rhwp-advanced routing", () => {
-  const skill = read(path.join("rhwp-edit", "SKILL.md"));
+  const skill = read(skillRel("rhwp-edit", "SKILL.md"));
 
   assert.match(skill, /^---\nname: rhwp-edit\n/);
   assert.match(skill, /k-skill-rhwp/);
@@ -3647,7 +5388,7 @@ test("rhwp-edit skill pins the k-skill-rhwp CLI as the editing engine and discla
 });
 
 test("rhwp-advanced skill pins the upstream rhwp Rust CLI debug/dump/convert surface", () => {
-  const skill = read(path.join("rhwp-advanced", "SKILL.md"));
+  const skill = read(skillRel("rhwp-advanced", "SKILL.md"));
 
   assert.match(skill, /^---\nname: rhwp-advanced\n/);
   assert.match(skill, /cargo install rhwp/);
@@ -3832,14 +5573,14 @@ test("README skill table skill-name column entries match real on-disk skill dire
   ];
 
   for (const skillName of allEntries) {
-    const skillFile = path.join(repoRoot, skillName, "SKILL.md");
+    const skillFile = skillAbs(skillName, "SKILL.md");
 
     assert.ok(
       fs.existsSync(skillFile),
       `expected ${skillName}/SKILL.md to exist on disk so the README table never advertises a non-existent skill identifier`,
     );
 
-    const frontmatterMatch = read(path.join(skillName, "SKILL.md")).match(/^name:\s*(\S+)\s*$/m);
+    const frontmatterMatch = read(skillRel(skillName, "SKILL.md")).match(/^name:\s*(\S+)\s*$/m);
 
     assert.ok(frontmatterMatch, `expected ${skillName}/SKILL.md to declare a name in frontmatter`);
     assert.equal(
@@ -3854,14 +5595,14 @@ test("repository docs advertise the k-skill-cleaner skill and agent usage source
   const readme = read("README.md");
   const install = read(path.join("docs", "install.md"));
   const featureDocPath = path.join(repoRoot, "docs", "features", "k-skill-cleaner.md");
-  const skillPath = path.join(repoRoot, "k-skill-cleaner", "SKILL.md");
-  const skillLocalHelperPath = path.join(repoRoot, "k-skill-cleaner", "scripts", "k_skill_cleaner.py");
+  const skillPath = skillAbs("k-skill-cleaner", "SKILL.md");
+  const skillLocalHelperPath = skillAbs("k-skill-cleaner", "scripts", "k_skill_cleaner.py");
 
-  assert.ok(fs.existsSync(skillPath), "expected k-skill-cleaner/SKILL.md to exist");
+  assert.ok(fs.existsSync(skillPath), "expected skills/k-skill-cleaner/SKILL.md to exist");
   assert.ok(fs.existsSync(skillLocalHelperPath), "expected k-skill-cleaner/scripts/k_skill_cleaner.py to be included in standalone skill installs");
   assert.ok(fs.existsSync(featureDocPath), "expected docs/features/k-skill-cleaner.md to exist");
 
-  const skill = read(path.join("k-skill-cleaner", "SKILL.md"));
+  const skill = read(skillRel("k-skill-cleaner", "SKILL.md"));
   const featureDoc = read(path.join("docs", "features", "k-skill-cleaner.md"));
 
   assert.match(skill, /^name: k-skill-cleaner$/m);

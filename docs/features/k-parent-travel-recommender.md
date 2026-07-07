@@ -1,4 +1,4 @@
-# k-parent-travel-recommender
+# 아이 동반 여행 추천 기능 문서
 
 아이 동반 가족 여행지/코스를 한국관광공사 데이터로 모아 추천하는 스킬.
 
@@ -11,9 +11,9 @@
 
 | 패키지 | 함수 | 출력 |
 | --- | --- | --- |
-| `k-parent-source-tourapi` | `areaBasedList({ areaCode, sigunguCode, contentTypeId })` | 지역 기반 장소 (12/14/28) |
-| `k-parent-source-tourapi` | `locationBasedList({ mapX, mapY, radius })` | 좌표 반경(m) 내 주변 장소, `dist` 포함 |
-| `k-parent-source-tourapi` | `searchFestival(...)` (선택) | 여행 기간 중 축제 보강 |
+| `packages/k-parent-source-tourapi` | `areaBasedList({ areaCode, sigunguCode, contentTypeId })` | 지역 기반 장소 (12/14/28) |
+| `packages/k-parent-source-tourapi` | `locationBasedList({ mapX, mapY, radius })` | 좌표 반경(m) 내 주변 장소, `dist` 포함 |
+| `packages/k-parent-source-tourapi` | `searchFestival(...)` (선택) | 여행 기간 중 축제 보강 |
 
 ## 환경변수
 
@@ -46,5 +46,11 @@
 ## 픽스처 갱신
 
 ```
-KSKILL_TOURAPI_KEY=... node packages/k-parent-source-tourapi/scripts/refresh-fixtures.mjs
+KSKILL_TOURAPI_KEY=... npm run refresh:fixtures --workspace k-parent-source-tourapi
 ```
+
+## 남은 확장 후보
+
+- 무장애·수유실·공중화장실·역 편의시설 source 보강
+- 숙박/교통 예약 후보는 공식 사이트 handoff만 제공하는 가드레일 확장
+- 다일정 코스의 이동시간·휴식시간·아이 연령대 적합도 점수화

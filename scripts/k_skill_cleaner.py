@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
-_HELPER_PATH = Path(__file__).resolve().parents[1] / "k-skill-cleaner" / "scripts" / "k_skill_cleaner.py"
+_HELPER_PATH = Path(__file__).resolve().parents[1] / "skills" / "k-skill-cleaner" / "scripts" / "k_skill_cleaner.py"
 _SPEC = importlib.util.spec_from_file_location("_k_skill_cleaner_impl", _HELPER_PATH)
 if _SPEC is None or _SPEC.loader is None:  # pragma: no cover - importlib defensive guard
     raise ImportError(f"Unable to load k-skill-cleaner helper from {_HELPER_PATH}")

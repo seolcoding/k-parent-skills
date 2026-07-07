@@ -1,0 +1,17 @@
+{
+  "response": {
+    "body": {
+      "items": {
+        "item": {
+          "sn": "YC-1",
+          "instlLc": "성남초등학교 정문",
+          "rdnmadr": "경기도 성남시 수정구 수정로 1",
+          "latitude": "37.4449",
+          "longitude": "127.1389",
+          "instlDe": "2025-03-02",
+          "mngInsttNm": "성남시"
+        }
+      }
+    }
+  }
+}

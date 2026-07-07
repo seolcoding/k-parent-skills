@@ -13,7 +13,27 @@ Works fully offline. No API key required.
 Each service includes `serviceId`, `title`, `agency`, `eligibility`,
 `requiredDocs[]`, `officialUrl`, `contact`, and `deadline`.
 
-## Optional live lookup
+## Usage
+
+```js
+const { listServices, getService, buildDeepLink } = require("k-parent-source-welfare");
+
+const services = listServices({ category: "현금지원" });
+const service = getService("child-allowance").service;
+const link = buildDeepLink(service, { region: "서울" });
+```
+
+Outputs keep provenance/source metadata and freshness metadata so parent workflows can show origin and staleness.
+
+## Testing
+
+```bash
+npm test
+```
+
+Tests run fully offline from the curated catalog and fixtures.
+
+## Configuration
 
 A live data.go.kr lookup can be gated behind the `KSKILL_DATAGOKR_KEY`
 environment variable. It is optional — the curated catalog is the default and

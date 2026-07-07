@@ -12,6 +12,7 @@ const KEY = process.env.KSKILL_DATAGOKR_KEY;
 async function main() {
   if (!KEY) {
     console.error("Set KSKILL_DATAGOKR_KEY to refresh fixtures from the live e-gen service.");
+    console.error("   KSKILL_DATAGOKR_KEY=... npm run refresh:fixtures");
     process.exit(1);
   }
 

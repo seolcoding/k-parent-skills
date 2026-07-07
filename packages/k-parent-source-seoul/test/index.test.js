@@ -5,6 +5,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
+const { SOURCE_FRESHNESS } = require("k-parent-core");
 const {
   fetchReservations,
   parseReservations,
@@ -75,6 +76,8 @@ test("parseReservations normalizes culture rows and reads RESULT.CODE", () => {
   const payload = readFixture("reservation-culture.json");
   const result = parseReservations(payload, {
     service: "ListPublicReservationCulture",
+    fetchedAt: "2026-06-04T00:00:00.000Z",
+    now: "2026-06-04T12:00:00.000Z",
   });
   assert.equal(result.resultCode, "INFO-000");
   assert.equal(result.items.length, 1);
@@ -87,6 +90,8 @@ test("parseReservations normalizes culture rows and reads RESULT.CODE", () => {
   assert.ok(item.svcUrl.includes("yeyak.seoul.go.kr"));
   assert.equal(item.institution.name, "서울시립미술관");
   assert.equal(result.metadata.sourceName, "서울 열린데이터광장 공공서비스예약");
+  assert.equal(result.metadata.freshness.status, SOURCE_FRESHNESS.FRESH);
+  assert.equal(result.metadata.freshness.checkedAt, "2026-06-04T00:00:00.000Z");
 });
 
 test("parseReservations handles each reservation service fixture", () => {

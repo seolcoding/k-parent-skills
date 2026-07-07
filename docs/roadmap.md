@@ -1,6 +1,6 @@
-# Roadmap
+# 로드맵
 
-## Department roadmap
+## 디파트먼트 로드맵
 
 K-Parent Skills는 `학교`, `학원`, `놀이`, `생활`, `트렌드`, `쇼핑`, `영양` 디파트먼트로 확장한다.
 
@@ -8,21 +8,21 @@ K-Parent Skills는 `학교`, `학원`, `놀이`, `생활`, `트렌드`, `쇼핑`
 
 | 디파트먼트 | 현재 상태 | 구현 패키지 | 다음 후보 |
 | --- | --- | --- | --- |
-| 학교 | adapter(fixture): NEIS 학교/급식/학사일정/시간표 + Today Brief; 안내문 추출 logic | `k-parent-source-neis`, `k-parent-brief`, `k-parent-doc-extract` | 유치원/어린이집 알리미 정밀화, 방과후 신청 흐름 |
-| 학원 | logic: 알림 텍스트 정규화(doc-extract) | `k-parent-doc-extract` | 학원 앱/API 표면 조사, 문자/카카오 알림 파서 |
-| 놀이 | adapter(fixture): TourAPI 축제/관광지/주변, 놀이시설·도시공원, 서울예약·도서관·문화 | `k-parent-source-tourapi`, `-playground`, `-seoul`, `-library`, `-culture` | 날씨 기반 후보 정렬, 평생교육 확대 |
-| 생활 | logic: 복지 카탈로그·딥링크, 캘린더 후보·ICS; adapter(fixture): 응급의료 야간/휴일 | `k-parent-source-welfare`, `k-parent-calendar`, `k-parent-source-emergency` | 정부24/복지로 가이던스 확대, 예방접종 체크리스트 |
-| 트렌드 | logic: 제너릭 수집 러너 + 네이버 신호 | `k-parent-source-naver` (collector) | 지역 부모 커뮤니티/시즌 이슈 수집 |
-| 쇼핑 | adapter(fixture): 네이버 가격비교 + 쿠팡 어필리에이트(고지) | `k-parent-source-naver`, `k-parent-source-coupang` | 재고·대체품·중고 비교 강화 |
-| 영양 | adapter(fixture): NEIS 급식·알레르기 | `k-parent-source-neis` | 유치원 식단+집밥 보완 |
-| 콘텐츠 | adapter(fixture): YouTube 교과 연계(safeSearch) | `k-parent-source-youtube` | 오디오형/대화 주제 큐레이션 확대 |
-| 유치원 | adapter(fixture): 어린이집/유치원 공시 비교 | `k-parent-source-childinfo` | 처음학교로 모집 흐름 |
+| 학교 | adapter(fixture): NEIS 학교/급식/학사일정/시간표 + Today Brief; 안내문 추출 logic | `packages/k-parent-source-neis`, `packages/k-parent-brief`, `packages/k-parent-doc-extract` | EDSS/KERIS 소재정보(학교알리미·NEIS·유치원알리미) 정밀화, 방과후 신청 흐름 |
+| 학원 | logic: 알림 텍스트 정규화(doc-extract) | `packages/k-parent-doc-extract` | 학원 앱/API 표면 조사, 문자/카카오 알림 파서 |
+| 놀이 | adapter(fixture): TourAPI 축제/관광지/주변, 놀이시설·도시공원, 서울예약·도서관·문화 | `packages/k-parent-source-tourapi`, `packages/k-parent-source-playground`, `packages/k-parent-source-seoul`, `packages/k-parent-source-library`, `packages/k-parent-source-culture` | 날씨 기반 후보 정렬, 평생교육 확대 |
+| 생활 | logic: 복지 카탈로그·딥링크, 캘린더 후보·ICS; adapter(fixture): 응급의료 야간/휴일 | `packages/k-parent-source-welfare`, `packages/k-parent-calendar`, `packages/k-parent-source-emergency` | 정부24/복지로 가이던스 확대, 예방접종 체크리스트 |
+| 트렌드 | logic: 제너릭 수집 러너 + 네이버 신호 | `packages/k-parent-source-naver` (collector) | 지역 부모 커뮤니티/시즌 이슈 수집 |
+| 쇼핑 | adapter(fixture): 네이버 가격비교 + 쿠팡 어필리에이트(고지) | `packages/k-parent-source-naver`, `packages/k-parent-source-coupang` | 재고·대체품·중고 비교 강화 |
+| 영양 | adapter(fixture): NEIS 급식·알레르기 | `packages/k-parent-source-neis` | 유치원 식단+집밥 보완 |
+| 콘텐츠 | adapter(fixture): YouTube 교과 연계(safeSearch) | `packages/k-parent-source-youtube` | 오디오형/대화 주제 큐레이션 확대 |
+| 유치원 | adapter(fixture): 어린이집/유치원 공시 비교 | `packages/k-parent-source-childinfo` | 처음학교로 모집 흐름 |
 
 > 모든 소스 패키지는 fixture-first입니다. 크레덴셜 발급·라이브 전환은 [OWNER-TASKS.md](../OWNER-TASKS.md) 참고.
 
-## Demo placeholders
+## 제품 스킬 상태
 
-부모용 스킬은 먼저 `SKILL.md` 전용 플레이스홀더로 시작한다. 반복 사용이 검증되면 원본 k-skill 구조처럼 `packages/` 또는 `scripts/` 구현으로 승격한다.
+부모용 제품 스킬은 `skills/*/SKILL.md` 지침을 유지한다. 반복 사용이 검증된 표면은 원본 k-skill 구조처럼 `packages/` 또는 `scripts/` 구현으로 승격하고, 아직 패키지 경계가 없는 표면은 concept workflow로 관리한다.
 
 - `k-parent-meal-planner`: 학교·유치원 식단, 알레르기, 집밥 보완 추천
 - `k-parent-school-info`: 학교 공지, 학사일정, 방과후, 급식, 통학 정보
@@ -33,15 +33,27 @@ K-Parent Skills는 `학교`, `학원`, `놀이`, `생활`, `트렌드`, `쇼핑`
 - `k-parent-application-helper`: 돌봄, 방과후, 바우처, 체험, 지원사업 신청
 - `k-parent-academy-connector`: 학원 일정, 숙제, 출결, 결제, 알림 API/앱 연동 컨셉
 - `k-parent-school-doc-capture`: 안내문 사진·PDF OCR 저장, 일정/준비물/신청 마감 추출, 캘린더 후보 생성
-- `k-parent-shopping-recommender`: 준비물·교재·육아용품 상품 후보 정리, 쿠팡 어필리에이트 링크 제공 컨셉
+- `k-parent-shopping-recommender`: 준비물·교재·육아용품 상품 후보 정리, 쿠팡 어필리에이트 링크 제공
 - `k-parent-mobile-agent`: 서버 배포형 모바일 부모 에이전트 컨셉
-- `k-parent-data-collector`: 학교데이터, 시간표, 평생교육, 축제, 행사, 트렌드 크롤링 컨셉
-- `k-parent-schedule-manager`: 자녀 스케줄, 가족 캘린더, 리마인더 통합 컨셉
-- `k-parent-travel-recommender`: 아이 동반 여행지·체험·일정 추천 컨셉
+- `k-parent-data-collector`: 학교데이터, 시간표, 평생교육, 축제, 행사, 트렌드 크롤링
+- `k-parent-schedule-manager`: 자녀 스케줄, 가족 캘린더, 리마인더 통합
+- `k-parent-travel-recommender`: 아이 동반 여행지·체험·일정 추천
 - `k-parent-knowledge-helper`: 부모 일반 지식 질의응답 컨셉
-- `k-parent-content-recommender`: 유튜브 채널·영상, 교과 연계, 차 안 오디오형 콘텐츠, 대화 주제 추천 컨셉
+- `k-parent-content-recommender`: 유튜브 채널·영상, 교과 연계, 차 안 오디오형 콘텐츠, 대화 주제 추천
 
-## v1 implementation candidates
+## 지원 중인 hosted proxy 예제 표면
+
+아래 상속 예제는 `examples/`에 남겨 두되, 기본 hosted proxy와 regression이 있어 바로 쓸 수 있는 생활정보 표면으로 관리한다. 반복 사용이 확인되면 parent 제품 스킬 또는 `packages/k-parent-*` 구현으로 승격한다.
+
+| 표면 | 스킬 | 현재 위치 | 승격 후보 |
+| --- | --- | --- | --- |
+| 블루리본 맛집 조회 | `blue-ribbon-nearby` | `examples/blue-ribbon-nearby` | 놀이/생활 근처 추천 |
+| 근처 공영주차장 찾기 | `parking-lot-search` | `examples/parking-lot-search` | 놀이·여행 후보 보조 정보 |
+| 네이버 쇼핑 가격비교 | `naver-shopping-search` | `examples/naver-shopping-search` | 쇼핑 추천 가격 비교 |
+| 네이버 뉴스 검색 | `naver-news-search` | `examples/naver-news-search` | 트렌드/지역 이슈 수집 |
+| LH 청약 공고 조회 | `lh-notice-search` | `examples/lh-notice-search` | 생활/신청 체크리스트 |
+
+## v1 구현 후보
 
 ### gstack 기반 개발·상품화 운영
 
@@ -62,6 +74,7 @@ K-Parent Skills는 `학교`, `학원`, `놀이`, `생활`, `트렌드`, `쇼핑`
 ### 소스 인벤토리와 코드 정규화
 
 - 공식 API/공시, 공공데이터 파일, 지도/지역검색 API, 제한 스크래핑, 커뮤니티 보조신호 순서로 source priority를 둔다.
+- EDSS/KERIS는 data.go.kr 활용신청 큐와 분리해 교육 데이터 소재 인벤토리로 추적한다. 공개 API 링크(학교알리미, NEIS, 에듀파인, 유치원알리미)는 source 후보로 다루고, 연구계획서 심의형 EDSS 심사데이터는 별도 사용자 승인 전 자동 신청하지 않는다.
 - NEIS 교육청/학교 코드, 학교알리미 지역 코드, TourAPI 법정동/분류 코드, 서울예약 `SVCID`, 정부/복지 서비스 id를 `region_code_map`과 resolver로 묶는다.
 - 초기 저장 모델은 `parent_profile`, `child_profile`, `region_code_map`, `institution`, `content_item`, `application_service`, `consent_log`로 시작한다.
 - 부모 계정이 주체이며 자녀 정보는 최소화한다. 기본 위치는 시군구 수준으로 두고 GPS는 근처 찾기 요청 시 일시 사용한다.
@@ -132,7 +145,7 @@ K-Parent Skills는 `학교`, `학원`, `놀이`, `생활`, `트렌드`, `쇼핑`
 - 상품 후보는 가격, 배송일, 리뷰, 재고, 대체품, 중고 가능 여부를 분리해 제시
 - 결제, 장바구니 담기, 자동 구매는 사용자 승인 전 실행하지 않음
 
-## Later candidates
+## 이후 후보
 
 - 예방접종·건강검진 일정 확인
 - 어린이 병원·약국 야간/휴일 진료 확인

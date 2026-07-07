@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Regenerate NEIS fixtures (school-info, meal, schedule, timetable) from the live API.
-// Requires KEDU_INFO_KEY (NEIS open API key). Run from the repo root or this package:
-//   KEDU_INFO_KEY=... node packages/k-parent-source-neis/scripts/refresh-fixtures.mjs
+// Requires KEDU_INFO_KEY (NEIS open API key). Run from this package:
+//   KEDU_INFO_KEY=... npm run refresh:fixtures
 import { writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -14,7 +14,7 @@ if (!apiKey) {
   console.error("2. 신청하기 > 인증키 신청 to issue an open API key.");
   console.error("3. Export it before running this script:");
   console.error("   export KEDU_INFO_KEY=<your-neis-key>");
-  console.error("   node packages/k-parent-source-neis/scripts/refresh-fixtures.mjs");
+  console.error("   KEDU_INFO_KEY=... npm run refresh:fixtures");
   process.exit(1);
 }
 

@@ -21,12 +21,24 @@ Supported services (`RESERVATION_SERVICES`):
 - `ListPublicReservationEducation` — 교육 프로그램
 - `ListPublicReservationSport` — 체육 강습
 
-## Environment
+## Configuration
 
 - `KSKILL_SEOUL_KEY` — 서울 열린데이터광장 인증키 (https://data.seoul.go.kr).
 
-## Refresh fixtures
+Outputs keep provenance/source metadata and freshness metadata so parent workflows can show origin and staleness.
 
+## Testing
+
+```bash
+npm test
 ```
-npm run refresh:fixtures
+
+Tests run fully offline from `test/fixtures/`.
+
+## Fixtures refresh
+
+Run this command only when you are ready to call the live API and overwrite local fixtures.
+
+```bash
+KSKILL_SEOUL_KEY=... npm run refresh:fixtures
 ```

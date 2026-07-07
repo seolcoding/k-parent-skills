@@ -9,7 +9,23 @@
 
 모든 함수는 `options.payload`를 받으면 HTTP 호출을 건너뜁니다(오프라인 테스트용).
 
-## Config
+## Usage
+
+```js
+const { fetchPlaygrounds, fetchUrbanParks } = require("k-parent-source-playground");
+const playgroundPayload = require("./test/fixtures/playgrounds.json");
+const urbanParkPayload = require("./test/fixtures/urban-parks.json");
+
+async function main() {
+  const playgrounds = await fetchPlaygrounds({ sido: "서울특별시", sigungu: "강남구", payload: playgroundPayload });
+  const parks = await fetchUrbanParks({ sido: "서울특별시", sigungu: "강남구", payload: urbanParkPayload });
+  return { playgrounds, parks };
+}
+
+main().then(console.log).catch(console.error);
+```
+
+## Configuration
 
 - Env: `KSKILL_DATAGOKR_KEY` (data.go.kr serviceKey). `options.apiKey`로도 전달 가능.
 - BASE: `http://apis.data.go.kr`
@@ -25,8 +41,20 @@ data.go.kr의 데이터셋마다 service id / endpoint path / 파라미터명이
 파라미터명도 버전에 따라 다르므로, `parse.js`의 `pick()`은 여러 후보 키
 (`pfctNm`/`facltNm`/`name`, `ronaAddr`/`rdnmadr`/`address`, `latitude`/`la`/`lat` 등)를 폭넓게 매핑합니다.
 
+Outputs keep provenance/source metadata and freshness metadata so parent workflows can show origin and staleness.
+
+## Testing
+
+```bash
+npm test
+```
+
+테스트는 `test/fixtures/`의 목 응답으로 완전히 오프라인 실행됩니다.
+
 ## Fixtures refresh
 
-```
-KSKILL_DATAGOKR_KEY=... node scripts/refresh-fixtures.mjs
+Run this command only when you are ready to call the live API and overwrite local fixtures.
+
+```bash
+KSKILL_DATAGOKR_KEY=... npm run refresh:fixtures
 ```

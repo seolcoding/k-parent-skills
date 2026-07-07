@@ -12,7 +12,7 @@
 
 | 유형 | 설명 | 예시 |
 |------|------|------|
-| **SKILL.md 전용** | 문서만으로 동작. 부모용 신규 컨셉은 이 형태로 먼저 시작 | `k-parent-meal-planner`, `k-parent-school-info` |
+| **SKILL.md 전용** | 문서만으로 동작. 부모용 신규 컨셉은 이 형태로 먼저 시작 | `k-parent-knowledge-helper`, `k-parent-mobile-agent` |
 | **npm 패키지** | `packages/` 아래 Node.js 라이브러리로 구현 | `k-lotto`, `blue-ribbon-nearby` |
 | **프록시 경유** | `k-skill-proxy`가 upstream API 키를 보관하고 HTTP로 중계 | `seoul-subway-arrival`, `fine-dust-location` |
 | **Python 스크립트** | `scripts/`의 Python 파일 직접 실행 | `korean-spell-check`, `sillok-search` |
@@ -21,20 +21,22 @@
 
 ## 스킬의 구조
 
-모든 스킬은 **저장소 루트에 디렉토리 하나**를 갖는다.
+모든 제품 스킬은 **`skills/` 컨테이너 아래에 디렉토리 하나**를 갖는다(상속받은 upstream 예제는 `examples/` 아래).
 
 ```
 k-parent-skill/
-├── my-new-skill/          ← 스킬 디렉토리 (이름 = 스킬 이름)
-│   ├── SKILL.md           ← 필수. 에이전트가 읽는 핵심 파일
-│   └── (지원 파일들)       ← 선택. 스크립트, 데이터 등
+├── skills/                ← 제품 스킬 컨테이너 (설치·트리거 단위)
+│   └── k-parent-my-new-skill/ ← 스킬 디렉토리 (이름 = 스킬 이름)
+│       ├── SKILL.md       ← 필수. 에이전트가 읽는 핵심 파일
+│       └── (지원 파일들)   ← 선택. 스크립트, 데이터 등
+├── examples/              ← 상속받은 upstream 참고용 예제 스킬 (제품 아님)
 ├── packages/              ← npm 패키지 유형일 때만
-│   └── my-new-skill/
+│   └── k-parent-my-new-skill/
 │       ├── package.json
 │       ├── src/
 │       └── test/
 └── scripts/               ← Python 스크립트 유형일 때만
-    └── my_new_skill.py
+    └── k_parent_my_new_skill.py
 ```
 
 ---
@@ -45,32 +47,32 @@ k-parent-skill/
 
 ```markdown
 ---
-name: my-new-skill
+name: k-parent-my-new-skill
 description: 한 문장으로 이 스킬이 무엇을 하는지 설명한다. 에이전트 UI에 표시된다.
 license: MIT
 metadata:
-  category: utility
+  category: parenting
   locale: ko-KR
-  phase: v1
+  phase: p0
 ---
 
-# My New Skill
+# k-parent-my-new-skill
 
-## What this skill does
+## 핵심 동작
 
 이 스킬이 무엇을 하는지 한두 문단으로 설명한다.
 
-## When to use
+## 사용 시점
 
 - "사용자가 이런 말을 할 때"
 - "또는 이런 상황일 때"
 
-## Prerequisites
+## 준비 사항
 
 - Node.js 18+ (필요하면)
 - 패키지 설치 명령
 
-## Workflow
+## 전형적 흐름
 
 ### 1. 첫 번째 단계
 
@@ -84,15 +86,15 @@ metadata:
 
 ...
 
-## Done when
+## 완료 조건
 
 - 이런 조건이 만족되면 완료다
 
-## Failure modes
+## 실패 모드
 
 - 예상 가능한 실패 상황
 
-## Notes
+## 참고
 
 - 특이사항, 보안 정책 등
 ```
@@ -104,9 +106,9 @@ metadata:
 | `name` | ✅ | **디렉토리 이름과 정확히 일치**해야 한다 |
 | `description` | ✅ | 에이전트 라우팅용 한국어 설명. 트리거 예시 발화 2~3개 + 겹치는 형제 스킬 경계 문장 포함 (아래 규칙 참고) |
 | `license` | ✅ | 항상 `MIT` |
-| `metadata.category` | ✅ | `utility` / `transit` / `travel` / `messaging` / `legal` / `setup` 등 |
+| `metadata.category` | ✅ | parent 제품 스킬은 `parenting` |
 | `metadata.locale` | ✅ | `ko-KR` |
-| `metadata.phase` | ✅ | `v1` (안정) / `v1.5` (기능 추가 중) |
+| `metadata.phase` | ✅ | parent 제품 스킬은 `p0`(핵심 제품 후보), `implemented`(runtime 패키지/스크립트 구현 있음), `concept`(SKILL.md-only 컨셉) 중 하나를 쓴다 |
 
 ### description 작성 규칙 (컨텍스트 엔지니어링)
 
@@ -119,9 +121,9 @@ metadata:
 
 ### 본문 구조와 progressive disclosure
 
-- 본문(`## When to use`, `## Workflow` 등)은 **간결·절차형**으로 유지한다.
-- 동작 패키지가 있으면 `## 데이터 소스 (deterministic packages)` 섹션에 패키지·함수 시그니처·env 변수를 적는다.
-- 긴 코드표·필드맵·정책표·샘플 데이터는 본문에 붓지 말고 **`<skill>/references/*.md`** 로 분리하고 백틱 경로(`` `references/foo.md` ``)로 링크한다. (선례: `korean-scholarship-search/references/`)
+- 본문(`## 사용 시점`, `## 전형적 흐름` 등)은 **간결·절차형**으로 유지한다.
+- 동작 패키지가 있으면 `## 데이터 소스` 섹션에 패키지·함수 시그니처·env 변수를 적는다.
+- 긴 코드표·필드맵·정책표·샘플 데이터는 본문에 붓지 말고 제품 스킬은 **`skills/k-parent-my-new-skill/references/*.md`**, 예제 스킬은 **`examples/korean-scholarship-search/references/*.md`** 같은 skill 폴더 내부 `references/`로 분리하고 `SKILL.md` 본문에서는 백틱 경로(`` `references/foo.md` ``)로 링크한다.
 - 질의→스킬 매핑과 겹침 해소 규칙은 `docs/skill-routing.md`에 모은다.
 
 ---
@@ -132,18 +134,18 @@ metadata:
 
 에이전트가 `SKILL.md` 안의 bash/python 코드를 직접 실행한다.
 
-1. 디렉토리 생성: `mkdir my-new-skill`
-2. `my-new-skill/SKILL.md` 작성
-3. Workflow 섹션에 에이전트가 따를 단계별 명령어를 적는다
+1. 디렉토리 생성: `mkdir -p skills/k-parent-my-new-skill`
+2. `skills/k-parent-my-new-skill/SKILL.md` 작성
+3. `전형적 흐름` 섹션에 에이전트가 따를 단계별 명령어를 적는다
 
 외부 라이브러리나 서버 없이 동작해야 한다.
 
 ### B. npm 패키지 스킬
 
-`packages/my-new-skill/`에 Node.js 구현체를 만들고, 루트 디렉토리 `my-new-skill/SKILL.md`에서 `require('my-new-skill')`로 호출한다.
+`packages/k-parent-my-new-skill/`에 Node.js 구현체를 만들고, 스킬 디렉토리 `skills/k-parent-my-new-skill/SKILL.md`에서 `require('k-parent-my-new-skill')`로 호출한다.
 
 ```
-packages/my-new-skill/
+packages/k-parent-my-new-skill/
 ├── package.json    # name, version, main, exports 필수
 ├── README.md
 ├── src/
@@ -152,25 +154,25 @@ packages/my-new-skill/
     └── index.test.js
 ```
 
-`package.json`에 `"name": "my-new-skill"` 설정 후 루트 `package.json`의 `workspaces`에 등록한다.
+`package.json`에 `"name": "k-parent-my-new-skill"` 설정 후 루트 `package.json`의 `workspaces`에 등록한다.
 
-npm에 배포하려면 `.changeset/` 파일을 추가한다 (`docs/releasing.md` 참고).
+현재 `k-parent-skill`의 npm release workflow는 비활성 상태다. npm 배포가 실제로 필요해지면 `docs/releasing.md`에 따라 Changesets 설정과 publish workflow를 같은 변경에서 재도입한다.
 
 ### C. 프록시 경유 스킬
 
 upstream API 키를 사용자에게 노출하지 않으려면 `k-skill-proxy`를 경유한다.
 
 1. `packages/k-skill-proxy/src/server.js`에 새 route 추가
-2. `SKILL.md` Workflow에 `curl $KSKILL_PROXY_BASE_URL/v1/...` 형태로 호출 작성
-3. upstream API 키는 서버의 `~/.config/k-skill/secrets.env`에만 보관
+2. `SKILL.md` `전형적 흐름`에 `curl $KSKILL_PROXY_BASE_URL/v1/...` 형태로 호출 작성
+3. upstream API 키는 서버의 `~/.config/k-parent-skill/secrets.env`에만 보관
 
-프록시 서버는 main 브랜치에 merge되어야 프로덕션에 반영된다 (`CLAUDE.md` 참고).
+프록시 서버는 main 브랜치에 merge되어야 프로덕션에 반영된다 (`AGENTS.md` 참고; `CLAUDE.md`는 호환 symlink).
 
 부모용 스킬에서 프록시를 추가할 때는 무료/공개 API 또는 공개 페이지 기반 조회만 넣는다. 로그인, 결제, 신청 제출, 아이 개인정보 입력이 필요한 작업은 프록시 자동화 대상이 아니다.
 
 ### D. Python 스크립트 스킬
 
-`scripts/my_skill.py`를 만들고 `SKILL.md`에서 `python3 scripts/my_skill.py`로 호출한다.
+`scripts/k_parent_my_new_skill.py`를 만들고 `SKILL.md`에서 `python3 scripts/k_parent_my_new_skill.py`로 호출한다.
 
 ---
 
@@ -186,11 +188,13 @@ npm run ci
 
 이 명령은 `scripts/validate-skills.sh`를 실행해 다음을 확인한다.
 
-- 루트 하위 모든 디렉토리에 `SKILL.md`가 있는지
+- `skills/`·`examples/` 하위 모든 디렉토리에 `SKILL.md`가 있는지
 - frontmatter가 `---`로 시작하는지
 - `name` 필드가 있는지
 - `description` 필드가 있는지
 - `name` 필드 값이 디렉토리 이름과 일치하는지
+- `skills/k-parent-*` 제품 스킬은 `license: MIT`, `metadata.category: parenting`,
+  `metadata.locale: ko-KR`, 허용된 `metadata.phase`를 갖는지
 
 ---
 
@@ -200,7 +204,7 @@ npm run ci
 
 1. 이미 환경변수에 있으면 → 그대로 사용
 2. 에이전트 vault(1Password, Bitwarden, macOS Keychain) → 주입
-3. `~/.config/k-skill/secrets.env` → 파일에서 읽기
+3. `~/.config/k-parent-skill/secrets.env` → 파일에서 읽기
 4. 아무것도 없으면 → 사용자에게 물어보고 3번에 저장
 
 시크릿 변수 이름 규칙: `KSKILL_<서비스명>_<항목>` (예: `KSKILL_SRT_ID`)
@@ -216,21 +220,24 @@ npm run ci
 
 새 스킬을 PR 올리기 전에 확인한다.
 
-- [ ] `my-new-skill/SKILL.md` 작성 완료
+- [ ] `skills/k-parent-my-new-skill/SKILL.md` 작성 완료
 - [ ] frontmatter `name`이 디렉토리 이름과 일치
 - [ ] `description`이 한국어 + 트리거 예시 발화 2~3개 포함 (겹치는 스킬이 있으면 경계 문장도)
 - [ ] 동작 패키지가 있으면 본문에 `## 데이터 소스` 섹션으로 패키지·env 명시
-- [ ] 긴 코드표/필드맵은 `references/`로 분리하고 백틱 경로로 링크
+- [ ] 긴 코드표/필드맵은 해당 skill 폴더 내부 `references/`로 분리하고 백틱 경로로 링크
 - [ ] 새 스킬이거나 라우팅이 바뀌면 `docs/skill-routing.md` 갱신
 - [ ] 부모용 스킬이면 아이 나이/학년, 지역, 날짜, 출처, 마감일, 비용, 준비물, 다음 행동이 출력 형식에 반영됨
 - [ ] child-personal-data, 로그인, 결제, 제출, 취소 같은 side effect는 사용자 승인 전 실행하지 않도록 명시
 - [ ] `npm run ci` 통과 (`./scripts/validate-skills.sh` 포함)
 - [ ] npm 패키지라면 `packages/`에 구현체와 테스트 추가
-- [ ] npm 패키지라면 `.changeset/*.md` 파일 추가 (반드시 **기능 PR에서**, Version Packages PR에서 추가하지 말 것)
-- [ ] 프록시 경유라면 `k-skill-proxy/src/server.js`에 route 추가하고 main에 merge
-- [ ] 시크릿이 있다면 `KSKILL_` 접두사 규칙 준수 및 `docs/setup.md` 업데이트
-- [ ] `docs/features/my-new-skill.md` 작성 (선택, 상세 가이드)
-- [ ] 범위나 아키텍처가 바뀌면 `README.md`, `docs/roadmap.md`, `docs/architecture.md`, `AGENTS.md`, `CLAUDE.md` 중 관련 파일 업데이트
+- [ ] npm 패키지를 실제 배포 대상으로 전환한다면 `docs/releasing.md`에 따라 Changesets 설정과 publish workflow를 같은 변경에서 재도입
+- [ ] `docs/features/k-parent-my-new-skill.md` 작성 (제품 스킬은 필수, 예제 스킬도 사용자 안내가 필요하면 작성)
+- [ ] 새 제품 스킬이면 `README.md`, `docs/skill-routing.md`, `docs/roadmap.md`, `docs/departments/README.md` 갱신
+- [ ] 새 예제 스킬이면 `examples/README.md`와 필요 시 `README.md`, `docs/install.md`, `docs/roadmap.md`, `docs/departments/README.md`의 예제 표면 갱신
+- [ ] 프록시 경유라면 `packages/k-skill-proxy/src/server.js`에 route 추가, `packages/k-skill-proxy/README.md`와 `docs/features/k-skill-proxy.md`에 route/env 문서화, main merge 전에는 프로덕션 미반영임을 기록
+- [ ] 프록시 경유 또는 시크릿 경계가 있으면 `docs/setup.md`, `docs/security-and-secrets.md`, `docs/sources.md`, `.env.example`, `OWNER-TASKS.md` 중 관련 표면 갱신
+- [ ] 시크릿이 있다면 사용자/client env와 proxy 운영자 env를 구분하고 `docs/security-and-secrets.md`의 기본 secrets 파일에 운영자 전용 key를 넣지 않음
+- [ ] 범위나 아키텍처가 바뀌면 `docs/architecture.md`, `AGENTS.md` 중 관련 파일 업데이트 (`CLAUDE.md`는 `AGENTS.md` symlink)
 
 ---
 

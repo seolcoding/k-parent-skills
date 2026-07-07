@@ -19,15 +19,23 @@ client/skill -> k-skill-proxy -> upstream public API
 - `GET /v1/korea-weather/forecast`
 - `GET /v1/seoul-subway/arrival`
 - `GET /v1/han-river/water-level`
+- `GET /v1/blue-ribbon/nearby` (블루리본 공개 검색 기반 주변 맛집 조회)
+- `GET /v1/opinet/around` (Opinet 주유소 주변 가격 조회, `OPINET_API_KEY`)
+- `GET /v1/opinet/detail` (Opinet 주유소 상세 조회, `OPINET_API_KEY`)
+- `GET /v1/real-estate/region-code` (부동산 지역 코드 조회)
+- `GET /v1/real-estate/:assetType/:dealType` (부동산 실거래가 조회, `DATA_GO_KR_API_KEY`)
+- `GET /v1/parking-lots/search` (전국주차장정보표준데이터 기반 근처 공영주차장 검색, `DATA_GO_KR_API_KEY`)
 - `GET /v1/household-waste/info` (생활쓰레기 배출정보, `DATA_GO_KR_API_KEY`; 쿼리 `pageNo`·`numOfRows` 필수, 값 `1`·`100`)
 - `GET /v1/mfds/drug-safety/lookup` (식약처 의약품개요정보 + 안전상비의약품 정보, `DATA_GO_KR_API_KEY`)
 - `GET /v1/mfds/food-safety/search` (식약처 부적합 식품 + 식품안전나라 회수 정보, `DATA_GO_KR_API_KEY`, 선택적 `FOODSAFETYKOREA_API_KEY`)
+- `GET /v1/mfds/food-safety/health-food-ingredient` (식약처 건강기능식품 원재료성 제품 조회)
+- `GET /v1/mfds/food-safety/inspection-fail` (식약처 부적합 식품 검사 이력 조회)
+- `GET /v1/mfds/food-safety/product-report` (식약처 식품 품목제조보고 조회)
 - `GET /v1/korean-stock/search`
 - `GET /v1/korean-stock/base-info`
 - `GET /v1/korean-stock/trade-info`
 - `GET /v1/naver-shopping/search` (네이버 검색 Open API 쇼핑 검색 우선, 키가 없으면 공개 BFF JSON 기반 상품/가격 후보 조회)
-- `GET /v1/opinet/around`
-- `GET /v1/opinet/detail`
+- `GET /v1/naver-news/search` (네이버 검색 Open API 뉴스 검색, `NAVER_SEARCH_CLIENT_ID`, `NAVER_SEARCH_CLIENT_SECRET`)
 - `GET /v1/neis/school-search` (나이스 학교기본정보, `KEDU_INFO_KEY`)
 - `GET /v1/neis/school-meal` (나이스 급식식단정보, `KEDU_INFO_KEY`)
 - `GET /v1/data4library/library-search` (도서관 정보나루 정보공개 도서관 조회, `DATA4LIBRARY_AUTH_KEY`)
@@ -35,6 +43,8 @@ client/skill -> k-skill-proxy -> upstream public API
 - `GET /v1/data4library/book-detail` (도서관 정보나루 도서 상세 조회, `DATA4LIBRARY_AUTH_KEY`)
 - `GET /v1/data4library/libraries-by-book` (도서 소장 도서관 조회, `DATA4LIBRARY_AUTH_KEY`)
 - `GET /v1/data4library/book-exists` (도서관별 도서 소장여부, `DATA4LIBRARY_AUTH_KEY`)
+- `GET /v1/lh-notice/search` (LH 청약 공고 목록, `DATA_GO_KR_API_KEY`)
+- `GET /v1/lh-notice/detail` (LH 청약 공고 상세, `DATA_GO_KR_API_KEY`)
 - `GET /B552584/:service/:operation` (허용된 AirKorea route passthrough)
 
 ## 권장 환경변수
@@ -49,14 +59,20 @@ client/skill -> k-skill-proxy -> upstream public API
 - `KMA_OPEN_API_KEY=...`
 - `SEOUL_OPEN_API_KEY=...`
 - `HRFCO_OPEN_API_KEY=...`
+- `BLUE_RIBBON_SESSION_ID=...`
 - `OPINET_API_KEY=...`
 - `DATA_GO_KR_API_KEY=...`
 - `FOODSAFETYKOREA_API_KEY=...` (선택: 식품안전나라 회수 live 결과, 없으면 sample fallback)
 - `KEDU_INFO_KEY=...` (나이스 교육정보 개방 포털 Open API 인증키)
 - `DATA4LIBRARY_AUTH_KEY=...` (도서관 정보나루 Open API 인증키)
 - `KRX_API_KEY=...`
-- `NAVER_SEARCH_CLIENT_ID=...`, `NAVER_SEARCH_CLIENT_SECRET=...` (선택: 네이버 검색 Open API 쇼핑 검색)
+- `NAVER_SEARCH_CLIENT_ID=...`, `NAVER_SEARCH_CLIENT_SECRET=...` (선택: 네이버 검색 Open API 쇼핑/뉴스 검색; legacy alias `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET`도 지원)
+- `KSKILL_PROXY_HOST=127.0.0.1`
 - `KSKILL_PROXY_PORT=4020`
+- `KSKILL_PROXY_NAME=k-skill-proxy`
+- `KSKILL_PROXY_CACHE_TTL_MS=300000`
+- `KSKILL_PROXY_RATE_LIMIT_WINDOW_MS=60000`
+- `KSKILL_PROXY_RATE_LIMIT_MAX=60`
 
 ## 프로덕션 배포 구조
 

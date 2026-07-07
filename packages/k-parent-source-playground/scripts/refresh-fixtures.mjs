@@ -2,7 +2,7 @@
 // Refresh playground / urban-park fixtures from live data.go.kr endpoints.
 // Requires KSKILL_DATAGOKR_KEY in the environment.
 //
-//   KSKILL_DATAGOKR_KEY=... node packages/k-parent-source-playground/scripts/refresh-fixtures.mjs
+//   KSKILL_DATAGOKR_KEY=... npm run refresh:fixtures
 //
 // NOTE: confirm the service paths in src/index.js (PLAYGROUND_PATH / URBAN_PARK_PATH)
 // against your approved data.go.kr service detail page before running.
@@ -17,6 +17,7 @@ const { fetchPlaygrounds, fetchUrbanParks } = require("../src/index.js");
 const apiKey = process.env.KSKILL_DATAGOKR_KEY;
 if (!apiKey) {
   console.error("KSKILL_DATAGOKR_KEY is required to refresh playground fixtures.");
+  console.error("   KSKILL_DATAGOKR_KEY=... npm run refresh:fixtures");
   process.exit(1);
 }
 

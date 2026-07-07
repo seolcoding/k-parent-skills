@@ -109,4 +109,4 @@ rhwp convert locked.hwp unlocked.hwp
 - CLI 서브커맨드 소스: https://github.com/edwardkim/rhwp/blob/main/src/main.rs
 - 편집 경로(이 repo): [`rhwp-edit`](rhwp-edit.md)
 - 조회 경로(이 repo): [`hwp`](hwp.md)
-- 스킬 정의: [`rhwp-advanced/SKILL.md`](../../rhwp-advanced/SKILL.md)
+- 스킬 정의: [`examples/rhwp-advanced/SKILL.md`](../../examples/rhwp-advanced/SKILL.md)

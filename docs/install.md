@@ -4,7 +4,7 @@
 
 권장 순서는 아래와 같다.
 
-1. `k-skill` 전체 스킬을 먼저 설치한다.
+1. `k-parent-skill` 전체 스킬을 먼저 설치한다.
 2. 설치가 끝나면 `k-skill-setup` 스킬을 사용해 공통 설정을 마친다.
 3. 그 다음 필요한 기능 스킬을 호출한다.
 
@@ -15,7 +15,7 @@
 Codex나 Claude Code에 아래 문장을 그대로 붙여 넣으면 된다.
 
 ```text
-이 레포의 설치 문서를 읽고 k-skill 전체 스킬을 먼저 설치해줘. 설치가 끝나면 k-skill-setup 스킬을 사용해서 credential 확보와 환경변수 확인까지 이어서 진행해줘. 끝나면 설치된 스킬과 다음 단계만 짧게 정리해.
+이 레포의 설치 문서를 읽고 k-parent-skill 전체 스킬을 먼저 설치해줘. 설치가 끝나면 k-skill-setup 스킬을 사용해서 credential 확보와 환경변수 확인까지 이어서 진행해줘. 끝나면 설치된 스킬과 다음 단계만 짧게 정리해.
 ```
 
 ## 직접 설치
@@ -28,10 +28,12 @@ pnpm dlx skills add <owner/repo> --list
 bunx skills add <owner/repo> --list
 ```
 
-권장: 전체 스킬 먼저 설치
+> **디렉토리 레이아웃 주의**: 제품 스킬은 표준 컨테이너 `skills/<name>/SKILL.md` 에 있어 `--skill <name>` 으로 바로 설치된다. 상속받은 upstream 참고용 예제 스킬은 `examples/<name>/SKILL.md` 에 있으며, 표준 컨테이너가 아니므로 예제 포함 선택 설치 블록에서만 `--full-depth` 를 함께 둔다.
+
+권장: 전체 스킬 먼저 설치 (`examples/` 예제까지 포함하려면 `--full-depth`)
 
 ```bash
-npx --yes skills add <owner/repo> --all -g
+npx --yes skills add <owner/repo> --all --full-depth -g
 ```
 
 설치 후 `k-skill-setup` 을 호출해 공통 설정을 진행한다.
@@ -40,10 +42,35 @@ npx --yes skills add <owner/repo> --all -g
 k-skill-setup 스킬을 사용해서 공통 설정을 진행해줘.
 ```
 
-선택 설치가 꼭 필요할 때만(예: 조회형만 먼저 테스트):
+parent 제품 스킬만 먼저 설치할 때:
 
 ```bash
 npx --yes skills add <owner/repo> \
+  --skill k-parent-meal-planner \
+  --skill k-parent-school-info \
+  --skill k-parent-kindergarten-info \
+  --skill k-parent-play-finder \
+  --skill k-parent-festival-finder \
+  --skill k-parent-culture-center-events \
+  --skill k-parent-application-helper \
+  --skill k-parent-academy-connector \
+  --skill k-parent-school-doc-capture \
+  --skill k-parent-shopping-recommender \
+  --skill k-parent-mobile-agent \
+  --skill k-parent-data-collector \
+  --skill k-parent-schedule-manager \
+  --skill k-parent-travel-recommender \
+  --skill k-parent-knowledge-helper \
+  --skill k-parent-content-recommender \
+  --skill k-skill-setup \
+  --skill k-skill-cleaner
+```
+
+상속 예제까지 포함한 선택 설치가 꼭 필요할 때만(예: 조회형만 먼저 테스트):
+
+```bash
+npx --yes skills add <owner/repo> \
+  --full-depth \
   --skill hwp \
   --skill rhwp-edit \
   --skill rhwp-advanced \
@@ -99,6 +126,7 @@ npx --yes skills add <owner/repo> \
 
 ```bash
 npx --yes skills add <owner/repo> \
+  --full-depth \
   --skill k-skill-setup \
   --skill srt-booking \
   --skill ktx-booking \
@@ -108,6 +136,11 @@ npx --yes skills add <owner/repo> \
   --skill mfds-drug-safety \
   --skill mfds-food-safety \
   --skill cheap-gas-nearby \
+  --skill blue-ribbon-nearby \
+  --skill parking-lot-search \
+  --skill naver-shopping-search \
+  --skill naver-news-search \
+  --skill lh-notice-search \
   --skill joseon-sillok-search \
   --skill korean-patent-search \
   --skill hipass-receipt \
@@ -137,13 +170,21 @@ korean-law list
 `korean-scholarship-search` 는 스킬 이름 `장학금 검색 및 조회` 로 동작한다. 별도 API key 없이 최신 웹 검색과 공식 공고 확인으로 장학금을 찾고, 한국장학재단·전국 대학교 본부·단과대·학과·재단·기업·공공기관 공고를 모아 금액/지원자격/지원구간/공식 링크를 정리한다. 설치된 helper `python3 scripts/scholarship_filter.py` 로 사용자 조건 필터링, KST(`Asia/Seoul`) 현재 날짜 기준 마감 상태 분류, readable report, 지원 가능 여부 확인을 할 수 있고, `python3 scripts/university_search_plan.py` 로 학교별 또는 전국 대학 검색 쿼리 팩을 만들 수 있다. 자세한 사용법은 [장학금 검색 및 조회 가이드](features/korean-scholarship-search.md)를 본다.
 
 
-`korean-jangbu-for` 는 `kimlawtech/korean-jangbu-for` (Apache-2.0, 원저작자 @kimlawtech / SpeciAI) 업스트림을 중심으로 사용하는 thin wrapper 다. 별도 hosted proxy 없이 `bash korean-jangbu-for/scripts/install.sh` 로 pinned upstream 을 `~/.claude/skills/korean-jangbu-for/upstream/` 와 `~/.agents/skills/korean-jangbu-for/upstream/` 양쪽에 설치하고, 업스트림 `jangbu-*` 하위 스킬을 양쪽 홈 디렉터리의 top-level skill 로 함께 등록한다. CODEF 자동 수집은 사용자가 직접 발급한 키를 쓰는 BYOK 방식이며, 장부·재무제표·세무사 전달 CSV 는 참고용 초안이므로 신고 전 세무사 검토 및 외감 대상 공인회계사 감사가 필요하다. 자세한 사용법은 [한국 사업자 장부 자동화 가이드](features/korean-jangbu-for.md)를 본다.
+`korean-jangbu-for` 는 `kimlawtech/korean-jangbu-for` (Apache-2.0, 원저작자 @kimlawtech / SpeciAI) 업스트림을 중심으로 사용하는 thin wrapper 다. 별도 hosted proxy 없이 `bash examples/korean-jangbu-for/scripts/install.sh` 로 pinned upstream 을 `~/.claude/skills/korean-jangbu-for/upstream/` 와 `~/.agents/skills/korean-jangbu-for/upstream/` 양쪽에 설치하고, 업스트림 `jangbu-*` 하위 스킬을 양쪽 홈 디렉터리의 top-level skill 로 함께 등록한다. CODEF 자동 수집은 사용자가 직접 발급한 키를 쓰는 BYOK 방식이며, 장부·재무제표·세무사 전달 CSV 는 참고용 초안이므로 신고 전 세무사 검토 및 외감 대상 공인회계사 감사가 필요하다. 자세한 사용법은 [한국 사업자 장부 자동화 가이드](features/korean-jangbu-for.md)를 본다.
 
 `korean-stock-search` 는 별도 설치 없이 기본 hosted proxy(`k-skill-proxy.nomadamas.org`)를 통해 바로 사용할 수 있다. 사용자 쪽 `KRX_API_KEY` 가 불필요하다. 원본 참고: `https://github.com/jjlabsio/korea-stock-mcp`. 자세한 사용법은 [한국 주식 정보 조회 가이드](features/korean-stock-search.md)를 본다.
 
 `household-waste-info` 는 별도 설치 없이 `k-skill-proxy`의 `/v1/household-waste/info` 라우트를 호출하고, `serviceKey`(`DATA_GO_KR_API_KEY`)는 proxy 서버에서만 원본 API(`apis.data.go.kr/1741000/household_waste_info/info`)로 주입한다. 사용자 쪽 `DATA_GO_KR_API_KEY` 가 불필요하다. 자세한 사용법은 [생활쓰레기 배출정보 조회 가이드](features/household-waste-info.md)를 본다.
 
 `library-book-search` 는 별도 설치 없이 기본 hosted proxy(`k-skill-proxy.nomadamas.org`)를 통해 바로 사용할 수 있다. 사용자 쪽 `DATA4LIBRARY_AUTH_KEY` 는 불필요하고, self-host proxy 운영자만 프록시 서버 환경변수로 설정한다. 자세한 사용법은 [도서관 도서 조회 가이드](features/library-book-search.md)를 본다.
+
+`blue-ribbon-nearby` 는 기본 hosted proxy(`k-skill-proxy.nomadamas.org`)의 `/v1/blue-ribbon/nearby`를 경유하므로 사용자 쪽 세션 값이 불필요하다. self-host proxy 운영자만 `BLUE_RIBBON_SESSION_ID`를 서버 환경변수로 설정한다. 자세한 사용법은 [블루리본 맛집 조회 가이드](features/blue-ribbon-nearby.md)를 본다.
+
+`parking-lot-search` 는 기본 hosted proxy(`k-skill-proxy.nomadamas.org`)의 `/v1/parking-lots/search`를 경유할 수 있어 사용자 쪽 `DATA_GO_KR_API_KEY`가 불필요하다. 자세한 사용법은 [근처 공영주차장 찾기 가이드](features/parking-lot-search.md)를 본다.
+
+`naver-shopping-search` 와 `naver-news-search` 는 기본 hosted proxy(`k-skill-proxy.nomadamas.org`)를 경유하므로 사용자가 네이버 개발자 센터 Client ID/Secret을 발급받지 않아도 된다. self-host proxy 운영자만 `NAVER_SEARCH_CLIENT_ID`와 `NAVER_SEARCH_CLIENT_SECRET`을 서버 환경변수로 설정한다. 자세한 사용법은 [네이버 쇼핑 검색 가이드](features/naver-shopping-search.md)와 [네이버 뉴스 검색 가이드](features/naver-news-search.md)를 본다.
+
+`lh-notice-search` 는 기본 hosted proxy(`k-skill-proxy.nomadamas.org`)의 `/v1/lh-notice/search`·`/v1/lh-notice/detail`을 경유하므로 사용자 쪽 `DATA_GO_KR_API_KEY`가 불필요하다. 자세한 사용법은 [LH 청약 공고 조회 가이드](features/lh-notice-search.md)를 본다.
 
 ### `korean-stock-search` proxy quickstart
 
@@ -243,11 +284,20 @@ python3 scripts/patent_search.py --query "배터리" --year 2024 --num-rows 5
 python3 scripts/patent_search.py --application-number 1020240001234
 ```
 
-로컬 저장소에서 바로 전체 설치 테스트:
+로컬 저장소에서 바로 전체 설치 테스트 (`examples/` 예제까지 포함):
 
 ```bash
-npx --yes skills add . --all -g
+npx --yes skills add . --all --full-depth -g
 ```
+
+## 개발 중 홈 디렉터리 설치 규칙
+
+이 저장소의 스킬을 수정하거나 테스트할 때는 현재 `skills/` 디렉터리를 사용자 홈의 전역 skill 위치에 설치하거나 동기화한다.
+
+- Claude Code: `~/.claude/skills/<skill-name>`
+- agents 호환 설치: `~/.agents/skills/<skill-name>`
+- `~/.agents/skills` 가 symlink 같은 indirection을 쓰고 있으면 기존 구조를 존중한다.
+- 사용자가 명시적으로 repository-local fixture를 요청하지 않는 한, 저장소 안에 `.claude/` 또는 `.agents/` 디렉터리를 만들지 않는다.
 
 ## 로컬 테스트
 
@@ -358,6 +408,11 @@ node scripts/korean_character_count.js --text $'첫 줄\n둘째 줄🙂' --profi
 - `korean-stock-search`
 - `household-waste-info`
 - `cheap-gas-nearby`
+- `blue-ribbon-nearby` (hosted proxy에 `BLUE_RIBBON_SESSION_ID`가 배포된 경우 사용자 시크릿 불필요)
+- `parking-lot-search` (hosted proxy에 `DATA_GO_KR_API_KEY`가 배포된 경우 사용자 시크릿 불필요)
+- `naver-shopping-search` (hosted proxy 사용 시 사용자 시크릿 불필요)
+- `naver-news-search` (hosted proxy에 `NAVER_SEARCH_CLIENT_ID`/`NAVER_SEARCH_CLIENT_SECRET`이 배포된 경우 사용자 시크릿 불필요)
+- `lh-notice-search` (hosted proxy에 `DATA_GO_KR_API_KEY`가 배포된 경우 사용자 시크릿 불필요)
 - `public-restroom-nearby`
 - `k-schoollunch-menu` (hosted proxy에 `KEDU_INFO_KEY`가 배포된 경우 사용자 시크릿 불필요)
 - `library-book-search` (hosted proxy에 `DATA4LIBRARY_AUTH_KEY`가 배포된 경우 사용자 시크릿 불필요)

@@ -1,6 +1,6 @@
 # Security And Secrets
 
-`k-skill`은 **필요한 환경변수 이름만 선언**하고, 그 값을 어떻게 공급하느냐는 에이전트의 자유에 맡긴다.
+`k-parent-skill`은 **필요한 환경변수 이름만 선언**하고, 그 값을 어떻게 공급하느냐는 에이전트의 자유에 맡긴다.
 
 ## Credential resolution order
 
@@ -8,14 +8,14 @@
 
 1. **이미 환경변수에 있으면** 그대로 사용한다.
 2. **에이전트가 자체 secret vault(1Password CLI, Bitwarden CLI, macOS Keychain 등)를 사용 중이면** 거기서 꺼내 환경변수로 주입해도 된다.
-3. **`~/.config/k-skill/secrets.env`** (기본 fallback) — plain dotenv 파일, 퍼미션 `0600`.
+3. **`~/.config/k-parent-skill/secrets.env`** (기본 fallback) — plain dotenv 파일, 퍼미션 `0600`.
 4. **아무것도 없으면** 유저에게 물어서 2 또는 3에 저장한다.
 
 기본 경로에 저장하는 것은 fallback일 뿐, 강제가 아니다.
 
 ## Default secrets file
 
-- 경로: `~/.config/k-skill/secrets.env`
+- 경로: `~/.config/k-parent-skill/secrets.env`
 - 형식: plain dotenv (`KEY=value`, 한 줄에 하나)
 - 퍼미션: `0600` (owner-only read/write)
 
@@ -34,6 +34,8 @@ KSKILL_PROXY_BASE_URL=https://your-proxy.example.com
 
 서울 지하철 도착정보와 한국 날씨 조회는 hosted public route rollout 이 끝나기 전까지 self-host 또는 배포 확인이 끝난 proxy URL 만 넣는다. 미세먼지, 한강 수위, 주유소 가격, 한국 주식 정보 조회, 의약품 안전 체크, 식품 안전 체크는 기본 hosted proxy(`k-skill-proxy.nomadamas.org`)를 쓰므로 사용자 쪽 키가 불필요하다. 생활쓰레기 배출정보는 `k-skill-proxy`의 `/v1/household-waste/info` 라우트를 거쳐 `serviceKey`만 proxy 서버에서 주입하므로 사용자 쪽 키가 불필요하다.
 
+블루리본 맛집 조회, 근처 공영주차장 찾기, 네이버 쇼핑 가격비교, 네이버 뉴스 검색, LH 청약 공고 조회도 기본 hosted proxy 예제 표면으로 다룬다. 일반 사용자/client 쪽 secrets 파일에는 `BLUE_RIBBON_SESSION_ID`, `NAVER_SEARCH_CLIENT_ID`, `NAVER_SEARCH_CLIENT_SECRET`, `DATA_GO_KR_API_KEY` 를 넣지 않는다. 이 값들은 self-host proxy 운영자 문맥에서만 서버에 주입한다.
+
 ## Missing secret handling policy
 
 인증이 필요한 스킬에서 필요한 값이 없으면 우회하지 않는다.
@@ -51,7 +53,7 @@ KSKILL_PROXY_BASE_URL=https://your-proxy.example.com
 
 ## Threat model
 
-- `~/.config/k-skill/secrets.env`는 plain dotenv 파일이다
+- `~/.config/k-parent-skill/secrets.env`는 plain dotenv 파일이다
 - 파일 퍼미션 `0600`으로 같은 머신의 다른 유저로부터 보호한다
 - `.gitignore`로 git 노출을 방지한다
 - 에이전트는 이 파일을 읽고 쓸 수 있다 — 이것은 의도된 동작이다
@@ -70,7 +72,11 @@ KSKILL_PROXY_BASE_URL=https://your-proxy.example.com
 - `AIR_KOREA_OPEN_API_KEY`
 - `KRX_API_KEY`
 - `KSKILL_PROXY_BASE_URL`
+- `BLUE_RIBBON_SESSION_ID`
+- `DATA_GO_KR_API_KEY`
+- `NAVER_SEARCH_CLIENT_ID`
+- `NAVER_SEARCH_CLIENT_SECRET`
 
-`LAW_OC` 는 `korean-law-mcp` 가 법제처 Open API 를 호출할 때 쓰는 표준 변수명이다. 이 값은 로컬 CLI/로컬 MCP server 경로에서만 사용자 쪽에 필요하고, upstream remote MCP endpoint 예시는 사용자 `LAW_OC` 없이 `url`만 등록한다. `DATA_GO_KR_API_KEY` 는 프록시 운영자 문맥에서만 서버에 넣는다. 부동산 실거래가 조회는 기본 hosted proxy(`k-skill-proxy.nomadamas.org`)를 경유하므로 사용자 쪽 키가 불필요하다. 생활쓰레기 배출정보 조회는 `k-skill-proxy`의 `/v1/household-waste/info` 라우트를 거쳐 `serviceKey`(`DATA_GO_KR_API_KEY`)를 proxy 서버에서 주입하므로 사용자 쪽 키가 불필요하다. 의약품 안전 체크도 `k-skill-proxy`의 `/v1/mfds/drug-safety/lookup` 라우트를 거쳐 `DATA_GO_KR_API_KEY` 를 proxy 서버에서만 주입하므로 사용자 쪽 키가 불필요하다. 식품 안전 체크는 `k-skill-proxy`의 `/v1/mfds/food-safety/search` 라우트를 거쳐 `DATA_GO_KR_API_KEY` 및 선택적 `FOODSAFETYKOREA_API_KEY` 를 proxy 서버에서만 주입하므로 사용자 쪽 키가 불필요하다. 한국 주식 정보 조회도 기본 hosted proxy를 경유하므로 사용자 쪽 `KRX_API_KEY` 가 불필요하다. `KRX_API_KEY` 는 self-host proxy 운영자 문맥에서만 서버에 넣는다. 근처 가장 싼 주유소 찾기는 기본 hosted proxy를 경유하므로 사용자 쪽 `OPINET_API_KEY` 가 불필요하다. `OPINET_API_KEY` 는 프록시 운영자 문맥에서만 서버에 넣는다. `KIPRIS_PLUS_API_KEY` 는 한국 특허 정보 검색 helper가 KIPRIS Plus Open API에 보낼 `ServiceKey` 값을 담는 표준 변수명이다. 공공데이터포털에서 복사한 percent-encoded key도 helper가 한 번 정규화한 뒤 요청한다. public 공유용 Cloudflare Tunnel/Auth0/operator secret은 사용자 기본 secrets 파일에 넣지 않는다. 프록시 운영자 문맥에서는 upstream 환경변수 `SEOUL_OPEN_API_KEY`, `KMA_OPEN_API_KEY`, `AIR_KOREA_OPEN_API_KEY`, `HRFCO_OPEN_API_KEY`, `OPINET_API_KEY`, `DATA_GO_KR_API_KEY`, `FOODSAFETYKOREA_API_KEY`, `KRX_API_KEY` 를 사용할 수 있다. 다만 일반 사용자/client 쪽 기본 secrets 파일에는 넣지 않는다. `KSKILL_PROXY_BASE_URL` 도 서울 지하철/한국 날씨 route가 실제 배포된 proxy URL 로만 넣는다. 미세먼지, 한강 수위, 주유소 가격, 한국 주식 정보 조회, 의약품 안전 체크, 식품 안전 체크는 이 값이 없으면 기본 hosted path(`k-skill-proxy.nomadamas.org`)를 사용한다.
+`LAW_OC` 는 `korean-law-mcp` 가 법제처 Open API 를 호출할 때 쓰는 표준 변수명이다. 이 값은 로컬 CLI/로컬 MCP server 경로에서만 사용자 쪽에 필요하고, upstream remote MCP endpoint 예시는 사용자 `LAW_OC` 없이 `url`만 등록한다. `DATA_GO_KR_API_KEY` 는 프록시 운영자 문맥에서만 서버에 넣는다. 부동산 실거래가 조회는 기본 hosted proxy(`k-skill-proxy.nomadamas.org`)를 경유하므로 사용자 쪽 키가 불필요하다. 생활쓰레기 배출정보 조회는 `k-skill-proxy`의 `/v1/household-waste/info` 라우트를 거쳐 `serviceKey`(`DATA_GO_KR_API_KEY`)를 proxy 서버에서 주입하므로 사용자 쪽 키가 불필요하다. 의약품 안전 체크도 `k-skill-proxy`의 `/v1/mfds/drug-safety/lookup` 라우트를 거쳐 `DATA_GO_KR_API_KEY` 를 proxy 서버에서만 주입하므로 사용자 쪽 키가 불필요하다. 식품 안전 체크는 `k-skill-proxy`의 `/v1/mfds/food-safety/search` 라우트를 거쳐 `DATA_GO_KR_API_KEY` 및 선택적 `FOODSAFETYKOREA_API_KEY` 를 proxy 서버에서만 주입하므로 사용자 쪽 키가 불필요하다. LH 청약 공고 조회도 `k-skill-proxy`의 `/v1/lh-notice/search` 및 `/v1/lh-notice/detail` 라우트를 거쳐 `DATA_GO_KR_API_KEY` 를 proxy 서버에서만 주입한다. 한국 주식 정보 조회도 기본 hosted proxy를 경유하므로 사용자 쪽 `KRX_API_KEY` 가 불필요하다. `KRX_API_KEY` 는 self-host proxy 운영자 문맥에서만 서버에 넣는다. 근처 가장 싼 주유소 찾기와 근처 공영주차장 찾기는 기본 hosted proxy를 경유하므로 사용자 쪽 `OPINET_API_KEY` 또는 `DATA_GO_KR_API_KEY` 가 불필요하다. `OPINET_API_KEY` 는 프록시 운영자 문맥에서만 서버에 넣는다. 블루리본 맛집 조회의 `BLUE_RIBBON_SESSION_ID`, 네이버 쇼핑 가격비교/네이버 뉴스 검색의 `NAVER_SEARCH_CLIENT_ID` 및 `NAVER_SEARCH_CLIENT_SECRET` 도 self-host proxy 운영자 문맥에서만 서버에 넣는다. `KIPRIS_PLUS_API_KEY` 는 한국 특허 정보 검색 helper가 KIPRIS Plus Open API에 보낼 `ServiceKey` 값을 담는 표준 변수명이다. 공공데이터포털에서 복사한 percent-encoded key도 helper가 한 번 정규화한 뒤 요청한다. public 공유용 Cloudflare Tunnel/Auth0/operator secret은 사용자 기본 secrets 파일에 넣지 않는다. 프록시 운영자 문맥에서는 upstream 환경변수 `SEOUL_OPEN_API_KEY`, `KMA_OPEN_API_KEY`, `AIR_KOREA_OPEN_API_KEY`, `HRFCO_OPEN_API_KEY`, `OPINET_API_KEY`, `DATA_GO_KR_API_KEY`, `FOODSAFETYKOREA_API_KEY`, `KRX_API_KEY`, `BLUE_RIBBON_SESSION_ID`, `NAVER_SEARCH_CLIENT_ID`, `NAVER_SEARCH_CLIENT_SECRET` 를 사용할 수 있다. 다만 일반 사용자/client 쪽 기본 secrets 파일에는 넣지 않는다. `KSKILL_PROXY_BASE_URL` 도 서울 지하철/한국 날씨 route가 실제 배포된 proxy URL 로만 넣는다. 미세먼지, 한강 수위, 주유소 가격, 한국 주식 정보 조회, 의약품 안전 체크, 식품 안전 체크, 블루리본 맛집 조회, 근처 공영주차장 찾기, 네이버 쇼핑 가격비교, 네이버 뉴스 검색, LH 청약 공고 조회는 이 값이 없으면 기본 hosted path(`k-skill-proxy.nomadamas.org`)를 사용한다.
 
 이 레포의 credential-bearing skill은 전부 이 정책을 전제로 작성한다. 자세한 공통 설치 절차는 [공통 설정 가이드](setup.md)를 본다.

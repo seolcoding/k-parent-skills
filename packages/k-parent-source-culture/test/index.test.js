@@ -5,6 +5,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
+const { SOURCE_FRESHNESS } = require("k-parent-core");
 const { fetchCultureEvents, parseCultureEvents } = require("../src/index");
 
 function readFixture(name) {
@@ -63,7 +64,10 @@ test("fetchCultureEvents throws UPSTREAM_ERROR on non-ok", async () => {
 
 test("parseCultureEvents normalizes perforList rows", () => {
   const payload = readFixture("culture-events.json");
-  const result = parseCultureEvents(payload);
+  const result = parseCultureEvents(payload, {
+    fetchedAt: "2026-06-04T00:00:00.000Z",
+    now: "2026-06-04T12:00:00.000Z",
+  });
   assert.equal(result.items.length, 2);
   const first = result.items[0];
   assert.equal(first.title, "어린이 인형극 - 아기돼지 삼형제");
@@ -77,6 +81,8 @@ test("parseCultureEvents normalizes perforList rows", () => {
   assert.equal(first.charge, "전석 15,000원");
   assert.equal(result.items[1].charge, "무료");
   assert.equal(result.metadata.sourceName, "문화포털 공연전시정보");
+  assert.equal(result.metadata.freshness.status, SOURCE_FRESHNESS.FRESH);
+  assert.equal(result.metadata.freshness.checkedAt, "2026-06-04T00:00:00.000Z");
 });
 
 test("parseCultureEvents handles single-object and empty payloads", () => {

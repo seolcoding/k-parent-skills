@@ -79,7 +79,7 @@ Use this loop for every product surface.
 
 ### Phase 0: Skill OS and Data Contracts
 
-- Maintain root skill folders and department docs.
+- Maintain product skill folders under `skills/*`, inherited example skills under `examples/*`, and department docs.
 - Define shared schemas for child profile, school source, timetable, notices, schedule item, crawl record, recommendation, document capture, calendar candidates, shopping candidates, and affiliate disclosure.
 - Define resolver contracts for school, education office, kindergarten/childcare institution, district, event source, program source, and official application URL.
 - Define the initial storage model: `parent_profile`, `child_profile`, `region_code_map`, `institution`, `content_item`, `application_service`, and `consent_log`.
@@ -203,3 +203,70 @@ Build this first:
 6. Confirm-before-write calendar/reminder actions.
 
 This path is narrow enough to build, but broad enough to prove the actual product: an agentic mobile parent assistant backed by real data collection.
+
+## Mobile MVP Acceptance Criteria
+
+The first shipped screen is not a marketing page. It is a usable mobile parent home for one real workflow: "이번 주 챙길 것".
+
+Required first viewport:
+
+- child switcher with child stage/grade visible
+- date scope: today and this week
+- source freshness strip with last refresh time and stale/unknown states
+- school/timetable/meal summary
+- deadlines and preparation items
+- recommendation row for local event/play/content candidates
+- agentic command input
+
+Required interaction states:
+
+- empty source state with manual next step
+- stale source state with source URL and refresh action
+- ambiguous school/institution resolver state
+- calendar candidate confirmation modal
+- reservation/application/payment/purchase handoff modal
+- affiliate disclosure state before product links
+- OCR review-needed state for document-derived items
+
+## Today Brief Contract
+
+The first MVP workflow is "이번 주 챙길 것". It composes the same parent-facing fields across source packages:
+
+- `child`: stage/grade only by default; no exact birth date required
+- `scope`: date range, region, school/institution context
+- `school`: timetable, schedule, meal, source freshness
+- `documents`: OCR-derived events, supplies, deadlines, confidence, review-needed flag
+- `applications`: deadline, required documents, official URL, login requirement
+- `recommendations`: play/festival/culture/content candidates with reason and source
+- `commerce`: optional shopping candidates only after purchase intent and disclosure
+- `actions`: guarded candidates from `k-parent-core.guardActionCandidate`
+- `sources`: source URL, source type, fetchedAt, freshness status
+
+All write-like actions stay candidates until confirmation. Calendar write, reservation, application, message send, purchase, payment, and cancellation must render with `requiresConfirmation: true` and must not execute directly from the generated brief.
+
+## gstack Mobile QA Checklist
+
+Run these checks on desktop and mobile widths before claiming the MVP flow works:
+
+- first viewport shows child, date range, source freshness, and next actions without scrolling confusion
+- child switching changes visible profile context and does not leak another child's data
+- stale/unknown sources are visible, not silently hidden
+- confirmation modal names the exact action, target, source, and consequence
+- calendar candidate can be cancelled without side effects
+- OCR review screen shows original/captured source and extracted fields
+- recommendation cards show reason, source, age fit, cost, and official final-check link
+- affiliate disclosure appears before any Coupang product link
+- console has no blocking errors
+- mobile text does not overlap in source, modal, card, and command-input states
+
+## Canary Smoke Paths
+
+After deploy, run one smoke path per live product surface:
+
+- login or anonymous entry loads the mobile parent home
+- "이번 주 챙길 것" returns a Today Brief with at least one source freshness state
+- school/timetable/meal source failure renders a recoverable error state
+- document-derived item creates a review-needed calendar candidate, not a direct write
+- recommendation path shows source, age fit, cost, and official final-check link
+- guarded action opens confirmation or official handoff, never direct submission/payment
+- deployed page has no blank first screen and no blocking console errors

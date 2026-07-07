@@ -7,7 +7,7 @@ from pathlib import Path
 
 _BUNDLED_HELPER = (
     Path(__file__).resolve().parent.parent
-    / "subway-lost-property"
+    / "examples" / "subway-lost-property"
     / "scripts"
     / "subway_lost_property.py"
 )

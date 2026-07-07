@@ -16,7 +16,7 @@ from k_skill_cleaner import (
 
 
 class KSkillCleanerTest(unittest.TestCase):
-    def test_finds_root_skill_dirs_only_by_skill_md(self):
+    def test_finds_direct_skill_dirs_only_by_skill_md(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "keep-me").mkdir()
@@ -26,6 +26,20 @@ class KSkillCleanerTest(unittest.TestCase):
             (root / "no-skill").mkdir()
 
             self.assertEqual(find_skill_dirs(root), ["keep-me"])
+
+    def test_finds_skills_and_examples_containers_from_repo_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            product = root / "skills" / "k-parent-school-info"
+            product.mkdir(parents=True)
+            (product / "SKILL.md").write_text("---\nname: k-parent-school-info\n", encoding="utf-8")
+            example = root / "examples" / "kbo-results"
+            example.mkdir(parents=True)
+            (example / "SKILL.md").write_text("---\nname: kbo-results\n", encoding="utf-8")
+            (root / "packages").mkdir()
+            (root / "packages" / "SKILL.md").write_text("not a skill", encoding="utf-8")
+
+            self.assertEqual(find_skill_dirs(root), ["k-parent-school-info", "kbo-results"])
 
     def test_collects_counts_from_jsonl_and_plain_agent_logs(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -166,7 +180,7 @@ class KSkillCleanerTest(unittest.TestCase):
             cleaner_scripts.mkdir(parents=True)
             (cleaner_dir / "SKILL.md").write_text("---\nname: k-skill-cleaner\n", encoding="utf-8")
             shutil.copyfile(
-                Path(__file__).resolve().parents[1] / "k-skill-cleaner" / "scripts" / "k_skill_cleaner.py",
+                Path(__file__).resolve().parents[1] / "skills" / "k-skill-cleaner" / "scripts" / "k_skill_cleaner.py",
                 cleaner_scripts / "k_skill_cleaner.py",
             )
 

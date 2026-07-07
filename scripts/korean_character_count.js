@@ -1,6 +1,6 @@
 "use strict";
 
-const bundled = require("../korean-character-count/scripts/korean_character_count.js");
+const bundled = require("../examples/korean-character-count/scripts/korean_character_count.js");
 
 if (require.main === module) {
   try {

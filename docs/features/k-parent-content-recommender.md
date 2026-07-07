@@ -1,6 +1,12 @@
-# 콘텐츠 추천 플레이스홀더
+# 콘텐츠 추천 기능 문서
 
-`k-parent-content-recommender`는 자녀를 위한 유튜브 채널·영상·오디오형 콘텐츠를 추천하는 데모 스킬이다. 핵심은 "아무거나 추천"이 아니라 차 안에서 듣기 좋은지, 교과 과정과 연결되는지, 부모-자녀 대화 주제로 확장되는지 평가하는 것이다.
+`k-parent-content-recommender`는 자녀를 위한 유튜브 채널·영상·오디오형 콘텐츠를 추천하는 스킬이다. 핵심은 "아무거나 추천"이 아니라 차 안에서 듣기 좋은지, 교과 과정과 연결되는지, 부모-자녀 대화 주제로 확장되는지 평가하는 것이다.
+
+## 사용 패키지
+
+| 패키지 | 역할 |
+| --- | --- |
+| `packages/k-parent-source-youtube` | YouTube Data API v3 검색 결과를 부모용 콘텐츠 후보 필드로 정규화 |
 
 ## 현재 범위
 
@@ -9,6 +15,9 @@
 - 부모가 던질 대화 질문 생성
 - 후속 활동 제안
 - 채널 신뢰도, 광고성, 연령 적합성, 현재성 확인
+- `searchVideos({ q, safeSearch: "strict" })` 기반의 영상 후보 조회
+- 기본 조회 옵션은 `safeSearch: "strict"`, `regionCode: "KR"`, `relevanceLanguage: "ko"`를 사용
+- 출력 필드: 영상 ID, 제목, 채널명, 게시일, 설명, 썸네일, `https://youtu.be/<videoId>` URL, provenance/freshness metadata
 
 ## 추천 레코드 후보
 
@@ -39,11 +48,17 @@
 }
 ```
 
-## 데이터 소스
+## 환경변수
 
-- `packages/k-parent-source-youtube` — `searchVideos({ q, safeSearch: "strict" })`로 YouTube Data API v3 검색. 환경변수 `KSKILL_YOUTUBE_KEY`. 키 발급은 `OWNER-TASKS.md` 참고.
+- `KSKILL_YOUTUBE_KEY` — YouTube Data API v3 API key. 키 발급은 `OWNER-TASKS.md` 참고.
 
-## 다음 구현 후보
+## 픽스처 갱신
+
+```bash
+KSKILL_YOUTUBE_KEY=... npm run refresh:fixtures --workspace k-parent-source-youtube -- "검색어"
+```
+
+## 남은 확장 후보
 
 - 학년/교과/단원 taxonomy
 - 유튜브 채널 후보 registry

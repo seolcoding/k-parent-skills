@@ -1,0 +1,39 @@
+{
+  "name": "k-parent-source-traffic-safety",
+  "version": "0.1.0",
+  "description": "어린이보호구역, 스쿨존 사고다발, 옐로카펫 data.go.kr adapters for K-Parent Skill",
+  "license": "MIT",
+  "main": "src/index.js",
+  "files": [
+    "src",
+    "scripts",
+    "test/fixtures",
+    "test/*.test.js",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seolcoding/k-parent-skill.git"
+  },
+  "keywords": [
+    "k-parent",
+    "k-skill",
+    "school-zone",
+    "traffic-safety",
+    "data.go.kr"
+  ],
+  "dependencies": {
+    "k-parent-core": "0.1.0"
+  },
+  "scripts": {
+    "lint": "node --check src/index.js && node --check src/parse.js && node --check scripts/refresh-fixtures.mjs && node --check test/index.test.js",
+    "test": "node --test",
+    "refresh:fixtures": "node scripts/refresh-fixtures.mjs"
+  }
+}

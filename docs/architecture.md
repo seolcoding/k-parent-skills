@@ -1,13 +1,17 @@
-# Architecture Conventions
+# 아키텍처 컨벤션
 
 `k-parent-skill` keeps the repository architecture of `NomaDamas/k-skill` and changes the domain concept to 대한민국 부모 생활정보.
 
-## Repository shape
+## 저장소 구조
 
 ```text
 k-parent-skill/
-├── <skill-name>/
-│   └── SKILL.md
+├── skills/                  # product skills (install/trigger unit, flat)
+│   └── <skill-name>/
+│       └── SKILL.md
+├── examples/                # inherited upstream k-skill demo skills (reference only)
+│   └── <skill-name>/
+│       └── SKILL.md
 ├── docs/
 │   ├── architecture.md
 │   ├── adding-a-skill.md
@@ -19,16 +23,18 @@ k-parent-skill/
 └── python-packages/
 ```
 
-## Skill-first pattern
+`skills/` is the canonical container the `skills` installer resolves `--skill <name>` against (`skills/<name>/SKILL.md`). `examples/` holds inherited upstream demo skills and is discovered only with `--full-depth`.
 
-- Treat a root skill directory as the public unit of capability.
-- Treat departments as the product taxonomy, not as nested install paths. Do not move skill folders under department folders.
+## 스킬 우선 패턴
+
+- Treat a skill directory under `skills/` as the public unit of capability.
+- Keep skills flat inside their container — `skills/` is a single install container, not a department. Treat departments as the product taxonomy, not as nested install paths. Do not split skill folders under department folders.
 - Keep `SKILL.md` concise and procedural. Put deeper explanation in `docs/features/<skill-name>.md`.
 - Put department strategy, shared schemas, and skill maps in `docs/departments/<department>.md`.
-- Use `SKILL.md`-only placeholders for concept validation.
+- Use `SKILL.md`-only concept docs for concept validation.
 - Add implementation code only when repeated usage proves that deterministic parsing, normalization, or API access is needed.
 
-## Progressive disclosure pattern
+## 점진적 공개 패턴
 
 Parent skills should preserve the upstream `k-skill` context-budget pattern:
 
@@ -36,11 +42,11 @@ Parent skills should preserve the upstream `k-skill` context-budget pattern:
 | --- | --- | --- |
 | 1 | Advertise | `SKILL.md` frontmatter `name` and `description` should be enough for semantic routing. Descriptions are written for agent matching, not humans browsing a catalog. For k-parent skills write the description in Korean, include 2-3 concrete trigger utterances, and add a boundary sentence when a sibling skill overlaps. See `docs/adding-a-skill.md` and the cross-skill map in `docs/skill-routing.md`. |
 | 2 | Load | The `SKILL.md` body should stay compact and procedural: when to use, what to ask, workflow, output fields, failure modes. When a deterministic package backs the skill, add a `## 데이터 소스` section naming the package, functions, and env vars. |
-| 3 | Read resources | Long API field maps, policy manuals, PDF-derived tables, and crawler schemas should live in a `<skill>/references/*.md` file (e.g. `k-parent-meal-planner/references/allergen-codes.md`) and be read only when needed. |
+| 3 | Read resources | Long API field maps, policy manuals, PDF-derived tables, and crawler schemas should live in `skills/<skill>/references/*.md` or `examples/<skill>/references/*.md` (e.g. `skills/k-parent-meal-planner/references/allergen-codes.md`) and be read only when needed. |
 
 This keeps many parent skills installable together without flooding an agent's initial context.
 
-## Department taxonomy
+## 디파트먼트 분류
 
 K-Parent Skills uses these top-level departments:
 
@@ -54,17 +60,17 @@ K-Parent Skills uses these top-level departments:
 | `shopping` | 쇼핑 | supplies, books, toys, price comparison, inventory, optional affiliate recommendations, purchase planning |
 | `nutrition` | 영양 | school meals, kindergarten meals, allergies, home meal planning |
 
-Department membership is metadata and documentation. A skill may belong to one primary department and optional secondary departments, but the root folder name stays stable.
+Department membership is metadata and documentation. A skill may belong to one primary department and optional secondary departments, but the `skills/<skill-name>` container folder name stays stable.
 
-## Implementation promotion path
+## 구현 승격 경로
 
-1. `SKILL.md` placeholder: instructions, examples, failure modes, and safety rules.
+1. `SKILL.md` concept doc: instructions, examples, failure modes, and safety rules.
 2. Feature doc: source surfaces, output format, and known limitations.
 3. Script helper: small one-off deterministic task.
 4. Package helper: reusable Node package under `packages/*`.
 5. Proxy route: free/public API aggregation via `packages/k-skill-proxy`.
 
-## Public data integration pattern
+## 공공 데이터 통합 패턴
 
 Many parent workflows depend on public data where a natural-language query is not enough. Prefer resolver-first pipelines:
 
@@ -92,7 +98,7 @@ Default source priority:
 
 The assistant should avoid ranking schools or childcare institutions as leaderboards. Prefer practical comparison fields such as distance, hours, care options, class size, meal/safety data, cost, official notices, and deadlines.
 
-## Normalization layer pattern
+## 정규화 레이어 패턴
 
 Parent-domain implementations may keep skills independent while sharing a central normalization layer for codes and profile context:
 
@@ -102,9 +108,9 @@ Parent-domain implementations may keep skills independent while sharing a centra
 - `application_service`: benefits, care programs, reservations, and public-service metadata.
 - `parent_profile`, `child_profile`, and `consent_log`: minimal product profile and consent records.
 
-Do not duplicate NEIS, TourAPI, public-reservation, and welfare code mapping logic inside every skill. Skills should call shared resolvers when the implementation is promoted beyond placeholder docs.
+Do not duplicate NEIS, TourAPI, public-reservation, and welfare code mapping logic inside every skill. Skills should call shared resolvers when the implementation is promoted beyond concept docs.
 
-## Cache and crawler pattern
+## 캐시와 크롤러 패턴
 
 Use live calls only when the data is volatile or the user needs a current answer. For slow-moving datasets, prefer scheduled or local/server-side synchronization:
 
@@ -115,7 +121,7 @@ Use live calls only when the data is volatile or the user needs a current answer
 - Keep scraping code in helpers or server jobs; do not encode brittle browser steps only in `SKILL.md`.
 - Prefer official APIs before headless-browser scraping.
 
-## Mobile agent product pattern
+## 모바일 에이전트 제품 패턴
 
 The product target is a server-deployed mobile-first parent agent for normal users, not only local developer skills:
 
@@ -126,7 +132,7 @@ The product target is a server-deployed mobile-first parent agent for normal use
 5. Action layer: calendar writes, applications, reservations, messages, and purchases require explicit confirmation.
 6. QA layer: gstack validates mobile flows, source freshness states, and deployed canaries.
 
-## Document ingestion pattern
+## 문서 인입 패턴
 
 School, academy, and institution documents should follow an ingest-normalize-confirm flow:
 
@@ -137,7 +143,7 @@ School, academy, and institution documents should follow an ingest-normalize-con
 5. Propose actions: calendar events, reminders, checklist items, or application tasks.
 6. Confirm before side effects: write to calendar, send messages, submit applications, or pay only after explicit user approval.
 
-## Commerce and affiliate pattern
+## 커머스와 제휴 패턴
 
 Shopping recommendations may monetize through Coupang Partners or other affiliate links, but this is not core product logic. Recommendations must preserve parent trust:
 
@@ -149,7 +155,7 @@ Shopping recommendations may monetize through Coupang Partners or other affiliat
 6. Do not auto-purchase, add to cart, or steer around safety/age suitability for commission.
 7. Keep commercial ranking explainable: relevance, deadline fit, price, reviews, delivery, and stock should be visible signals.
 
-## Sensitive transaction boundary
+## 민감 거래 경계
 
 Government services, care applications, reservations, payments, academy account actions, and child-data writes require a hard boundary:
 
@@ -158,7 +164,7 @@ Government services, care applications, reservations, payments, academy account 
 3. The agent must not collect NPKI/certificate credentials, impersonate identity verification, submit government applications, reserve paid programs, cancel bookings, pay, or expose child personal data without explicit approval.
 4. For certificate-login or identity-heavy services, default to pre-transaction guidance and handoff to the official site.
 
-## gstack development loop
+## gstack 개발 루프
 
 Use gstack as the development and commercialization quality loop once this repo grows beyond pure skill documents:
 
@@ -169,7 +175,7 @@ Use gstack as the development and commercialization quality loop once this repo 
 5. Canary: after deploy, verify the live app has no blocking console errors and that key flows still work.
 6. Ship discipline: keep skill docs, schemas, tests, and product screens aligned in each PR.
 
-## Parent-domain output schema
+## 부모 도메인 출력 스키마
 
 Parent-facing skills should normalize information into practical decision fields:
 
@@ -187,7 +193,7 @@ Parent-facing skills should normalize information into practical decision fields
 - commerce disclosure and affiliate link status when the next action is purchase-related
 - source freshness and crawl provenance when the answer depends on collected data
 
-## Safety and privacy
+## 안전과 개인정보
 
 - Do not store child names, birth dates, school identifiers, contact information, or application credentials in the repository.
 - Store OCR outputs and document metadata in user-controlled local storage by default; do not commit captured school or academy documents.
@@ -196,12 +202,12 @@ Parent-facing skills should normalize information into practical decision fields
 - Separate confirmed official information from recommendations, guesses, reviews, or stale search snippets.
 - Schedules, admissions, events, and applications are time-sensitive. Verify current sources before answering.
 
-## Agent context surfaces
+## 에이전트 컨텍스트 표면
 
 Future agents should use these files as the standing repository context:
 
 - `AGENTS.md`: operational rules for coding agents
-- `CLAUDE.md`: compact Claude Code context
+- `CLAUDE.md`: compatibility symlink to `AGENTS.md`
 - `docs/architecture.md`: architecture and promotion conventions
 - `docs/adding-a-skill.md`: new skill workflow
 - `docs/departments/README.md`: department taxonomy and skill map

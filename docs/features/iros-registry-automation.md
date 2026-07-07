@@ -22,7 +22,7 @@
 
 ## 설치
 
-이 스킬은 로그인·인증·결제 인접 브라우저 자동화를 mutable upstream `HEAD`에 맡기지 않는다. 실행 전 이 저장소의 `iros-registry-automation/scripts/upstream.pin`에 적힌 reviewed SHA로 checkout한다.
+이 스킬은 로그인·인증·결제 인접 브라우저 자동화를 mutable upstream `HEAD`에 맡기지 않는다. 실행 전 이 저장소의 `examples/iros-registry-automation/scripts/upstream.pin`에 적힌 reviewed SHA로 checkout한다.
 
 ```bash
 git clone https://github.com/challengekim/iros-registry-automation.git

@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
-WRAPPER_PATH = REPO_ROOT / "coupang-product-search" / "scripts" / "coupang_partners_mcp.py"
+WRAPPER_PATH = REPO_ROOT / "examples" / "coupang-product-search" / "scripts" / "coupang_partners_mcp.py"
 
 
 def load_wrapper_module():

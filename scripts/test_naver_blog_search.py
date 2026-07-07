@@ -4,7 +4,7 @@ import unittest
 from unittest import mock
 
 
-MODULE_PATH = pathlib.Path(__file__).resolve().parents[1] / "naver-blog-research" / "scripts" / "naver_search.py"
+MODULE_PATH = pathlib.Path(__file__).resolve().parents[1] / "examples" / "naver-blog-research" / "scripts" / "naver_search.py"
 MODULE_SPEC = importlib.util.spec_from_file_location("naver_search", MODULE_PATH)
 naver_search = importlib.util.module_from_spec(MODULE_SPEC)
 assert MODULE_SPEC.loader is not None

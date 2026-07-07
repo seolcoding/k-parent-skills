@@ -1,4 +1,4 @@
-# k-parent-festival-finder
+# 가족 축제 찾기 기능 문서
 
 날짜·지역 기준으로 축제/행사를 찾아 아이 동반 가족 관점에서 정리해 추천하는 스킬.
 
@@ -11,7 +11,7 @@
 
 | 패키지 | 함수 | 출력 |
 | --- | --- | --- |
-| `k-parent-source-tourapi` | `searchFestival({ eventStartDate, eventEndDate, areaCode, sigunguCode })` | `{ contentId, title, addr, startDate, endDate, image, mapx, mapy, tel, areaCode }` |
+| `packages/k-parent-source-tourapi` | `searchFestival({ eventStartDate, eventEndDate, areaCode, sigunguCode })` | `{ contentId, title, addr, startDate, endDate, image, mapx, mapy, tel, areaCode }` |
 
 `/searchFestival2` 엔드포인트. `eventStartDate`는 `YYYYMMDD` 필수.
 
@@ -44,5 +44,11 @@
 ## 픽스처 갱신
 
 ```
-KSKILL_TOURAPI_KEY=... node packages/k-parent-source-tourapi/scripts/refresh-fixtures.mjs
+KSKILL_TOURAPI_KEY=... npm run refresh:fixtures --workspace k-parent-source-tourapi
 ```
+
+## 남은 확장 후보
+
+- 지역 축제 공식 홈페이지에서 요금·주차·체험 연령 보강
+- 우천/폭염/미세먼지 시 대체 실내 행사 추천
+- 문화센터·공공예약형 체험과 중복 제거

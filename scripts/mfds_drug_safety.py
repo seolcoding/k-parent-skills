@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 _BUNDLED_HELPER = (
-    Path(__file__).resolve().parent.parent / "mfds-drug-safety" / "scripts" / "mfds_drug_safety.py"
+    Path(__file__).resolve().parent.parent / "examples" / "mfds-drug-safety" / "scripts" / "mfds_drug_safety.py"
 )
 
 if not _BUNDLED_HELPER.exists():  # pragma: no cover - defensive import guard

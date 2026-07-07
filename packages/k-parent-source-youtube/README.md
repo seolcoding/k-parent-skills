@@ -7,7 +7,7 @@ parent-friendly video search used by the content-recommender skill.
 
 Set an API key from the Google Cloud Console (enable **YouTube Data API v3**):
 
-```
+```bash
 export KSKILL_YOUTUBE_KEY="your-api-key"
 ```
 
@@ -16,11 +16,16 @@ export KSKILL_YOUTUBE_KEY="your-api-key"
 ```js
 const { searchVideos } = require("k-parent-source-youtube");
 
-const videos = await searchVideos({
-  q: "초등 4학년 과학 물의 상태 변화",
-  safeSearch: "strict", // default
-  maxResults: 10,
-});
+async function main() {
+  const videos = await searchVideos({
+    q: "초등 4학년 과학 물의 상태 변화",
+    safeSearch: "strict", // default
+    maxResults: 10,
+  });
+  return videos;
+}
+
+main().then(console.log).catch(console.error);
 // -> [{ videoId, title, channelTitle, publishedAt, description, thumbnail, url, source, source_id, fetched_at }, ...]
 ```
 
@@ -41,16 +46,20 @@ Each result includes `url: https://youtu.be/<videoId>`.
 | `fetchImpl` | `global.fetch` | inject for tests |
 | `payload` | — | pre-fetched payload; bypasses HTTP |
 
+Outputs keep provenance/source metadata and freshness metadata so parent workflows can show origin and staleness.
+
 ## Testing
 
-```
-node --test packages/k-parent-source-youtube/test/
+```bash
+npm test
 ```
 
 Tests run fully offline using the fixture in `test/fixtures/search.json`.
 
-## Refreshing fixtures
+## Fixtures refresh
 
-```
-KSKILL_YOUTUBE_KEY=... node packages/k-parent-source-youtube/scripts/refresh-fixtures.mjs "검색어"
+Run this command only when you are ready to call the live API and overwrite local fixtures.
+
+```bash
+KSKILL_YOUTUBE_KEY=... npm run refresh:fixtures -- "검색어"
 ```

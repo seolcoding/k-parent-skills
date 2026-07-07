@@ -105,7 +105,7 @@ Inputs:
 
 - PRD
 - source priority
-- skill placeholder docs
+- skill concept docs
 
 Outputs:
 
@@ -145,19 +145,22 @@ When code work starts, each implementation ticket should include:
 - validation command
 - expected documentation update
 
-Recommended first implementation handoff:
+Recommended current follow-up handoff:
 
 ```text
-Feature: Today Brief P0
+Feature: Today Brief source coverage follow-up
 Owner role: executor
 Support roles: architect, critic
 Write scope:
-- packages/k-parent-core/
+- packages/k-parent-brief/
 - packages/k-parent-source-neis/
-- tests/fixtures/neis/
+- packages/k-parent-source-childinfo/
+- packages/k-parent-source-tourapi/
+- packages/k-parent-source-neis/test/fixtures/
 - docs/features/k-parent-meal-planner.md
+- docs/features/k-parent-school-info.md
 Validation:
-- package unit tests
+- package unit tests for changed workspaces
 - skill docs test
 - npm run ci
 Guardrails:
@@ -172,7 +175,7 @@ Use this when asking OMC or another agent to plan a bounded slice:
 
 ```text
 You are working in /Users/sdh/10_Dev/k-parent-skill.
-Preserve upstream k-skill conventions: root skill folders, SKILL.md progressive disclosure, docs/features, optional packages only when implementation begins.
+Preserve upstream k-skill conventions through the current containers: product skills under `skills/*`, inherited examples under `examples/*`, SKILL.md progressive disclosure, docs/features, optional packages only when implementation begins.
 Use docs/research, docs/specs, and docs/planning as source of truth.
 Plan only for [FEATURE].
 Return:

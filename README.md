@@ -1,14 +1,14 @@
-# k-parent-skill
+# 대한민국 부모 생활정보 스킬
 
 대한민국 부모가 매주 반복해서 확인하는 아이 관련 생활 정보를 모바일에서 에이전틱하게 사용할 수 있도록 만드는 스킬·데이터·상품화 실험 저장소입니다.
 
-원본 [`NomaDamas/k-skill`](https://github.com/NomaDamas/k-skill)의 컬렉션형 구조를 그대로 승계합니다. 루트에는 각 스킬 디렉토리가 있고, 필요해지면 `packages/`, `scripts/`, `docs/features/`로 구현과 문서를 확장합니다.
+원본 [`NomaDamas/k-skill`](https://github.com/NomaDamas/k-skill)의 컬렉션형 구조를 승계하되, 스킬 디렉토리는 `skills/`(제품)와 `examples/`(상속 예제) 컨테이너 아래에 평면 배치합니다. 필요해지면 `packages/`, `scripts/`, `docs/features/`로 구현과 문서를 확장합니다.
 
 Claude Code, Codex, OpenCode, OpenClaw/ClawHub 등 각종 코딩 에이전트에서 사용할 수 있는 `SKILL.md` 중심 구조입니다.
 
 ## 디파트먼트
 
-K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영합니다. 스킬 디렉토리는 원본 `k-skill` 컨벤션을 따라 루트에 두고, 디파트먼트는 문서·로드맵·검색/추천의 상위 분류로 사용합니다.
+K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영합니다. 제품 스킬 디렉토리는 `skills/` 컨테이너 아래에 평면 배치하고, 디파트먼트는 문서·로드맵·검색/추천의 상위 분류로 사용합니다.
 
 | 디파트먼트 | 범위 | 대표 스킬 |
 | --- | --- | --- |
@@ -22,35 +22,51 @@ K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영합�
 
 ## 스킬 현황
 
-아래 스킬은 대부분 `packages/k-parent-source-*`(공식 API 어댑터) 또는 `packages/k-parent-*`(순수 로직) 패키지로 뒷받침됩니다. 각 소스 패키지는 **fixture-first**로 동작합니다: 공개 API 스펙 기반의 목 응답을 `test/fixtures/`에 캐시해 오프라인으로 정규화·테스트하고, 크레덴셜을 넣고 `scripts/refresh-fixtures.mjs`를 돌리면 라이브 데이터로 전환됩니다. 크레덴셜 발급은 [OWNER-TASKS.md](OWNER-TASKS.md)와 [.env.example](.env.example)을 참고하세요. `knowledge-helper`·`mobile-agent`는 컨셉(워크플로우) 스킬입니다.
+아래 스킬은 대부분 `packages/k-parent-source-*`(공식 API 어댑터) 또는 `packages/k-parent-*`(순수 로직) 패키지로 뒷받침됩니다. 각 소스 패키지는 **fixture-first**로 동작합니다: 공개 API 스펙 기반의 목 응답을 `test/fixtures/`에 캐시해 오프라인으로 정규화·테스트하고, 크레덴셜을 넣고 `npm run refresh:fixtures --workspace <package>`를 돌리면 라이브 데이터로 전환됩니다. 크레덴셜 발급은 [OWNER-TASKS.md](OWNER-TASKS.md)와 [.env.example](.env.example)을 참고하세요. `knowledge-helper`·`mobile-agent`는 아직 패키지 경계가 없는 컨셉(워크플로우) 스킬입니다.
 
 | 디파트먼트 | 할 수 있는 일 | 스킬 이름 | 설명 | 사용자 로그인 | 문서 |
 | --- | --- | --- | --- | --- | --- |
-| 영양 | 식단 | `k-parent-meal-planner` | 학교 급식, 유치원 식단, 가정 식단 후보를 아이 기준으로 정리 | 불필요 | [식단 플레이스홀더](docs/features/k-parent-meal-planner.md) |
-| 학교 | 학교 정보 | `k-parent-school-info` | 학교 기본정보, 학사일정, 공지, 방과후 정보를 확인 | 불필요 | [학교 정보 플레이스홀더](docs/features/k-parent-school-info.md) |
-| 학교 | 유치원 | `k-parent-kindergarten-info` | 유치원 기본정보, 모집, 방과후, 통학 조건을 비교 | 불필요 | [유치원 플레이스홀더](docs/features/k-parent-kindergarten-info.md) |
-| 놀이 | 놀것 | `k-parent-play-finder` | 아이와 갈 실내외 놀이, 체험, 키즈 공간 후보를 추천 | 불필요 | [놀것 플레이스홀더](docs/features/k-parent-play-finder.md) |
-| 놀이 | 축제 | `k-parent-festival-finder` | 지역 축제와 가족 동반 행사를 날짜·연령 기준으로 정리 | 불필요 | [축제 플레이스홀더](docs/features/k-parent-festival-finder.md) |
-| 놀이 | 문화센터, 행사 | `k-parent-culture-center-events` | 백화점·마트·도서관·공공기관 문화센터 강좌와 행사를 탐색 | 불필요 | [문화센터/행사 플레이스홀더](docs/features/k-parent-culture-center-events.md) |
-| 생활 | 각종 신청 | `k-parent-application-helper` | 돌봄, 방과후, 바우처, 체험 신청의 준비물과 마감일을 정리 | 필요할 수 있음 | [각종 신청 플레이스홀더](docs/features/k-parent-application-helper.md) |
-| 학원 | 학원 API | `k-parent-academy-connector` | 학원 일정, 숙제, 출결, 결제, 알림 데이터를 통합할 API/연동 컨셉 | 필요할 수 있음 | [학원 API 플레이스홀더](docs/features/k-parent-academy-connector.md) |
-| 학교 | 학교문서 스캔 | `k-parent-school-doc-capture` | 학교 안내문 사진을 OCR로 저장하고 일정·준비물·신청 마감 캘린더 후보로 정리 | 필요할 수 있음 | [학교문서 스캔 플레이스홀더](docs/features/k-parent-school-doc-capture.md) |
-| 쇼핑 | 상품 추천 | `k-parent-shopping-recommender` | 준비물·교재·육아용품 구매 후보를 정리하고 쿠팡 어필리에이트 링크를 선택적으로 제공 | 필요할 수 있음 | [쇼핑 추천 플레이스홀더](docs/features/k-parent-shopping-recommender.md) |
-| 생활 | 모바일 에이전트 | `k-parent-mobile-agent` | 서버 배포형 모바일 부모 에이전트 제품 표면 | 필요할 수 있음 | [모바일 에이전트 플레이스홀더](docs/features/k-parent-mobile-agent.md) |
-| 트렌드 | 데이터 수집 | `k-parent-data-collector` | 학교데이터, 시간표, 평생교육, 축제, 행사, 트렌드 크롤링 | 불필요 | [데이터 수집 플레이스홀더](docs/features/k-parent-data-collector.md) |
-| 생활 | 자녀 스케줄 | `k-parent-schedule-manager` | 자녀 스케줄, 가족 캘린더, 리마인더 후보 관리 | 필요할 수 있음 | [스케줄 관리 플레이스홀더](docs/features/k-parent-schedule-manager.md) |
-| 놀이 | 여행지 추천 | `k-parent-travel-recommender` | 아이 동반 여행지, 체험, 일정 추천 | 불필요 | [여행지 추천 플레이스홀더](docs/features/k-parent-travel-recommender.md) |
-| 생활 | 일반 지식 | `k-parent-knowledge-helper` | 부모가 묻는 일반 지식과 생활 판단 질문에 출처 기반 답변 | 불필요 | [일반 지식 플레이스홀더](docs/features/k-parent-knowledge-helper.md) |
-| 놀이 | 콘텐츠 추천 | `k-parent-content-recommender` | 차 안에서 듣기 좋은 유튜브 채널·영상, 교과 연계 콘텐츠, 부모-자녀 대화 주제 추천 | 불필요 | [콘텐츠 추천 플레이스홀더](docs/features/k-parent-content-recommender.md) |
+| 영양 | 식단 | `k-parent-meal-planner` | 학교 급식, 유치원 식단, 가정 식단 후보를 아이 기준으로 정리 | 불필요 | [식단 기능 문서](docs/features/k-parent-meal-planner.md) |
+| 학교 | 학교 정보 | `k-parent-school-info` | 학교 기본정보, 학사일정, 공지, 방과후 정보를 확인 | 불필요 | [학교 정보 기능 문서](docs/features/k-parent-school-info.md) |
+| 학교 | 유치원 | `k-parent-kindergarten-info` | 유치원 기본정보, 모집, 방과후, 통학 조건을 비교 | 불필요 | [유치원 기능 문서](docs/features/k-parent-kindergarten-info.md) |
+| 놀이 | 놀거리 | `k-parent-play-finder` | 아이와 갈 실내외 놀이, 체험, 키즈 공간 후보를 추천 | 불필요 | [놀거리 기능 문서](docs/features/k-parent-play-finder.md) |
+| 놀이 | 축제 | `k-parent-festival-finder` | 지역 축제와 가족 동반 행사를 날짜·연령 기준으로 정리 | 불필요 | [축제 기능 문서](docs/features/k-parent-festival-finder.md) |
+| 놀이 | 문화센터, 행사 | `k-parent-culture-center-events` | 백화점·마트·도서관·공공기관 문화센터 강좌와 행사를 탐색 | 불필요 | [문화센터/행사 기능 문서](docs/features/k-parent-culture-center-events.md) |
+| 생활 | 각종 신청 | `k-parent-application-helper` | 돌봄, 방과후, 바우처, 체험 신청의 준비물과 마감일을 정리 | 필요할 수 있음 | [각종 신청 기능 문서](docs/features/k-parent-application-helper.md) |
+| 학원 | 학원 안내문 | `k-parent-academy-connector` | 학원 공지에서 수업, 보강, 숙제, 시험, 수강료 마감을 추출하고 일정 후보로 정리 | 필요할 수 있음 | [학원 안내문 기능 문서](docs/features/k-parent-academy-connector.md) |
+| 학교 | 학교문서 스캔 | `k-parent-school-doc-capture` | 학교 안내문 사진을 OCR로 저장하고 일정·준비물·신청 마감 캘린더 후보로 정리 | 필요할 수 있음 | [학교문서 스캔 기능 문서](docs/features/k-parent-school-doc-capture.md) |
+| 쇼핑 | 준비물 쇼핑 | `k-parent-shopping-recommender` | 준비물·교재·육아용품 구매 후보를 정리하고 쿠팡 어필리에이트 링크를 선택적으로 제공 | 필요할 수 있음 | [준비물 쇼핑 기능 문서](docs/features/k-parent-shopping-recommender.md) |
+| 생활 | 모바일 에이전트 | `k-parent-mobile-agent` | 서버 배포형 모바일 부모 에이전트 제품 표면 | 필요할 수 있음 | [모바일 에이전트 컨셉 문서](docs/features/k-parent-mobile-agent.md) |
+| 트렌드 | 데이터 수집 | `k-parent-data-collector` | 학교데이터, 시간표, 평생교육, 축제, 행사, 트렌드 크롤링 | 불필요 | [데이터 수집 기능 문서](docs/features/k-parent-data-collector.md) |
+| 생활 | 자녀 스케줄 | `k-parent-schedule-manager` | 자녀 스케줄, 가족 캘린더, 리마인더 후보 관리 | 필요할 수 있음 | [스케줄 관리 기능 문서](docs/features/k-parent-schedule-manager.md) |
+| 놀이 | 여행지 추천 | `k-parent-travel-recommender` | 아이 동반 여행지, 체험, 일정 추천 | 불필요 | [여행지 추천 기능 문서](docs/features/k-parent-travel-recommender.md) |
+| 생활 | 일반 지식 | `k-parent-knowledge-helper` | 부모가 묻는 일반 지식과 생활 판단 질문에 출처 기반 답변 | 불필요 | [일반 지식 컨셉 문서](docs/features/k-parent-knowledge-helper.md) |
+| 놀이 | 콘텐츠 추천 | `k-parent-content-recommender` | 차 안에서 듣기 좋은 유튜브 채널·영상, 교과 연계 콘텐츠, 부모-자녀 대화 주제 추천 | 불필요 | [콘텐츠 추천 기능 문서](docs/features/k-parent-content-recommender.md) |
+
+### 바로 쓸 수 있는 hosted proxy 예제
+
+상속 예제 스킬 중 일부는 기본 hosted proxy(`k-skill-proxy.nomadamas.org`)를 경유하므로 사용자 쪽 API key 없이 바로 쓸 수 있습니다. self-host proxy 운영자만 upstream key를 서버 환경변수로 관리합니다.
+
+| 할 수 있는 일 | 스킬 이름 | 사용자 시크릿 | 문서 |
+| --- | --- | --- | --- |
+| 블루리본 맛집 조회 | `blue-ribbon-nearby` | 불필요 | [블루리본 맛집 조회 가이드](docs/features/blue-ribbon-nearby.md) |
+| 근처 공영주차장 찾기 | `parking-lot-search` | 불필요 | [근처 공영주차장 찾기 가이드](docs/features/parking-lot-search.md) |
+| 네이버 쇼핑 가격비교 | `naver-shopping-search` | 불필요 | [네이버 쇼핑 검색 가이드](docs/features/naver-shopping-search.md) |
+| 네이버 뉴스 검색 | `naver-news-search` | 불필요 | [네이버 뉴스 검색 가이드](docs/features/naver-news-search.md) |
+| LH 청약 공고 조회 | `lh-notice-search` | 불필요 | [LH 청약 공고 조회 가이드](docs/features/lh-notice-search.md) |
 
 ## 구조
 
 ```text
 k-parent-skill/
-├── k-parent-meal-planner/
-│   └── SKILL.md
-├── k-parent-school-info/
-│   └── SKILL.md
+├── skills/                       # 제품 스킬 (설치·트리거 단위, 평면 배치)
+│   ├── k-parent-meal-planner/
+│   │   └── SKILL.md
+│   ├── k-parent-school-info/
+│   │   └── SKILL.md
+│   └── …                         # k-parent-*, k-skill-setup, k-skill-cleaner
+├── examples/                     # 원본 NomaDamas/k-skill 상속 참고용 예제 스킬 (제품 아님)
+│   └── …                         # hwp, lotto-results, daiso-product-search …
 ├── docs/features/
 │   └── k-parent-*.md
 ├── docs/departments/
@@ -65,9 +81,11 @@ k-parent-skill/
     └── 단일 실행 스크립트가 필요할 때 추가
 ```
 
+제품 스킬은 `skills/<skill-name>/SKILL.md` 컨테이너에 평면 배치한다(원본 k-skill의 루트 평면 배치를 단일 컨테이너로 정리). `skills/` 는 `skills` 설치 CLI 가 `--skill <name>` 으로 해석하는 표준 컨테이너이며, 상속받은 upstream 예제는 `examples/` 에 두고 `--full-depth` 로만 설치한다.
+
 ## 처음 시작하는 순서
 
-1. 필요한 데모 스킬의 `SKILL.md`를 에이전트 스킬 경로에 설치합니다.
+1. 필요한 제품 스킬(`skills/*`) 또는 예제 스킬(`examples/*`)의 `SKILL.md`를 에이전트 스킬 경로에 설치합니다.
 2. 사용자가 지역, 아이 나이, 날짜, 예산, 이동수단 같은 조건을 말하면 스킬 워크플로우를 따릅니다.
 3. 실제 조회가 필요한 정보는 현재 날짜 기준으로 공식/공개 출처를 확인하고, 출처와 마감일을 함께 답합니다.
 4. 반복 수요가 확인된 스킬부터 `packages/` 또는 `scripts/` 구현으로 승격합니다.
@@ -78,7 +96,7 @@ k-parent-skill/
 - 사진·PDF·알림장·학원 앱에서 들어온 문서는 OCR/추출 결과와 원본을 연결해 일정, 준비물, 신청 항목으로 구조화합니다.
 - 모바일에서 일반 사용자도 쓸 수 있도록 서버 배포형 제품 표면을 우선합니다.
 - 실제 학교데이터, 시간표, 평생교육, 축제, 행사, 트렌드 데이터는 수집 시각과 출처를 함께 관리합니다.
-- 상품 추천과 쿠팡 어필리에이트는 핵심 로직이 아니라 구매 의도가 있을 때의 보조 기능입니다.
+- 준비물 쇼핑 추천과 쿠팡 어필리에이트는 핵심 로직이 아니라 구매 의도가 있을 때의 보조 기능입니다.
 - 아이 관련 정보는 오래된 결과를 그대로 쓰지 않고 현재 출처를 확인합니다.
 - 로그인, 결제, 신청서 제출은 사용자의 명시적 승인 없이는 실행하지 않습니다.
 - 개인정보와 아동 정보는 로컬 입력값으로만 취급하고 저장하지 않습니다.
@@ -89,14 +107,16 @@ k-parent-skill/
 | --- | --- |
 | [소유자 작업·크레덴셜](OWNER-TASKS.md) | 발급해야 할 API 키, 가입 URL, 라이브 fixture 재생성 명령, 가드레일 |
 | [환경변수 템플릿](.env.example) | `KEDU_INFO_KEY` + 모든 `KSKILL_*` 변수 |
+| [처음 사용자 온보딩](docs/onboarding.md) | 저장소 목적, 기능 지형도, 설치 후 확인, fixture-first 동작, 검증 명령 |
 | [아키텍처 컨벤션](docs/architecture.md) | 원본 k-skill 구조 승계, 스킬 승격 경로, 에이전트 컨텍스트 |
 | [디파트먼트 인덱스](docs/departments/README.md) | 학교·학원·놀이·생활·트렌드·쇼핑·영양 분류와 스킬 매핑 |
 | [스킬 라우팅 인덱스](docs/skill-routing.md) | 부모 질의 → 스킬 매핑, 놀이 계열 겹침 해소, 복합 명령 분해 |
 | [gstack 개발·상품화 계획](docs/productization-gstack.md) | gstack 기반 QA, 디자인 검토, 배포 검증, 상품화 단계 |
 | [새 스킬 추가 가이드](docs/adding-a-skill.md) | 원본 k-skill 방식의 스킬 추가 규칙 |
 | [로드맵](docs/roadmap.md) | 부모용 스킬 확장 후보 |
+| [EDSS/KERIS 소스 후보](docs/edss_k_parent_sources.md) | 한국교육학술정보원 EDSS와 학교알리미·NEIS·유치원알리미 API 후보 |
 | [브리핑 HTML](docs/briefing.html) | 리포·리서치·기능 계획을 한 번에 설명하는 공유용 HTML |
-| [설치 방법](docs/install.md) | 원본 구조에서 승계한 설치/테스트 안내 |
+| [설치 방법](docs/install.md) | `k-parent-skill` 전체 설치, parent 제품 스킬 선택 설치, 예제 스킬 `--full-depth` 안내 |
 | [연구 기록](docs/research/k-parent-skill-architecture-ecosystem-2026-05-01.md) | k-skill 기반 부모 타깃 스킬 아키텍처와 연동 생태계 분석 |
 | [전환 전략 연구](docs/research/k-parent-skill-conversion-strategy-2026-05-01.md) | 부모용 보이스/어시스턴트 전환, API 우선순위, 딥링크형 신청 보조 전략 |
 | [스펙 인덱스](docs/specs/README.md) | 제품 스펙, 데이터 계약, 프로젝트 구조와 향후 계획 |

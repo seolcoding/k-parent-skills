@@ -35,13 +35,13 @@
 홈 디렉터리 wrapper 에는 재실행 가능한 `scripts/install.sh`, `scripts/upstream.pin`, `LICENSE.upstream`, `DISCLAIMER.md`, `NOTICE` 까지 함께 복사된다. Promoted `jangbu-*` top-level 스킬은 wrapper 가 이전에 설치한 managed copy 만 자동 갱신하며, 같은 이름의 unrelated/user-authored 스킬이 있으면 덮어쓰지 않고 중단한다. 의도적으로 교체해야 하는 경우에만 `KOREAN_JANGBU_FOR_OVERWRITE_SKILLS=1` 로 재실행한다.
 
 ```bash
-bash korean-jangbu-for/scripts/install.sh
+bash examples/korean-jangbu-for/scripts/install.sh
 ```
 
 설치 확인:
 
 ```bash
-cat korean-jangbu-for/scripts/upstream.pin
+cat examples/korean-jangbu-for/scripts/upstream.pin
 git -C ~/.claude/skills/korean-jangbu-for/upstream rev-parse HEAD
 git -C ~/.agents/skills/korean-jangbu-for/upstream rev-parse HEAD
 ```
@@ -84,7 +84,7 @@ CODEF 자동 수집은 BYOK 원칙을 따른다. 사용자가 직접 발급한 C
 
 - 업스트림: https://github.com/kimlawtech/korean-jangbu-for (Apache-2.0)
 - 원저작자·관리자: @kimlawtech (SpeciAI)
-- upstream pin 파일: `korean-jangbu-for/scripts/upstream.pin`
+- upstream pin 파일: `examples/korean-jangbu-for/scripts/upstream.pin`
 - 회계·세무 면책 전문: `korean-jangbu-for/DISCLAIMER.md`
 - Apache-2.0 전문: `korean-jangbu-for/LICENSE.upstream`
 - attribution notice: `korean-jangbu-for/NOTICE`

@@ -34,24 +34,42 @@ while IFS= read -r -d '' skill_dir; do
     echo "name mismatch: $skill_file declares '$declared_name' but directory is '$skill_name'"
     status=1
   fi
+
+  if [[ "$skill_name" == k-parent-* ]]; then
+    if ! grep -q '^license: MIT$' "$skill_file"; then
+      echo "missing parent MIT license: $skill_file"
+      status=1
+    fi
+
+    if ! grep -q '^metadata:$' "$skill_file"; then
+      echo "missing parent metadata block: $skill_file"
+      status=1
+    fi
+
+    if ! grep -q '^  category: parenting$' "$skill_file"; then
+      echo "missing parent category metadata: $skill_file"
+      status=1
+    fi
+
+    if ! grep -q '^  locale: ko-KR$' "$skill_file"; then
+      echo "missing parent locale metadata: $skill_file"
+      status=1
+    fi
+
+    if ! grep -Eq '^  phase: (p0|implemented|concept)$' "$skill_file"; then
+      echo "missing or unsupported parent phase metadata: $skill_file"
+      status=1
+    fi
+  fi
 done < <(
-  find "$root" -mindepth 1 -maxdepth 1 -type d \
+  # Skills live under skills/ (product) and examples/ (inherited upstream demos),
+  # one directory deep. Only scan containers that actually exist.
+  containers=()
+  for c in "$root/skills" "$root/examples"; do
+    [[ -d "$c" ]] && containers+=("$c")
+  done
+  find "${containers[@]}" -mindepth 1 -maxdepth 1 -type d \
     ! -name '.*' \
-    ! -name .git \
-    ! -name .github \
-    ! -name .codex \
-    ! -name .claude \
-    ! -name .omx \
-    ! -name .ouroboros \
-    ! -name .changeset \
-    ! -name .cursor \
-    ! -name .vscode \
-    ! -name docs \
-    ! -name node_modules \
-    ! -name packages \
-    ! -name python-packages \
-    ! -name scripts \
-    ! -name examples \
     -print0
 )
 

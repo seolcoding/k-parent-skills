@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 _BUNDLED_HELPER = (
-    Path(__file__).resolve().parent.parent / "korean-spell-check" / "scripts" / "korean_spell_check.py"
+    Path(__file__).resolve().parent.parent / "examples" / "korean-spell-check" / "scripts" / "korean_spell_check.py"
 )
 
 if not _BUNDLED_HELPER.exists():  # pragma: no cover - defensive import guard

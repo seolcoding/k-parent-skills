@@ -24,7 +24,7 @@
 
 1. **이미 환경변수에 있으면** 그대로 사용한다.
 2. **에이전트가 자체 secret vault(1Password CLI, Bitwarden CLI, macOS Keychain 등)를 사용 중이면** 거기서 꺼내 환경변수로 주입해도 된다.
-3. **`~/.config/k-skill/secrets.env`** (기본 fallback) — plain dotenv 파일, 퍼미션 `0600`.
+3. **`~/.config/k-parent-skill/secrets.env`** (기본 fallback) — plain dotenv 파일, 퍼미션 `0600`.
 4. **아무것도 없으면** 유저에게 물어서 2 또는 3에 저장한다.
 
 ## 입력값

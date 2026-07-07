@@ -1,0 +1,20 @@
+{
+  "response": {
+    "body": {
+      "items": {
+        "item": [
+          {
+            "afos_fid": "2024-1",
+            "spot_nm": "서울 행복초등학교 앞",
+            "spot_addr": "서울특별시 성동구 왕십리로 1",
+            "la_crd": "37.5573",
+            "lo_crd": "127.0294",
+            "occrrnc_cnt": "3",
+            "caslt_cnt": "4",
+            "faclt_nm": "행복초등학교"
+          }
+        ]
+      }
+    }
+  }
+}

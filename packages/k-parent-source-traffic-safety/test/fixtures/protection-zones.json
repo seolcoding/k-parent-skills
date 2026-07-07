@@ -1,0 +1,21 @@
+{
+  "response": {
+    "body": {
+      "items": [
+        {
+          "mngNo": "GB-1",
+          "fcltyTy": "초등학교",
+          "fcltyNm": "영천초등학교",
+          "rdnmadr": "경상북도 영천시 중앙로 1",
+          "latitude": "35.9732",
+          "longitude": "128.9386",
+          "polcsttnNm": "영천경찰서",
+          "cctvYn": "Y",
+          "cctvCo": "2",
+          "mngInsttNm": "영천시",
+          "referenceDate": "2026-05-01"
+        }
+      ]
+    }
+  }
+}

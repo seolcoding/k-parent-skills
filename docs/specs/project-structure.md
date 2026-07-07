@@ -6,8 +6,12 @@ Keep the inherited `NomaDamas/k-skill` structure:
 
 ```text
 k-parent-skill/
-├── <skill-name>/
-│   └── SKILL.md
+├── skills/
+│   └── <skill-name>/
+│       └── SKILL.md
+├── examples/
+│   └── <skill-name>/
+│       └── SKILL.md
 ├── docs/
 │   ├── architecture.md
 │   ├── departments/
@@ -19,7 +23,7 @@ k-parent-skill/
 └── python-packages/
 ```
 
-Root-level skill directories remain the installable unit. Departments are product taxonomy, not nested folders.
+Product skill directories under `skills/` are the installable unit. Inherited upstream demos live under `examples/` and require `--full-depth` when installing. Departments are product taxonomy, not nested folders.
 
 ## Documentation structure
 
@@ -27,7 +31,7 @@ Use documentation layers intentionally:
 
 | Layer | Path | Role |
 | --- | --- | --- |
-| Agent entry | `AGENTS.md`, `CLAUDE.md` | Standing agent context and operational rules |
+| Agent entry | `AGENTS.md`, `CLAUDE.md` | `AGENTS.md` is the source of truth; `CLAUDE.md` is a compatibility symlink |
 | Architecture | `docs/architecture.md` | Repository conventions, source priorities, safety boundaries |
 | Product plan | `docs/productization-gstack.md` | Commercialization path and gstack QA loop |
 | Roadmap | `docs/roadmap.md` | Priority sequence and implementation candidates |
@@ -36,33 +40,55 @@ Use documentation layers intentionally:
 | Research | `docs/research/*.md` | Input analysis and source claims requiring verification |
 | Specs | `docs/specs/*.md` | Implementation-ready product, data, and structure decisions |
 
-## Future runtime structure
+## Runtime package structure
 
 Add code only after a skill's repeated use proves deterministic implementation is needed.
 
-Suggested future layout:
+The runtime layer is partially implemented. Keep existing source/core/proxy packages aligned with this layout, and add new packages only when the adapter boundary is proven by fixtures and repeated workflows.
 
 ```text
 packages/
 ├── k-parent-core/                 # shared schemas, resolvers, validation helpers
+├── k-parent-brief/                # Today Brief composition
+├── k-parent-calendar/             # calendar candidates, dedupe, ICS
+├── k-parent-doc-extract/          # notice text extraction
 ├── k-parent-source-neis/          # NEIS school, schedule, meal adapters
-├── k-parent-source-childcare/     # kindergarten and childcare disclosure adapters
-├── k-parent-source-events/        # TourAPI, public reservation, festival/event adapters
-├── k-parent-source-benefits/      # Government24/Bokjiro guidance adapters
-├── k-parent-recommender/          # ranking/explanation logic
-└── k-parent-proxy/                # thin parent-domain proxy if needed
+├── k-parent-source-childinfo/     # kindergarten and childcare disclosure adapters
+├── k-parent-source-tourapi/       # TourAPI event/place adapters
+├── k-parent-source-playground/    # playground and urban park adapters
+├── k-parent-source-traffic-safety/ # school-zone safety adapters
+├── k-parent-source-welfare/       # Government24/Bokjiro guidance adapters
+├── k-parent-source-seoul/         # Seoul reservation adapters
+├── k-parent-source-culture/       # culture and lifelong education program adapters
+├── k-parent-source-library/       # library search/program adapters
+├── k-parent-source-emergency/     # emergency/pharmacy adapters
+├── k-parent-source-naver/         # Naver shopping/blog and collector runner
+├── k-parent-source-coupang/       # Coupang Partners product adapter
+├── k-parent-source-youtube/       # YouTube safe-search content adapter
+└── k-skill-proxy/                 # existing free/public API proxy extended with parent-domain routes
 
 scripts/
-├── sync-region-codes.*
-├── sync-public-events.*
-├── sync-childcare-disclosures.*
-└── validate-parent-fixtures.*
+├── validate-skills.sh
+├── build-region-codes.js
+├── data_portal_k_parent_*.mjs
+├── neis_*_probe.py
+└── run-k-skill-proxy.sh
 
 python-packages/
-└── k-parent-etl/                  # optional ETL, scoring, and data quality jobs
+└── README.md                      # no Python package exists yet
 ```
 
-This is a future structure, not current code. Do not create these packages until implementation starts.
+Do not create additional packages from this outline until their implementation starts with fixtures, tests, and a clear source boundary.
+
+Future candidate files:
+
+```text
+scripts/sync-region-codes.*
+scripts/sync-tourapi-events.*
+scripts/sync-childinfo-disclosures.*
+scripts/validate-parent-fixtures.*
+python-packages/k-parent-etl/       # optional ETL, scoring, and data quality jobs
+```
 
 ## Milestone plan
 
@@ -79,7 +105,8 @@ Deliverables:
 - `docs/specs/product-spec.md`
 - `docs/specs/data-contracts.md`
 - `docs/specs/project-structure.md`
-- source inventory under future docs or issue tracker
+- source inventory in `docs/sources.md`
+- issue checklist per source when ownership, key issuance, or terms review is still open
 
 ### M1: Official data MVP
 
@@ -193,5 +220,5 @@ Current durable decisions:
 - No ranking UX for schools, kindergarten, or childcare.
 - Shopping and affiliate are secondary.
 - Private scraping comes after official-data MVP.
-- Root skill folders stay flat.
+- Product skill folders stay flat under `skills/*`; inherited reference skills stay under `examples/*`.
 - Departments stay documentation/product taxonomy.

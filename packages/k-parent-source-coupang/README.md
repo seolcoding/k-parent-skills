@@ -12,10 +12,22 @@ Coupang Partners affiliate API adapter for K-Parent Skill.
   deterministic CEA HMAC-SHA256 signer (`Authorization: CEA algorithm=HmacSHA256, access-key=..., signed-date=..., signature=...`).
 - `formatSignedDate(date)` — UTC `YYMMDDTHHMMSSZ` signed-date stamp.
 
-## Credentials
+## Configuration
 
 Set `KSKILL_COUPANG_ACCESS_KEY` and `KSKILL_COUPANG_SECRET_KEY`. Sign up for
 Coupang Partners and issue an API access key / secret key.
+
+## Usage
+
+```js
+const { fetchProducts } = require("k-parent-source-coupang");
+
+async function main() {
+  return fetchProducts({ keyword: "물티슈", limit: 10 });
+}
+
+main().then(console.log).catch(console.error);
+```
 
 ## Disclosure (required)
 
@@ -23,11 +35,20 @@ Any user-facing surface that shows Coupang Partners links MUST display the
 disclosure text above. It is attached to every normalized item so it cannot be
 dropped accidentally.
 
-## Tests / fixtures
+Outputs keep provenance/source metadata and freshness metadata so parent workflows can show origin and staleness.
 
-`node --test` runs fully offline from `test/fixtures/products.json`. To refresh:
+## Testing
 
+```bash
+npm test
 ```
-KSKILL_COUPANG_ACCESS_KEY=... KSKILL_COUPANG_SECRET_KEY=... \
-  node packages/k-parent-source-coupang/scripts/refresh-fixtures.mjs
+
+Tests run fully offline from `test/fixtures/products.json`.
+
+## Fixtures refresh
+
+Run against the live API:
+
+```bash
+KSKILL_COUPANG_ACCESS_KEY=... KSKILL_COUPANG_SECRET_KEY=... npm run refresh:fixtures
 ```
