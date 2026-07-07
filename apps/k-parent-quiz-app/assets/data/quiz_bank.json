@@ -1,0 +1,164 @@
+{
+  "meta": {
+    "version": "0.0.1-stub",
+    "generator": "handwritten-stub",
+    "generatedAt": "2026-07-07",
+    "note": "개발용 수기 스텁 10문항. 트랙 A 머지 후 node packages/k-parent-quiz-core/scripts/generate-quiz-bank.mjs 로 전량 재생성 예정.",
+    "standardsSource": "skills/k-parent-quiz-maker/references/achievement-standards-elementary.json (2022 개정 교육과정, 국가교육위원회 고시 제2026-1호)",
+    "subjects": ["수학", "국어"],
+    "gradeBands": ["1-2", "3-4"],
+    "questionCount": 10
+  },
+  "questions": [
+    {
+      "id": "stub-m34-add-001",
+      "type": "ox",
+      "standard": {
+        "code": "4수01-03",
+        "subject": "수학",
+        "gradeBand": "3-4",
+        "domain": "수와 연산"
+      },
+      "prompt": "352 + 148 = 500 이에요. 맞을까요?",
+      "choices": null,
+      "answer": "O",
+      "explanation": "일의 자리 2+8=10, 십의 자리 5+4+1=10, 백의 자리 3+1+1=5. 그래서 500이 맞아요.",
+      "difficulty": "easy"
+    },
+    {
+      "id": "stub-m34-mul-002",
+      "type": "choice3",
+      "standard": {
+        "code": "4수01-04",
+        "subject": "수학",
+        "gradeBand": "3-4",
+        "domain": "수와 연산"
+      },
+      "prompt": "24 × 3 은 얼마일까요?",
+      "choices": ["62", "72", "82"],
+      "answer": "72",
+      "explanation": "20×3=60이고 4×3=12예요. 60+12=72가 돼요.",
+      "difficulty": "easy"
+    },
+    {
+      "id": "stub-m34-div-003",
+      "type": "blank",
+      "standard": {
+        "code": "4수01-06",
+        "subject": "수학",
+        "gradeBand": "3-4",
+        "domain": "수와 연산"
+      },
+      "prompt": "17 ÷ 5 의 나머지는 얼마일까요?",
+      "choices": null,
+      "answer": "2",
+      "explanation": "5×3=15이고 17에서 15를 빼면 2가 남아요. 몫은 3, 나머지는 2예요.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "stub-m34-frac-004",
+      "type": "choice3",
+      "standard": {
+        "code": "4수01-10",
+        "subject": "수학",
+        "gradeBand": "3-4",
+        "domain": "수와 연산"
+      },
+      "prompt": "분자가 분모보다 작은 분수를 무엇이라고 부를까요?",
+      "choices": ["진분수", "가분수", "대분수"],
+      "answer": "진분수",
+      "explanation": "3분의 1처럼 분자가 분모보다 작으면 진분수예요. 분자가 분모와 같거나 크면 가분수라고 해요.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "stub-m34-weight-005",
+      "type": "choice3",
+      "standard": {
+        "code": "4수03-21",
+        "subject": "수학",
+        "gradeBand": "3-4",
+        "domain": "도형과 측정"
+      },
+      "prompt": "1kg은 몇 g과 같을까요?",
+      "choices": ["10g", "100g", "1000g"],
+      "answer": "1000g",
+      "explanation": "1kg = 1000g이에요. 우유 1L 한 팩이 대략 1kg쯤 돼요.",
+      "difficulty": "easy"
+    },
+    {
+      "id": "stub-k34-fact-006",
+      "type": "ox",
+      "standard": {
+        "code": "4국02-04",
+        "subject": "국어",
+        "gradeBand": "3-4",
+        "domain": "읽기"
+      },
+      "prompt": "\"오늘 아침에 비가 왔다.\"는 의견이 아니라 사실을 쓴 문장이에요. 맞을까요?",
+      "choices": null,
+      "answer": "O",
+      "explanation": "실제로 있었던 일을 그대로 쓴 것은 사실이에요. \"비 오는 날이 좋다.\"처럼 생각이나 느낌을 쓰면 의견이 돼요.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "stub-k34-word-007",
+      "type": "choice3",
+      "standard": {
+        "code": "4국04-01",
+        "subject": "국어",
+        "gradeBand": "3-4",
+        "domain": "문법"
+      },
+      "prompt": "'뜨겁다'와 뜻이 반대인 낱말은 무엇일까요?",
+      "choices": ["차갑다", "따뜻하다", "미지근하다"],
+      "answer": "차갑다",
+      "explanation": "'뜨겁다'의 반대말은 '차갑다'예요. '따뜻하다'와 '미지근하다'는 그 사이의 온도를 나타내요.",
+      "difficulty": "easy"
+    },
+    {
+      "id": "stub-k34-honor-008",
+      "type": "blank",
+      "standard": {
+        "code": "4국04-04",
+        "subject": "국어",
+        "gradeBand": "3-4",
+        "domain": "문법"
+      },
+      "prompt": "웃어른께 말할 때 '밥' 대신 쓰는 높임말은 무엇일까요?",
+      "choices": null,
+      "answer": "진지",
+      "explanation": "\"할머니, 진지 드세요.\"처럼 웃어른께는 '밥'을 '진지'로 높여 말해요.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "stub-m12-add-009",
+      "type": "choice3",
+      "standard": {
+        "code": "2수01-06",
+        "subject": "수학",
+        "gradeBand": "1-2",
+        "domain": "수와 연산"
+      },
+      "prompt": "37 + 25 는 얼마일까요?",
+      "choices": ["52", "62", "72"],
+      "answer": "62",
+      "explanation": "7+5=12라서 일의 자리는 2가 되고 십의 자리로 1을 올려요. 30+20+10=60, 그래서 62예요.",
+      "difficulty": "easy"
+    },
+    {
+      "id": "stub-k12-order-010",
+      "type": "blank",
+      "standard": {
+        "code": "2국01-01",
+        "subject": "국어",
+        "gradeBand": "1-2",
+        "domain": "듣기⋅말하기"
+      },
+      "prompt": "이야기를 말할 때에는 일이 일어난 ○○에 맞게 말해요. ○○에 들어갈 말은 무엇일까요?",
+      "choices": null,
+      "answer": "순서",
+      "explanation": "아침, 점심, 저녁처럼 일이 일어난 순서를 생각하며 말하면 듣는 사람이 이해하기 쉬워요.",
+      "difficulty": "easy"
+    }
+  ]
+}

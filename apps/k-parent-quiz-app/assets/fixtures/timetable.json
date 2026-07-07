@@ -1,0 +1,33 @@
+{
+  "elsTimetable": [
+    { "head": [{ "LIST_TOTAL_COUNT": 2 }] },
+    {
+      "row": [
+        {
+          "ATPT_OFCDC_SC_CODE": "B10",
+          "SD_SCHUL_CODE": "7010123",
+          "SCHUL_NM": "서울미래초등학교",
+          "AY": "2026",
+          "SEM": "1",
+          "ALL_TI_YMD": "20260501",
+          "GRADE": "1",
+          "CLASS_NM": "2",
+          "PERIO": "1",
+          "ITRT_CNTNT": "국어"
+        },
+        {
+          "ATPT_OFCDC_SC_CODE": "B10",
+          "SD_SCHUL_CODE": "7010123",
+          "SCHUL_NM": "서울미래초등학교",
+          "AY": "2026",
+          "SEM": "1",
+          "ALL_TI_YMD": "20260501",
+          "GRADE": "1",
+          "CLASS_NM": "2",
+          "PERIO": "2",
+          "ITRT_CNTNT": "수학"
+        }
+      ]
+    }
+  ]
+}

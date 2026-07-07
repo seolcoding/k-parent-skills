@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "quiz-app-web",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd apps/k-parent-quiz-app && /opt/homebrew/bin/flutter run -d web-server --web-port 8787"
+      ],
+      "port": 8787
+    }
+  ]
+}
