@@ -19,14 +19,17 @@
 
 - [x] 부모 접근 가능 학교·학급·학습자료 API 인벤토리를 `docs/research/parent-education-api-quiz-2026-07-07.md`로 작성한다.
 - [x] 신규 확인 출처(학교알리미/유치원알리미/NCIC/STAS/에듀넷)를 `docs/sources.md`에 반영한다.
-- [ ] `skills/k-parent-quiz-maker` concept `SKILL.md`를 저장소 authoring 규칙에 맞게 스캐폴딩한다.
-- [ ] `packages/k-skill-proxy`에 NEIS 학교검색/시간표 allowlist 라우트와 일 단위 캐시를 추가한다.
+- [x] `skills/k-parent-quiz-maker` concept `SKILL.md`를 저장소 authoring 규칙에 맞게 스캐폴딩한다.
+- [x] 안드로이드 MVP 화면 흐름(온보딩 학교/학년/반 → 오늘 시간표 → 퀴즈 5문항)과 proxy 계약 초안을 `docs/features/k-parent-quiz-maker.md`에 확정한다.
+- [ ] `packages/k-skill-proxy`에 NEIS 학교검색/학급/시간표/학사일정 allowlist 라우트와 일 단위 캐시를 추가한다.
 - [ ] 2022 개정 교육과정 성취기준 과목×학년 JSON 번들(초등 우선)을 수집하고 확인일을 기록한다.
-- [ ] 안드로이드 MVP 화면 흐름(온보딩 학교/학년/반 → 오늘 시간표 → 퀴즈 5문항)을 확정한다.
+- [ ] 학교알리미 키(`SCHOOLINFO_API_KEY`) 발급과 schoolinfo-mcp 평가계획 파싱 채택 여부를 확정한다.
+- [ ] 안드로이드 저장소를 별도 부트스트랩한다(Kotlin+Compose, 온보딩/오늘/퀴즈 3화면, proxy 연동).
 
 검증 기록:
 
 - [x] 2026-07-07: NEIS 12종 라이브 검증 자산 확인(`docs/neis_api_ref.md`), 학교알리미·유치원알리미 Open API 및 NCIC/STAS 학습자료 표면 웹 확인, e학습터 2026-02-28 종료 확인.
+- [x] 2026-07-07: schoolinfo-mcp(MIT, 학교알리미 35종+나이스+평가계획 kordoc 파싱) 확인, 에듀넷 파일데이터 제4유형(상업적 이용금지) 확인, `k-parent-quiz-maker` 컨셉 스킬 스캐폴딩.
 
 ## Goal 179. 구현된 parent feature doc 공통 표준 회귀 테스트
 

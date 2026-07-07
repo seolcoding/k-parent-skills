@@ -13,7 +13,8 @@
 | 유치원 공시 | 유치원알리미 Open API | 키 발급만 하면 사용 가능 (승인제) | 유아 확장 시 |
 | 교육과정·성취기준 | NCIC 자료실 (PDF/HWP) | API 없음 → 문서를 로컬 데이터로 번들 | 과목→학습내용 매핑의 핵심 |
 | 평가문항·평가도구 | 학생평가지원포털(STAS, KICE) | API 없음, 로그인 필요 | 퀴즈 문항 스타일 참고자료 |
-| 주제별 학습자료 | 에듀넷 티클리어 | API 신청 표면 존재하나 상세 미확인(JS 렌더링) + data.go.kr 파일데이터 | 보조 콘텐츠 |
+| 주제별 학습자료 | 에듀넷 티클리어 | 파일데이터는 제4유형(상업적 이용금지·변경금지) 링크 모음이라 번들 불가; 콘텐츠 API 신청 표면은 상세 미확인 | 출처 링크 안내만 |
+| 공시+평가계획 통합 참고 구현 | schoolinfo-mcp (MIT, chrisryugj) | 채택 검토 — 학교알리미 35종+나이스+평가계획(HWP/PDF) kordoc 파싱, TypeScript | **단원 수준 정밀화 경로** |
 | 아동 도서 | 도서관 정보나루 | **이미 래핑됨** (`packages/k-parent-source-library`) | 독서 퀴즈 확장 |
 | 아이 개인 성적·출결·알림장 | 나이스 학부모서비스, 하이클래스/클래스팅 등 | 공개 API 없음 (본인인증/사설) | 접근하지 않음 — 사진 입력으로 대체 |
 
@@ -49,7 +50,8 @@ Base `https://open.neis.go.kr/hub/<endpoint>`, 인증키 `KEDU_INFO_KEY`(발급 
 
 - **NCIC 국가교육과정정보센터** (<https://ncic.re.kr>): 2022 개정 교육과정 원문, 성취기준·성취수준 연구보고서를 자료실에서 PDF/HWP로 배포(<https://ncic.re.kr/bbs/standard/list.do>). API 없음. → 과목×학년(군)별 성취기준을 1회 추출해 JSON으로 번들하면 "오늘 3학년 수학" → "분수의 이해, 곱셈…" 수준의 학습내용 매핑이 가능해진다.
 - **학생평가지원포털 STAS** (<https://stas.moe.go.kr>): 교육부·KICE 운영. 초·중·고 성취기준 검색과 수행평가/서·논술형 평가도구 제공. 로그인 필요, API 없음. → 문항 형식·난이도 설계의 참고자료.
-- **에듀넷 티클리어** (<https://www.edunet.net>): 주제별 학습자료. 콘텐츠 API 신청 폼(<https://www.edunet.net/nedu/eduapisvc/contApiRegisterForm.do?menu_id=1043>)이 존재하나 JS 렌더링 페이지라 조건 미확인 — 후속 확인 필요. 정적 대안: data.go.kr 파일데이터 [15118987 주제별 학습자료](https://www.data.go.kr/data/15118987/fileData.do)(2023-08 기준 CSV).
+- **에듀넷 티클리어** (<https://www.edunet.net>): 주제별 학습자료. 콘텐츠 API 신청 폼(<https://www.edunet.net/nedu/eduapisvc/contApiRegisterForm.do?menu_id=1043>)이 존재하나 JS 렌더링 페이지라 조건 미확인 — 후속 확인 필요. data.go.kr 파일데이터 [15118987 주제별 학습자료](https://www.data.go.kr/data/15118987/fileData.do)는 PDF 링크 모음 1건에 **공공저작물 제4유형(출처표시·상업적 이용금지·변경금지)** 라 앱 콘텐츠로 번들할 수 없다(2026-07-07 확인). 출처 링크 안내 용도로만 쓴다.
+- **schoolinfo-mcp** (<https://github.com/chrisryugj/schoolinfo-mcp>, MIT, TypeScript): 학교알리미 35종 공시 + 나이스(학사일정/급식/시간표) + **교과별 평가계획 첨부파일(HWP/HWPX/PDF) 자동 다운로드·kordoc 파싱**을 `find_school`, `get_evaluation_plan`, `parse_evaluation_file`, `get_parent_digest` 등 13개 도구로 노출한다. 환경변수 `SCHOOLINFO_API_KEY`(필수), `NEIS_API_KEY`(선택). 시간표가 과목명 수준에 그치는 한계를 **평가계획 문서의 단원/영역 정보**로 보강할 수 있는 가장 빠른 참고 구현이다(2026-06 정비 확인).
 - **e학습터는 2026-02-28 서비스 종료** — 학습 콘텐츠 소스로 계획에 넣지 말 것.
 - **디지털교과서/AI 디지털교과서**: 학교 발급 계정 기반, 공개 API 없음.
 - **도서관 정보나루**: 이미 `packages/k-parent-source-library`로 래핑됨. 연령별 인기대출도서로 독서 퀴즈 확장 가능.
@@ -70,6 +72,7 @@ Base `https://open.neis.go.kr/hub/<endpoint>`, 인증키 `KEDU_INFO_KEY`(발급 
   성취기준 번들(과목×학년) → 이번 학기 학습내용 후보
   LLM(Claude API) → 과목·학년·성취기준 기반 퀴즈 N개 생성
 [정밀화(선택)]
+  학교알리미 평가계획 문서(schoolinfo-mcp 패턴) → 과목별 단원/영역 → 단원 수준 퀴즈
   교과서/알림장 사진 → OCR → 단원 인식 → 해당 단원 퀴즈
 ```
 

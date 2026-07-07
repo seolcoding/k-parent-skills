@@ -419,6 +419,7 @@ if (readJson("package.json").name === "k-parent-skill") {
       "k-parent-travel-recommender",
       "k-parent-knowledge-helper",
       "k-parent-content-recommender",
+      "k-parent-quiz-maker",
     ];
 
     for (const skillName of parentSkills) {
@@ -452,11 +453,13 @@ if (readJson("package.json").name === "k-parent-skill") {
     for (const skillName of [
       "k-parent-knowledge-helper",
       "k-parent-mobile-agent",
+      "k-parent-quiz-maker",
     ]) {
       assert.match(readme, new RegExp(`\\[[^\\]]+ 컨셉 문서\\]\\(docs/features/${escapeRegex(skillName)}\\.md\\)`));
     }
 
-    assert.match(readme, /`knowledge-helper`·`mobile-agent`는 아직 패키지 경계가 없는 컨셉/);
+    assert.match(readme, /`knowledge-helper`·`mobile-agent`·`quiz-maker`는 아직 패키지 경계가 없는 컨셉/);
+    assert.doesNotMatch(readme, /`knowledge-helper`·`mobile-agent`는 아직 패키지 경계가 없는 컨셉/);
     assert.doesNotMatch(readme, /`academy-connector`·`knowledge-helper`·`mobile-agent`는 아직 패키지 경계가 없는 컨셉/);
     assert.match(readme, /\| 놀이 \| 놀거리 \| `k-parent-play-finder` \|/);
     assert.match(readme, /\| 쇼핑 \| 준비물 쇼핑 \| `k-parent-shopping-recommender` \|/);
@@ -485,6 +488,7 @@ if (readJson("package.json").name === "k-parent-skill") {
       "k-parent-meal-planner": "p0",
       "k-parent-mobile-agent": "concept",
       "k-parent-play-finder": "p0",
+      "k-parent-quiz-maker": "concept",
       "k-parent-schedule-manager": "implemented",
       "k-parent-school-doc-capture": "implemented",
       "k-parent-school-info": "p0",
@@ -545,6 +549,7 @@ if (readJson("package.json").name === "k-parent-skill") {
       "k-parent-travel-recommender",
       "k-parent-knowledge-helper",
       "k-parent-content-recommender",
+      "k-parent-quiz-maker",
     ];
 
     // Backing source/logic packages each skill must cite in its one-line description.
@@ -689,6 +694,7 @@ if (readJson("package.json").name === "k-parent-skill") {
       "k-parent-travel-recommender",
       "k-parent-knowledge-helper",
       "k-parent-content-recommender",
+      "k-parent-quiz-maker",
     ];
     const requiredSignals = [
       /아이|대상/,
@@ -729,6 +735,7 @@ if (readJson("package.json").name === "k-parent-skill") {
       "k-parent-travel-recommender",
       "k-parent-knowledge-helper",
       "k-parent-content-recommender",
+      "k-parent-quiz-maker",
     ];
     const routing = read(path.join("docs", "skill-routing.md"));
     const readme = read("README.md");

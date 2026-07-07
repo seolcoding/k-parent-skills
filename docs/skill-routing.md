@@ -11,6 +11,7 @@ frontmatter `description`이며, 이 문서는 겹침 해소 규칙을 한곳에
 | "이번 주 급식 뭐야", "알레르기 빼고 식단" | `k-parent-meal-planner` | 영양 |
 | "이번 달 학교 일정", "○○초 공지", "방과후 언제까지" | `k-parent-school-info` | 학교 |
 | "가정통신문 사진 정리", "알림장 일정 캘린더로" | `k-parent-school-doc-capture` | 학교 |
+| "오늘 배운 거 퀴즈 내줘", "복습 문제 만들어줘" | `k-parent-quiz-maker` | 학교 |
 | "근처 유치원 비교", "국공립 모집 언제", "어린이집 방과후" | `k-parent-kindergarten-info` | 학교 |
 | "아이랑 갈 만한 곳", "주말 실내 놀이터", "근처 어린이공원" | `k-parent-play-finder` | 놀이 |
 | "이번 주말 가족 축제", "다음 달 동네 행사" | `k-parent-festival-finder` | 놀이 |
@@ -65,6 +66,7 @@ frontmatter `description`이며, 이 문서는 겹침 해소 규칙을 한곳에
 | "주말 갈 곳" | `k-parent-play-finder` / `k-parent-festival-finder` / `k-parent-travel-recommender` |
 | "학교 일정 정리" | `k-parent-school-info` + `k-parent-school-doc-capture` |
 | "학원 숙제 확인" | `k-parent-academy-connector` |
+| "오늘 복습 시켜줘" | `k-parent-quiz-maker` |
 | "준비물 사기" | `k-parent-shopping-recommender` |
 | "여행지 추천" | `k-parent-travel-recommender` |
 

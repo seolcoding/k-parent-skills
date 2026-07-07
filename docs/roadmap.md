@@ -40,6 +40,7 @@ K-Parent Skills는 `학교`, `학원`, `놀이`, `생활`, `트렌드`, `쇼핑`
 - `k-parent-travel-recommender`: 아이 동반 여행지·체험·일정 추천
 - `k-parent-knowledge-helper`: 부모 일반 지식 질의응답 컨셉
 - `k-parent-content-recommender`: 유튜브 채널·영상, 교과 연계, 차 안 오디오형 콘텐츠, 대화 주제 추천
+- `k-parent-quiz-maker`: 오늘 배운 과목 기반 복습 퀴즈 생성 컨셉(안드로이드 앱 1차 표면)
 
 ## 지원 중인 hosted proxy 예제 표면
 

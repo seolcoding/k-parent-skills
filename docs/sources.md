@@ -184,7 +184,8 @@
 - NCIC 국가교육과정정보센터 성취수준 자료실: https://ncic.re.kr/bbs/standard/list.do
 - 학생평가지원포털(STAS, 교육부/KICE): https://stas.moe.go.kr
 - 에듀넷 티클리어 콘텐츠 API 신청 표면(상세 미확인): https://www.edunet.net/nedu/eduapisvc/contApiRegisterForm.do?menu_id=1043
-- 공공데이터포털 에듀넷티클리어 주제별 학습자료 파일데이터: https://www.data.go.kr/data/15118987/fileData.do
+- 공공데이터포털 에듀넷티클리어 주제별 학습자료 파일데이터(제4유형, 상업적 이용금지): https://www.data.go.kr/data/15118987/fileData.do
+- schoolinfo-mcp (학교알리미 35종 공시+나이스+평가계획 파싱 MCP, MIT, chrisryugj): https://github.com/chrisryugj/schoolinfo-mcp
 
 - 도서관 정보나루 Open API 활용방법: https://www.data4library.kr/apiUtilization
 - 도서관 정보나루 도서 검색 endpoint: https://data4library.kr/api/srchBooks

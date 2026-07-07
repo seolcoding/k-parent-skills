@@ -62,6 +62,7 @@ npx --yes skills add <owner/repo> \
   --skill k-parent-travel-recommender \
   --skill k-parent-knowledge-helper \
   --skill k-parent-content-recommender \
+  --skill k-parent-quiz-maker \
   --skill k-skill-setup \
   --skill k-skill-cleaner
 ```
