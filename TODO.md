@@ -11,6 +11,23 @@
 - 일정, 모집, 행사, 정책, API 동작처럼 변동 가능한 정보는 현재 공식/공개 출처 확인과 확인일을 남긴다.
 - 검증은 기존 명령을 우선한다: `npm run lint`, `npm run typecheck`, `npm test`, `npm run pack:dry-run`, `npm run ci`.
 
+## Goal 225. '오늘 배운 것 퀴즈' 안드로이드 앱 시작점
+
+목표: 아이가 학교에서 그날 배운 과목을 기반으로 퀴즈를 생성하는 안드로이드 앱을 이 저장소 자산(NEIS 시간표 + 성취기준 번들 + proxy) 위에서 시작한다.
+
+달성조건:
+
+- [x] 부모 접근 가능 학교·학급·학습자료 API 인벤토리를 `docs/research/parent-education-api-quiz-2026-07-07.md`로 작성한다.
+- [x] 신규 확인 출처(학교알리미/유치원알리미/NCIC/STAS/에듀넷)를 `docs/sources.md`에 반영한다.
+- [ ] `skills/k-parent-quiz-maker` concept `SKILL.md`를 저장소 authoring 규칙에 맞게 스캐폴딩한다.
+- [ ] `packages/k-skill-proxy`에 NEIS 학교검색/시간표 allowlist 라우트와 일 단위 캐시를 추가한다.
+- [ ] 2022 개정 교육과정 성취기준 과목×학년 JSON 번들(초등 우선)을 수집하고 확인일을 기록한다.
+- [ ] 안드로이드 MVP 화면 흐름(온보딩 학교/학년/반 → 오늘 시간표 → 퀴즈 5문항)을 확정한다.
+
+검증 기록:
+
+- [x] 2026-07-07: NEIS 12종 라이브 검증 자산 확인(`docs/neis_api_ref.md`), 학교알리미·유치원알리미 Open API 및 NCIC/STAS 학습자료 표면 웹 확인, e학습터 2026-02-28 종료 확인.
+
 ## Goal 179. 구현된 parent feature doc 공통 표준 회귀 테스트
 
 목표: runtime 패키지를 문서화한 `k-parent-*` feature docs가 공통 표준 섹션과 현재 구현 상태 표현을 유지하도록 일반 회귀 테스트를 추가한다.

@@ -176,6 +176,16 @@
 - Naver Developers Search API news docs: https://developers.naver.com/docs/serviceapi/search/news/news.md
 - Naver Search API news endpoint: https://openapi.naver.com/v1/search/news.json
 
+- 학교알리미 Open API 이용안내: https://www.schoolinfo.go.kr/ng/go/pnnggo_a01_m0.do
+- 학교알리미 OpenAPI 개발자 가이드 PDF: https://www.schoolinfo.go.kr/download/OpenAPI_Developer_Guide.pdf
+- 공공데이터포털 학교알리미 공시정보: https://www.data.go.kr/data/15098092/openapi.do
+- 유치원알리미 Open API 이용안내: https://e-childschoolinfo.moe.go.kr/openApi/openApiIntro.do
+- 공공데이터포털 유치원 공시정보: https://www.data.go.kr/data/15020786/openapi.do
+- NCIC 국가교육과정정보센터 성취수준 자료실: https://ncic.re.kr/bbs/standard/list.do
+- 학생평가지원포털(STAS, 교육부/KICE): https://stas.moe.go.kr
+- 에듀넷 티클리어 콘텐츠 API 신청 표면(상세 미확인): https://www.edunet.net/nedu/eduapisvc/contApiRegisterForm.do?menu_id=1043
+- 공공데이터포털 에듀넷티클리어 주제별 학습자료 파일데이터: https://www.data.go.kr/data/15118987/fileData.do
+
 - 도서관 정보나루 Open API 활용방법: https://www.data4library.kr/apiUtilization
 - 도서관 정보나루 도서 검색 endpoint: https://data4library.kr/api/srchBooks
 - 도서관 정보나루 도서 상세 endpoint: https://data4library.kr/api/srchDtlList
