@@ -19,6 +19,10 @@ k-parent-skill/
 │   ├── research/
 │   └── specs/
 ├── packages/
+├── apps/
+│   └── k-parent-quiz-app/         # Flutter product surface (outside npm workspaces/CI, own AGENTS.md)
+├── tools/
+│   └── quiz-dev-mcp/              # repo-scoped dev MCP (stdio, zero-dep, read-only over repo files)
 ├── scripts/
 └── python-packages/
 ```
@@ -222,3 +226,4 @@ Current durable decisions:
 - Private scraping comes after official-data MVP.
 - Product skill folders stay flat under `skills/*`; inherited reference skills stay under `examples/*`.
 - Departments stay documentation/product taxonomy.
+- Product app surfaces live under `apps/*` (outside npm workspaces and `npm run ci`, gated by their own nested `AGENTS.md`); repo-scoped dev tooling lives under `tools/*`; repo-scoped agent infrastructure (`.claude/agents`, `.claude/skills`, `.mcp.json`) is committed (owner request, 2026-07).

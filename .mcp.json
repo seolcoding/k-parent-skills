@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "quiz-dev": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["tools/quiz-dev-mcp/server.mjs"]
+    }
+  }
+}

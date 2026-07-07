@@ -18,6 +18,8 @@ These rules are repo-specific and apply to everything under this directory.
 - Node implementations live in `packages/<skill-name>` and are called from the skill folder.
 - Small deterministic Python or shell helpers live in `scripts/` or `<skill-name>/scripts/` depending on whether they are shared or skill-specific.
 - Free public API aggregation should use the existing `k-skill-proxy` pattern: narrow allowlisted routes, cache/rate-limit where useful, and no user-side API key exposure.
+- `apps/<app-name>` holds product surfaces (e.g. the Flutter quiz app) that consume skill/package assets. Apps live outside npm workspaces and `npm run ci`; they carry their own gates in a nested `AGENTS.md`. This coexists with the "do not flatten" rule — the skill collection stays the core.
+- `tools/<tool-name>` holds repo development tooling (e.g. the quiz-dev MCP server) outside npm workspaces, with zero or minimal dependencies.
 - Parent-specific outputs should normalize around: child age/grade, region, date range, source URL, deadline, cost, required documents, reservation/application status, and confirmation date.
 
 ## Agent context conventions
@@ -69,7 +71,8 @@ These rules are repo-specific and apply to everything under this directory.
 - When testing or developing skills from this repository, install or sync the current skill directories into the user's home-directory global skill locations first.
 - Use `~/.claude/skills/<skill-name>` for Claude Code and `~/.agents/skills/<skill-name>` for agents-compatible home installs.
 - Respect existing home-directory indirection such as symlinks when syncing `~/.agents/skills`.
-- Do **not** create repo-local `.claude` or `.agents` directories for skill installation unless the user explicitly asks for a repository-local test fixture.
+- Skill **installation** for testing stays in the home-directory locations above — do not use repo-local directories as a skill install target.
+- Repo-local `.claude/agents/`, `.claude/skills/`, `.mcp.json`, and `tools/` are committed **development infrastructure** for this repository's own build loops (owner request, 2026-07). They are strictly repo-scoped: never sync them into home directories, and never point them at files outside this repository.
 
 ## Free API proxy policy
 
