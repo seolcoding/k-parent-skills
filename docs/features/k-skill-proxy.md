@@ -38,6 +38,9 @@ client/skill -> k-skill-proxy -> upstream public API
 - `GET /v1/naver-news/search` (네이버 검색 Open API 뉴스 검색, `NAVER_SEARCH_CLIENT_ID`, `NAVER_SEARCH_CLIENT_SECRET`)
 - `GET /v1/neis/school-search` (나이스 학교기본정보, `KEDU_INFO_KEY`)
 - `GET /v1/neis/school-meal` (나이스 급식식단정보, `KEDU_INFO_KEY`)
+- `GET /v1/neis/timetable` (나이스 시간표 — 초·중·고·특수 `level` 선택, `KEDU_INFO_KEY`)
+- `GET /v1/neis/classes` (나이스 학급정보 — 학년도별 학년·반 목록, `KEDU_INFO_KEY`)
+- `GET /v1/neis/schedule` (나이스 학사일정 — 기간 조회 최대 31일, `KEDU_INFO_KEY`)
 - `GET /v1/data4library/library-search` (도서관 정보나루 정보공개 도서관 조회, `DATA4LIBRARY_AUTH_KEY`)
 - `GET /v1/data4library/book-search` (도서관 정보나루 도서 검색, `DATA4LIBRARY_AUTH_KEY`)
 - `GET /v1/data4library/book-detail` (도서관 정보나루 도서 상세 조회, `DATA4LIBRARY_AUTH_KEY`)
@@ -71,6 +74,7 @@ client/skill -> k-skill-proxy -> upstream public API
 - `KSKILL_PROXY_PORT=4020`
 - `KSKILL_PROXY_NAME=k-skill-proxy`
 - `KSKILL_PROXY_CACHE_TTL_MS=300000`
+- `KSKILL_PROXY_NEIS_DAILY_CACHE_TTL_MS=86400000` (선택: 나이스 시간표/학급/학사일정 라우트 캐시 TTL, 기본 24시간 — INFO-200 빈 결과도 캐시)
 - `KSKILL_PROXY_RATE_LIMIT_WINDOW_MS=60000`
 - `KSKILL_PROXY_RATE_LIMIT_MAX=60`
 
@@ -182,6 +186,42 @@ curl -fsS --get 'https://k-skill-proxy.nomadamas.org/v1/neis/school-meal' \
   --data-urlencode 'schoolCode=7010123' \
   --data-urlencode 'mealDate=20260410'
 ```
+
+나이스 시간표 endpoint (`level`: `els` 초등(기본) / `mis` 중 / `his` 고 / `sps` 특수; `ay`/`sem` 미지정 시 `date`에서 자동 도출 — 3~8월은 1학기, 9~2월은 2학기, 1~2월은 전년도 학년도):
+
+```bash
+curl -fsS --get 'https://k-skill-proxy.nomadamas.org/v1/neis/timetable' \
+  --data-urlencode 'educationOfficeCode=B10' \
+  --data-urlencode 'schoolCode=7130110' \
+  --data-urlencode 'date=20260410' \
+  --data-urlencode 'grade=3' \
+  --data-urlencode 'classNm=2'
+```
+
+나이스 학급정보 endpoint (`year` 미지정 시 KST 오늘 기준 학년도; `grade`로 학년 필터):
+
+```bash
+curl -fsS --get 'https://k-skill-proxy.nomadamas.org/v1/neis/classes' \
+  --data-urlencode 'educationOfficeCode=B10' \
+  --data-urlencode 'schoolCode=7130110' \
+  --data-urlencode 'year=2026'
+```
+
+나이스 학사일정 endpoint (`to` 미지정 시 `from`과 동일한 하루 조회, `from`~`to` 범위는 최대 31일):
+
+```bash
+curl -fsS --get 'https://k-skill-proxy.nomadamas.org/v1/neis/schedule' \
+  --data-urlencode 'educationOfficeCode=B10' \
+  --data-urlencode 'schoolCode=7010057' \
+  --data-urlencode 'from=20260501' \
+  --data-urlencode 'to=20260531'
+```
+
+시간표·학급·학사일정 라우트는 NEIS 원본 필드를 소문자 스키마의 `rows` 배열로 정규화한다
+(시간표 `{date, period, subject, grade, class_nm}`, 학급 `{ay, grade, class_nm}` 숫자 정렬,
+학사일정 `{date, event_name, day_off}`). 조건에 맞는 데이터가 없으면(NEIS `INFO-200`) 오류가
+아니라 `rows: []` + `info: {code: "INFO-200", message, hint}` 형태의 200 응답을 주며, 빈 결과도
+`KSKILL_PROXY_NEIS_DAILY_CACHE_TTL_MS` TTL로 캐시해 재조회 폭주를 막는다.
 
 생활쓰레기 배출정보 endpoint. 쿼리에 **`pageNo`와 `numOfRows`를 반드시 포함**하고, 값은 각각 **`1`**, **`100`**만 허용한다(`page_no` / `num_of_rows` 동일). 누락·다른 값·숫자만이 아닌 문자열이면 **`400`**(upstream 미호출):
 

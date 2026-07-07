@@ -35,6 +35,15 @@ const KMA_FORECAST_READY_MINUTE = 10;
 const OPINET_API_BASE_URL = "https://www.opinet.co.kr/api";
 const NEIS_MEAL_SERVICE_URL = "https://open.neis.go.kr/hub/mealServiceDietInfo";
 const NEIS_SCHOOL_INFO_URL = "https://open.neis.go.kr/hub/schoolInfo";
+const NEIS_HUB_BASE_URL = "https://open.neis.go.kr/hub";
+const NEIS_TIMETABLE_DATASETS = new Map([
+  ["els", "elsTimetable"],
+  ["mis", "misTimetable"],
+  ["his", "hisTimetable"],
+  ["sps", "spsTimetable"]
+]);
+const NEIS_SCHEDULE_MAX_RANGE_DAYS = 31;
+const NEIS_DAY_OFF_PATTERN = /휴업|공휴/;
 
 const ALLOWED_AIRKOREA_ROUTES = new Map([
   ["MsrstnInfoInqireSvc", new Set(["getMsrstnList", "getNearbyMsrstnList", "getTMStdrCrdnt"])],
@@ -164,6 +173,7 @@ function buildConfig(env = process.env) {
     naverSearchClientId: trimOrNull(env.NAVER_SEARCH_CLIENT_ID ?? env.NAVER_CLIENT_ID),
     naverSearchClientSecret: trimOrNull(env.NAVER_SEARCH_CLIENT_SECRET ?? env.NAVER_CLIENT_SECRET),
     cacheTtlMs: parseInteger(env.KSKILL_PROXY_CACHE_TTL_MS, 300000),
+    neisDailyCacheTtlMs: parseInteger(env.KSKILL_PROXY_NEIS_DAILY_CACHE_TTL_MS, 86400000),
     rateLimitWindowMs: parseInteger(env.KSKILL_PROXY_RATE_LIMIT_WINDOW_MS, 60000),
     rateLimitMax: parseInteger(env.KSKILL_PROXY_RATE_LIMIT_MAX, 60)
   };
@@ -674,6 +684,248 @@ function normalizeNeisSchoolSearchQuery(query) {
   };
 }
 
+function normalizeNeisSchoolKeys(query) {
+  const atptOfcdcScCode = trimOrNull(
+    query.educationOfficeCode ??
+      query.education_office_code ??
+      query.atptOfcdcScCode ??
+      query.ATPT_OFCDC_SC_CODE
+  );
+  const sdSchulCode = trimOrNull(
+    query.schoolCode ?? query.school_code ?? query.sdSchulCode ?? query.SD_SCHUL_CODE
+  );
+
+  if (!atptOfcdcScCode) {
+    throw new Error("Provide educationOfficeCode (ATPT_OFCDC_SC_CODE).");
+  }
+  if (!sdSchulCode) {
+    throw new Error("Provide schoolCode (SD_SCHUL_CODE).");
+  }
+
+  return { atptOfcdcScCode, sdSchulCode };
+}
+
+function normalizeNeisDate(raw, label) {
+  const cleaned = raw.replaceAll("-", "").replaceAll(".", "");
+  if (!/^\d{8}$/.test(cleaned)) {
+    throw new Error(`${label} must be YYYYMMDD (8 digits).`);
+  }
+  return cleaned;
+}
+
+function parseNeisYmdToUtc(ymd, label) {
+  const year = Number.parseInt(ymd.slice(0, 4), 10);
+  const month = Number.parseInt(ymd.slice(4, 6), 10);
+  const day = Number.parseInt(ymd.slice(6, 8), 10);
+  const time = Date.UTC(year, month - 1, day);
+  const roundTrip = new Date(time);
+  if (
+    roundTrip.getUTCFullYear() !== year ||
+    roundTrip.getUTCMonth() !== month - 1 ||
+    roundTrip.getUTCDate() !== day
+  ) {
+    throw new Error(`${label} must be a valid calendar date.`);
+  }
+  return time;
+}
+
+function normalizeNeisPagination(query) {
+  const pIndex = parseInteger(query.pIndex ?? query.p_index, 1);
+  const pSize = parseInteger(query.pSize ?? query.p_size, 100);
+  if (pIndex < 1) {
+    throw new Error("pIndex must be >= 1.");
+  }
+  if (pSize < 1 || pSize > 1000) {
+    throw new Error("pSize must be between 1 and 1000.");
+  }
+  return { pIndex, pSize };
+}
+
+function deriveNeisSchoolYearAndSemester(ymd) {
+  const year = Number.parseInt(ymd.slice(0, 4), 10);
+  const month = Number.parseInt(ymd.slice(4, 6), 10);
+  return {
+    ay: String(month <= 2 ? year - 1 : year),
+    sem: month >= 3 && month <= 8 ? "1" : "2"
+  };
+}
+
+function normalizeNeisTimetableQuery(query) {
+  const { atptOfcdcScCode, sdSchulCode } = normalizeNeisSchoolKeys(query);
+
+  const dateRaw = trimOrNull(
+    query.date ?? query.timetableDate ?? query.timetable_date ?? query.allTiYmd ?? query.ALL_TI_YMD
+  );
+  if (!dateRaw) {
+    throw new Error("Provide date (ALL_TI_YMD) as YYYYMMDD.");
+  }
+  const allTiYmd = normalizeNeisDate(dateRaw, "date");
+  parseNeisYmdToUtc(allTiYmd, "date");
+
+  const gradeRaw = trimOrNull(query.grade ?? query.GRADE);
+  if (!gradeRaw || !/^\d{1,2}$/.test(gradeRaw)) {
+    throw new Error("Provide grade as a number (e.g. 1-6).");
+  }
+  const grade = String(Number.parseInt(gradeRaw, 10));
+
+  const classNm = trimOrNull(
+    query.classNm ?? query.class_nm ?? query.className ?? query.CLASS_NM
+  );
+
+  const level = (trimOrNull(query.level ?? query.schoolLevel ?? query.school_level) || "els").toLowerCase();
+  const dataset = NEIS_TIMETABLE_DATASETS.get(level);
+  if (!dataset) {
+    throw new Error("level must be one of els (초등), mis (중), his (고), sps (특수).");
+  }
+
+  const derived = deriveNeisSchoolYearAndSemester(allTiYmd);
+  const ayRaw = trimOrNull(query.ay ?? query.AY ?? query.year);
+  if (ayRaw && !/^\d{4}$/.test(ayRaw)) {
+    throw new Error("ay must be a 4-digit school year (e.g. 2026).");
+  }
+  const semRaw = trimOrNull(query.sem ?? query.SEM ?? query.semester);
+  if (semRaw && !["1", "2"].includes(semRaw)) {
+    throw new Error("sem must be 1 or 2.");
+  }
+
+  const { pIndex, pSize } = normalizeNeisPagination(query);
+
+  return {
+    atptOfcdcScCode,
+    sdSchulCode,
+    allTiYmd,
+    grade,
+    classNm,
+    level,
+    dataset,
+    ay: ayRaw || derived.ay,
+    sem: semRaw || derived.sem,
+    pIndex,
+    pSize
+  };
+}
+
+function normalizeNeisClassesQuery(query, now = new Date()) {
+  const { atptOfcdcScCode, sdSchulCode } = normalizeNeisSchoolKeys(query);
+
+  const yearRaw = trimOrNull(query.year ?? query.ay ?? query.AY);
+  if (yearRaw && !/^\d{4}$/.test(yearRaw)) {
+    throw new Error("year must be a 4-digit school year (e.g. 2026).");
+  }
+  const ay = yearRaw || deriveNeisSchoolYearAndSemester(formatKstDate(now)).ay;
+
+  const gradeRaw = trimOrNull(query.grade ?? query.GRADE);
+  if (gradeRaw && !/^\d{1,2}$/.test(gradeRaw)) {
+    throw new Error("grade must be a number (e.g. 1-6).");
+  }
+  const grade = gradeRaw ? String(Number.parseInt(gradeRaw, 10)) : null;
+
+  const { pIndex, pSize } = normalizeNeisPagination(query);
+
+  return { atptOfcdcScCode, sdSchulCode, ay, grade, pIndex, pSize };
+}
+
+function normalizeNeisScheduleQuery(query) {
+  const { atptOfcdcScCode, sdSchulCode } = normalizeNeisSchoolKeys(query);
+
+  const fromRaw = trimOrNull(
+    query.from ?? query.fromDate ?? query.from_date ?? query.aaFromYmd ?? query.AA_FROM_YMD
+  );
+  if (!fromRaw) {
+    throw new Error("Provide from (AA_FROM_YMD) as YYYYMMDD.");
+  }
+  const fromYmd = normalizeNeisDate(fromRaw, "from");
+
+  const toRaw = trimOrNull(
+    query.to ?? query.toDate ?? query.to_date ?? query.aaToYmd ?? query.AA_TO_YMD
+  );
+  const toYmd = toRaw ? normalizeNeisDate(toRaw, "to") : fromYmd;
+
+  const fromTime = parseNeisYmdToUtc(fromYmd, "from");
+  const toTime = parseNeisYmdToUtc(toYmd, "to");
+  if (fromTime > toTime) {
+    throw new Error("from must be earlier than or equal to to.");
+  }
+  const rangeDays = Math.round((toTime - fromTime) / 86400000) + 1;
+  if (rangeDays > NEIS_SCHEDULE_MAX_RANGE_DAYS) {
+    throw new Error(`Date range must be ${NEIS_SCHEDULE_MAX_RANGE_DAYS} days or fewer.`);
+  }
+
+  const { pIndex, pSize } = normalizeNeisPagination(query);
+
+  return { atptOfcdcScCode, sdSchulCode, fromYmd, toYmd, pIndex, pSize };
+}
+
+function compareNumericStrings(a, b) {
+  const left = Number.parseInt(a, 10);
+  const right = Number.parseInt(b, 10);
+  const leftFinite = Number.isFinite(left);
+  const rightFinite = Number.isFinite(right);
+  if (leftFinite && rightFinite) {
+    return left - right;
+  }
+  if (leftFinite) {
+    return -1;
+  }
+  if (rightFinite) {
+    return 1;
+  }
+  return String(a ?? "").localeCompare(String(b ?? ""), "ko");
+}
+
+function parseNeisDatasetPayload(body, dataset) {
+  let parsed;
+  try {
+    parsed = JSON.parse(body);
+  } catch {
+    return { status: "error", message: "NEIS upstream returned a non-JSON response." };
+  }
+
+  const readResult = (value) =>
+    value && typeof value === "object" && value.RESULT && typeof value.RESULT.CODE === "string"
+      ? value.RESULT
+      : null;
+
+  const topResult = readResult(parsed);
+  const entries = parsed && Array.isArray(parsed[dataset]) ? parsed[dataset] : null;
+
+  let headResult = null;
+  let listTotalCount = null;
+  const rows = [];
+  if (entries) {
+    for (const entry of entries) {
+      if (entry && Array.isArray(entry.head)) {
+        for (const headEntry of entry.head) {
+          if (headEntry && headEntry.list_total_count !== undefined) {
+            listTotalCount = headEntry.list_total_count;
+          } else if (headEntry && headEntry.LIST_TOTAL_COUNT !== undefined) {
+            listTotalCount = headEntry.LIST_TOTAL_COUNT;
+          }
+          headResult = readResult(headEntry) || headResult;
+        }
+      }
+      if (entry && Array.isArray(entry.row)) {
+        rows.push(...entry.row);
+      }
+    }
+  }
+
+  const result = headResult || topResult;
+  if (result && result.CODE.startsWith("ERROR")) {
+    return {
+      status: "error",
+      message: `NEIS upstream error ${result.CODE}: ${result.MESSAGE || ""}`.trim()
+    };
+  }
+  if (!entries || rows.length === 0) {
+    return {
+      status: "empty",
+      message: (result && result.MESSAGE) || "해당하는 데이터가 없습니다."
+    };
+  }
+  return { status: "ok", rows, listTotalCount };
+}
+
 function normalizeBlueRibbonNearbyQuery(query) {
   const latitude = parseFloatValue(query.latitude ?? query.lat);
   const longitude = parseFloatValue(query.longitude ?? query.lng);
@@ -1181,6 +1433,47 @@ async function proxyNeisSchoolInfoRequest({
   url.searchParams.set("pSize", String(pSize));
   url.searchParams.set("ATPT_OFCDC_SC_CODE", atptOfcdcScCode);
   url.searchParams.set("SCHUL_NM", schulNm);
+
+  const response = await fetchImpl(url, {
+    signal: AbortSignal.timeout(20000)
+  });
+
+  return {
+    statusCode: response.status,
+    contentType: response.headers.get("content-type") || "application/json; charset=utf-8",
+    body: await response.text()
+  };
+}
+
+async function proxyNeisDatasetRequest({
+  apiKey,
+  dataset,
+  params = {},
+  pIndex = 1,
+  pSize = 100,
+  fetchImpl = global.fetch
+}) {
+  if (!apiKey) {
+    return {
+      statusCode: 503,
+      contentType: "application/json; charset=utf-8",
+      body: JSON.stringify({
+        error: "upstream_not_configured",
+        message: "KEDU_INFO_KEY is not configured on the proxy server."
+      })
+    };
+  }
+
+  const url = new URL(`${NEIS_HUB_BASE_URL}/${dataset}`);
+  url.searchParams.set("KEY", apiKey);
+  url.searchParams.set("Type", "json");
+  url.searchParams.set("pIndex", String(pIndex));
+  url.searchParams.set("pSize", String(pSize));
+  for (const [name, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== "") {
+      url.searchParams.set(name, String(value));
+    }
+  }
 
   const response = await fetchImpl(url, {
     signal: AbortSignal.timeout(20000)
@@ -3212,6 +3505,231 @@ function buildServer({ env = process.env, provider = null, now = () => new Date(
     return payload;
   });
 
+  async function handleNeisDatasetRoute({
+    request,
+    reply,
+    route,
+    normalize,
+    dataset,
+    upstreamParams,
+    mapRows,
+    emptyHint,
+    queryPayload
+  }) {
+    let normalized;
+
+    try {
+      normalized = normalize(request.query || {});
+    } catch (error) {
+      reply.code(400);
+      return {
+        error: "bad_request",
+        message: error.message
+      };
+    }
+
+    const cacheKey = makeCacheKey({
+      route,
+      ...normalized
+    });
+    const cached = cache.get(cacheKey);
+    if (cached) {
+      return {
+        ...cached,
+        proxy: {
+          ...cached.proxy,
+          cache: {
+            hit: true,
+            ttl_ms: config.neisDailyCacheTtlMs
+          }
+        }
+      };
+    }
+
+    if (!config.keduInfoKey) {
+      reply.code(503);
+      return {
+        error: "upstream_not_configured",
+        message: "KEDU_INFO_KEY is not configured on the proxy server.",
+        proxy: {
+          name: config.proxyName,
+          cache: {
+            hit: false,
+            ttl_ms: config.neisDailyCacheTtlMs
+          }
+        }
+      };
+    }
+
+    const datasetName = dataset(normalized);
+    let upstream;
+    try {
+      upstream = await proxyNeisDatasetRequest({
+        apiKey: config.keduInfoKey,
+        dataset: datasetName,
+        params: upstreamParams(normalized),
+        pIndex: normalized.pIndex,
+        pSize: normalized.pSize
+      });
+    } catch (error) {
+      reply.code(error.statusCode && error.statusCode >= 400 ? error.statusCode : 502);
+      return {
+        error: error.code || "proxy_error",
+        message: error.message
+      };
+    }
+
+    if (upstream.statusCode < 200 || upstream.statusCode >= 300) {
+      reply.code(502);
+      return {
+        error: "upstream_error",
+        message: `NEIS upstream returned HTTP ${upstream.statusCode}.`
+      };
+    }
+
+    const parsedBody = parseNeisDatasetPayload(upstream.body, datasetName);
+    if (parsedBody.status === "error") {
+      reply.code(502);
+      return {
+        error: "upstream_error",
+        message: parsedBody.message
+      };
+    }
+
+    const rows = parsedBody.status === "ok" ? mapRows(parsedBody.rows, normalized) : [];
+    const payload = {
+      rows,
+      total: parsedBody.status === "ok" ? (parsedBody.listTotalCount ?? rows.length) : 0,
+      query: queryPayload(normalized),
+      proxy: {
+        name: config.proxyName,
+        cache: {
+          hit: false,
+          ttl_ms: config.neisDailyCacheTtlMs
+        },
+        requested_at: new Date().toISOString()
+      }
+    };
+    if (parsedBody.status === "empty") {
+      payload.info = {
+        code: "INFO-200",
+        message: parsedBody.message,
+        hint: emptyHint
+      };
+    }
+
+    cache.set(cacheKey, payload, config.neisDailyCacheTtlMs);
+    return payload;
+  }
+
+  app.get("/v1/neis/timetable", async (request, reply) => handleNeisDatasetRoute({
+    request,
+    reply,
+    route: "neis-timetable",
+    normalize: normalizeNeisTimetableQuery,
+    dataset: (normalized) => normalized.dataset,
+    upstreamParams: (normalized) => ({
+      ATPT_OFCDC_SC_CODE: normalized.atptOfcdcScCode,
+      SD_SCHUL_CODE: normalized.sdSchulCode,
+      AY: normalized.ay,
+      SEM: normalized.sem,
+      ALL_TI_YMD: normalized.allTiYmd,
+      GRADE: normalized.grade,
+      CLASS_NM: normalized.classNm
+    }),
+    mapRows: (rows) => rows
+      .map((row) => ({
+        date: row.ALL_TI_YMD ?? null,
+        period: row.PERIO ?? null,
+        subject: row.ITRT_CNTNT ?? null,
+        grade: row.GRADE ?? null,
+        class_nm: row.CLASS_NM ?? null
+      }))
+      .sort((a, b) =>
+        String(a.date ?? "").localeCompare(String(b.date ?? "")) ||
+        compareNumericStrings(a.period, b.period) ||
+        compareNumericStrings(a.class_nm, b.class_nm)
+      ),
+    emptyHint: "휴업일이거나 미공개일 수 있음 — /v1/neis/schedule로 학사일정 확인",
+    queryPayload: (normalized) => ({
+      education_office_code: normalized.atptOfcdcScCode,
+      school_code: normalized.sdSchulCode,
+      date: normalized.allTiYmd,
+      grade: normalized.grade,
+      class_nm: normalized.classNm,
+      level: normalized.level,
+      dataset: normalized.dataset,
+      ay: normalized.ay,
+      sem: normalized.sem,
+      p_index: normalized.pIndex,
+      p_size: normalized.pSize
+    })
+  }));
+
+  app.get("/v1/neis/classes", async (request, reply) => handleNeisDatasetRoute({
+    request,
+    reply,
+    route: "neis-classes",
+    normalize: (query) => normalizeNeisClassesQuery(query, now()),
+    dataset: () => "classInfo",
+    upstreamParams: (normalized) => ({
+      ATPT_OFCDC_SC_CODE: normalized.atptOfcdcScCode,
+      SD_SCHUL_CODE: normalized.sdSchulCode,
+      AY: normalized.ay,
+      GRADE: normalized.grade
+    }),
+    mapRows: (rows, normalized) => rows
+      .filter((row) => !normalized.grade || String(row.GRADE ?? "") === normalized.grade)
+      .map((row) => ({
+        ay: row.AY ?? null,
+        grade: row.GRADE ?? null,
+        class_nm: row.CLASS_NM ?? null
+      }))
+      .sort((a, b) =>
+        compareNumericStrings(a.grade, b.grade) ||
+        compareNumericStrings(a.class_nm, b.class_nm)
+      ),
+    emptyHint: "해당 학년도 학급 정보가 아직 공개되지 않았을 수 있음 — year를 전년도로 바꿔 확인",
+    queryPayload: (normalized) => ({
+      education_office_code: normalized.atptOfcdcScCode,
+      school_code: normalized.sdSchulCode,
+      year: normalized.ay,
+      grade: normalized.grade,
+      p_index: normalized.pIndex,
+      p_size: normalized.pSize
+    })
+  }));
+
+  app.get("/v1/neis/schedule", async (request, reply) => handleNeisDatasetRoute({
+    request,
+    reply,
+    route: "neis-schedule",
+    normalize: normalizeNeisScheduleQuery,
+    dataset: () => "SchoolSchedule",
+    upstreamParams: (normalized) => ({
+      ATPT_OFCDC_SC_CODE: normalized.atptOfcdcScCode,
+      SD_SCHUL_CODE: normalized.sdSchulCode,
+      AA_FROM_YMD: normalized.fromYmd,
+      AA_TO_YMD: normalized.toYmd
+    }),
+    mapRows: (rows) => rows
+      .map((row) => ({
+        date: row.AA_YMD ?? null,
+        event_name: row.EVENT_NM ?? null,
+        day_off: NEIS_DAY_OFF_PATTERN.test(String(row.SBTR_DD_SC_NM ?? ""))
+      }))
+      .sort((a, b) => String(a.date ?? "").localeCompare(String(b.date ?? ""))),
+    emptyHint: "해당 기간에 공개된 학사일정이 없을 수 있음 — 날짜 범위를 넓혀 확인",
+    queryPayload: (normalized) => ({
+      education_office_code: normalized.atptOfcdcScCode,
+      school_code: normalized.sdSchulCode,
+      from: normalized.fromYmd,
+      to: normalized.toYmd,
+      p_index: normalized.pIndex,
+      p_size: normalized.pSize
+    })
+  }));
+
   app.get("/v1/korean-stock/base-info", async (request, reply) => {
     let normalized;
 
@@ -3460,8 +3978,11 @@ module.exports = {
   normalizeLhNoticeSearchQuery,
   normalizeOpinetAroundQuery,
   normalizeOpinetDetailQuery,
+  normalizeNeisClassesQuery,
+  normalizeNeisScheduleQuery,
   normalizeNeisSchoolMealQuery,
   normalizeNeisSchoolSearchQuery,
+  normalizeNeisTimetableQuery,
   normalizeNaverShoppingSearchQuery,
   normalizeParkingLotSearchQuery,
   normalizeRealEstateQuery,
@@ -3470,6 +3991,7 @@ module.exports = {
   proxyAirKoreaRequest,
   proxyData4LibraryRequest,
   proxyHrfcoWaterLevelRequest,
+  proxyNeisDatasetRequest,
   proxyNeisSchoolMealRequest,
   proxyNeisSchoolInfoRequest,
   proxyKmaWeatherRequest,

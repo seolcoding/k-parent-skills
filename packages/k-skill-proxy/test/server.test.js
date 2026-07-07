@@ -2154,6 +2154,386 @@ test("neis school-meal maps rejected upstream fetches to a 502 proxy error", asy
   });
 });
 
+const SAMPLE_NEIS_TIMETABLE_JSON = JSON.stringify({
+  elsTimetable: [
+    {
+      head: [
+        { list_total_count: 2 },
+        { RESULT: { CODE: "INFO-000", MESSAGE: "정상 처리되었습니다." } }
+      ]
+    },
+    {
+      row: [
+        {
+          ATPT_OFCDC_SC_CODE: "B10",
+          SD_SCHUL_CODE: "7130110",
+          AY: "2026",
+          SEM: "1",
+          ALL_TI_YMD: "20260410",
+          GRADE: "3",
+          CLASS_NM: "2",
+          PERIO: "2",
+          ITRT_CNTNT: "수학",
+          LOAD_DTM: "20260409"
+        },
+        {
+          ATPT_OFCDC_SC_CODE: "B10",
+          SD_SCHUL_CODE: "7130110",
+          AY: "2026",
+          SEM: "1",
+          ALL_TI_YMD: "20260410",
+          GRADE: "3",
+          CLASS_NM: "2",
+          PERIO: "1",
+          ITRT_CNTNT: "국어",
+          LOAD_DTM: "20260409"
+        }
+      ]
+    }
+  ]
+});
+
+const SAMPLE_NEIS_INFO_200_JSON = JSON.stringify({
+  RESULT: { CODE: "INFO-200", MESSAGE: "해당하는 데이터가 없습니다." }
+});
+
+test("neis timetable endpoint returns 503 without KEDU_INFO_KEY", async (t) => {
+  const app = buildServer({ env: {} });
+
+  t.after(async () => {
+    await app.close();
+  });
+
+  const response = await app.inject({
+    method: "GET",
+    url: "/v1/neis/timetable?educationOfficeCode=B10&schoolCode=7130110&date=20260410&grade=3"
+  });
+
+  assert.equal(response.statusCode, 503);
+  assert.equal(response.json().error, "upstream_not_configured");
+});
+
+test("neis timetable endpoint returns 400 for invalid queries", async (t) => {
+  const app = buildServer({ env: { KEDU_INFO_KEY: "test-key" } });
+
+  t.after(async () => {
+    await app.close();
+  });
+
+  const missingGrade = await app.inject({
+    method: "GET",
+    url: "/v1/neis/timetable?educationOfficeCode=B10&schoolCode=7130110&date=20260410"
+  });
+  assert.equal(missingGrade.statusCode, 400);
+  assert.equal(missingGrade.json().error, "bad_request");
+
+  const badDate = await app.inject({
+    method: "GET",
+    url: "/v1/neis/timetable?educationOfficeCode=B10&schoolCode=7130110&date=2026041&grade=3"
+  });
+  assert.equal(badDate.statusCode, 400);
+  assert.equal(badDate.json().error, "bad_request");
+
+  const badLevel = await app.inject({
+    method: "GET",
+    url: "/v1/neis/timetable?educationOfficeCode=B10&schoolCode=7130110&date=20260410&grade=3&level=uni"
+  });
+  assert.equal(badLevel.statusCode, 400);
+  assert.match(badLevel.json().message, /level/);
+});
+
+test("neis timetable endpoint proxies rows, derives AY/SEM, and caches with the daily TTL", async (t) => {
+  const originalFetch = global.fetch;
+  let fetchedUrl = "";
+  let fetchCalls = 0;
+  global.fetch = async (url) => {
+    fetchCalls += 1;
+    fetchedUrl = String(url);
+    return new Response(SAMPLE_NEIS_TIMETABLE_JSON, {
+      status: 200,
+      headers: { "content-type": "application/json;charset=UTF-8" }
+    });
+  };
+
+  const app = buildServer({
+    env: {
+      KEDU_INFO_KEY: "neis-key",
+      KSKILL_PROXY_NEIS_DAILY_CACHE_TTL_MS: "43200000"
+    }
+  });
+
+  t.after(async () => {
+    global.fetch = originalFetch;
+    await app.close();
+  });
+
+  const url = "/v1/neis/timetable?educationOfficeCode=B10&schoolCode=7130110&date=2026-04-10&grade=3&classNm=2";
+  const first = await app.inject({ method: "GET", url });
+  const second = await app.inject({ method: "GET", url });
+
+  assert.equal(first.statusCode, 200);
+  assert.deepEqual(first.json().rows, [
+    { date: "20260410", period: "1", subject: "국어", grade: "3", class_nm: "2" },
+    { date: "20260410", period: "2", subject: "수학", grade: "3", class_nm: "2" }
+  ]);
+  assert.equal(first.json().total, 2);
+  assert.equal(first.json().query.date, "20260410");
+  assert.equal(first.json().query.level, "els");
+  assert.equal(first.json().query.ay, "2026");
+  assert.equal(first.json().query.sem, "1");
+  assert.equal(first.json().proxy.cache.hit, false);
+  assert.equal(first.json().proxy.cache.ttl_ms, 43200000);
+  assert.equal(second.json().proxy.cache.hit, true);
+  assert.equal(second.json().proxy.cache.ttl_ms, 43200000);
+  assert.equal(fetchCalls, 1);
+  assert.ok(fetchedUrl.includes("open.neis.go.kr/hub/elsTimetable"));
+  assert.ok(fetchedUrl.includes("KEY=neis-key"));
+  assert.ok(fetchedUrl.includes("ATPT_OFCDC_SC_CODE=B10"));
+  assert.ok(fetchedUrl.includes("SD_SCHUL_CODE=7130110"));
+  assert.ok(fetchedUrl.includes("ALL_TI_YMD=20260410"));
+  assert.ok(fetchedUrl.includes("AY=2026"));
+  assert.ok(fetchedUrl.includes("SEM=1"));
+  assert.ok(fetchedUrl.includes("GRADE=3"));
+  assert.ok(fetchedUrl.includes("CLASS_NM=2"));
+});
+
+test("neis timetable endpoint maps INFO-200 to an empty cached result", async (t) => {
+  const originalFetch = global.fetch;
+  let fetchedUrl = "";
+  let fetchCalls = 0;
+  global.fetch = async (url) => {
+    fetchCalls += 1;
+    fetchedUrl = String(url);
+    return new Response(SAMPLE_NEIS_INFO_200_JSON, {
+      status: 200,
+      headers: { "content-type": "application/json;charset=UTF-8" }
+    });
+  };
+
+  const app = buildServer({ env: { KEDU_INFO_KEY: "neis-key" } });
+
+  t.after(async () => {
+    global.fetch = originalFetch;
+    await app.close();
+  });
+
+  const url = "/v1/neis/timetable?educationOfficeCode=B10&schoolCode=7130165&date=20260110&grade=2&level=mis";
+  const first = await app.inject({ method: "GET", url });
+  const second = await app.inject({ method: "GET", url });
+
+  assert.equal(first.statusCode, 200);
+  assert.deepEqual(first.json().rows, []);
+  assert.equal(first.json().info.code, "INFO-200");
+  assert.equal(first.json().info.message, "해당하는 데이터가 없습니다.");
+  assert.match(first.json().info.hint, /\/v1\/neis\/schedule/);
+  assert.ok(fetchedUrl.includes("open.neis.go.kr/hub/misTimetable"));
+  assert.ok(fetchedUrl.includes("AY=2025"), "1~2월 date는 전년도 학년도로 매핑되어야 한다");
+  assert.ok(fetchedUrl.includes("SEM=2"), "1~2월 date는 2학기로 매핑되어야 한다");
+  assert.equal(second.json().proxy.cache.hit, true, "빈 결과도 daily TTL로 캐시되어야 한다");
+  assert.equal(fetchCalls, 1);
+});
+
+test("neis timetable endpoint maps rejected upstream fetches to a 502 proxy error", async (t) => {
+  const originalFetch = global.fetch;
+  global.fetch = async () => {
+    throw new Error("boom");
+  };
+
+  const app = buildServer({ env: { KEDU_INFO_KEY: "k" } });
+
+  t.after(async () => {
+    global.fetch = originalFetch;
+    await app.close();
+  });
+
+  const response = await app.inject({
+    method: "GET",
+    url: "/v1/neis/timetable?educationOfficeCode=B10&schoolCode=7130110&date=20260410&grade=3"
+  });
+
+  assert.equal(response.statusCode, 502);
+  assert.deepEqual(response.json(), {
+    error: "proxy_error",
+    message: "boom"
+  });
+});
+
+const SAMPLE_NEIS_CLASSES_JSON = JSON.stringify({
+  classInfo: [
+    {
+      head: [
+        { list_total_count: 3 },
+        { RESULT: { CODE: "INFO-000", MESSAGE: "정상 처리되었습니다." } }
+      ]
+    },
+    {
+      row: [
+        { AY: "2026", GRADE: "2", CLASS_NM: "1" },
+        { AY: "2026", GRADE: "1", CLASS_NM: "10" },
+        { AY: "2026", GRADE: "1", CLASS_NM: "2" }
+      ]
+    }
+  ]
+});
+
+test("neis classes endpoint proxies classInfo and sorts rows numerically", async (t) => {
+  const originalFetch = global.fetch;
+  let fetchedUrl = "";
+  global.fetch = async (url) => {
+    fetchedUrl = String(url);
+    return new Response(SAMPLE_NEIS_CLASSES_JSON, {
+      status: 200,
+      headers: { "content-type": "application/json;charset=UTF-8" }
+    });
+  };
+
+  const app = buildServer({ env: { KEDU_INFO_KEY: "neis-key" } });
+
+  t.after(async () => {
+    global.fetch = originalFetch;
+    await app.close();
+  });
+
+  const response = await app.inject({
+    method: "GET",
+    url: "/v1/neis/classes?educationOfficeCode=B10&schoolCode=7130110&year=2026"
+  });
+
+  assert.equal(response.statusCode, 200);
+  assert.deepEqual(response.json().rows, [
+    { ay: "2026", grade: "1", class_nm: "2" },
+    { ay: "2026", grade: "1", class_nm: "10" },
+    { ay: "2026", grade: "2", class_nm: "1" }
+  ]);
+  assert.equal(response.json().total, 3);
+  assert.equal(response.json().query.year, "2026");
+  assert.equal(response.json().proxy.cache.ttl_ms, 86400000);
+  assert.ok(fetchedUrl.includes("open.neis.go.kr/hub/classInfo"));
+  assert.ok(fetchedUrl.includes("AY=2026"));
+});
+
+test("neis classes endpoint maps INFO-200 and defaults the school year", async (t) => {
+  const originalFetch = global.fetch;
+  let fetchedUrl = "";
+  global.fetch = async (url) => {
+    fetchedUrl = String(url);
+    return new Response(SAMPLE_NEIS_INFO_200_JSON, {
+      status: 200,
+      headers: { "content-type": "application/json;charset=UTF-8" }
+    });
+  };
+
+  const app = buildServer({ env: { KEDU_INFO_KEY: "neis-key" } });
+
+  t.after(async () => {
+    global.fetch = originalFetch;
+    await app.close();
+  });
+
+  const response = await app.inject({
+    method: "GET",
+    url: "/v1/neis/classes?educationOfficeCode=B10&schoolCode=7130110&grade=1"
+  });
+
+  assert.equal(response.statusCode, 200);
+  assert.deepEqual(response.json().rows, []);
+  assert.equal(response.json().info.code, "INFO-200");
+  assert.ok(typeof response.json().info.hint === "string" && response.json().info.hint.length > 0);
+  assert.match(fetchedUrl, /AY=\d{4}/, "year 미지정 시 KST 오늘 기준 학년도가 기본값이어야 한다");
+  assert.ok(fetchedUrl.includes("GRADE=1"));
+});
+
+const SAMPLE_NEIS_SCHEDULE_JSON = JSON.stringify({
+  SchoolSchedule: [
+    {
+      head: [
+        { list_total_count: 3 },
+        { RESULT: { CODE: "INFO-000", MESSAGE: "정상 처리되었습니다." } }
+      ]
+    },
+    {
+      row: [
+        { AA_YMD: "20260505", EVENT_NM: "어린이날", SBTR_DD_SC_NM: "공휴일" },
+        { AA_YMD: "20260502", EVENT_NM: "개교기념일", SBTR_DD_SC_NM: "휴업일" },
+        { AA_YMD: "20260504", EVENT_NM: "상담주간", SBTR_DD_SC_NM: "해당없음" }
+      ]
+    }
+  ]
+});
+
+test("neis schedule endpoint proxies SchoolSchedule and flags day_off rows", async (t) => {
+  const originalFetch = global.fetch;
+  const fetchedUrls = [];
+  global.fetch = async (url) => {
+    fetchedUrls.push(String(url));
+    return new Response(SAMPLE_NEIS_SCHEDULE_JSON, {
+      status: 200,
+      headers: { "content-type": "application/json;charset=UTF-8" }
+    });
+  };
+
+  const app = buildServer({ env: { KEDU_INFO_KEY: "neis-key" } });
+
+  t.after(async () => {
+    global.fetch = originalFetch;
+    await app.close();
+  });
+
+  const ranged = await app.inject({
+    method: "GET",
+    url: "/v1/neis/schedule?educationOfficeCode=B10&schoolCode=7010057&from=2026-05-01&to=2026-05-31"
+  });
+
+  assert.equal(ranged.statusCode, 200);
+  assert.deepEqual(ranged.json().rows, [
+    { date: "20260502", event_name: "개교기념일", day_off: true },
+    { date: "20260504", event_name: "상담주간", day_off: false },
+    { date: "20260505", event_name: "어린이날", day_off: true }
+  ]);
+  assert.equal(ranged.json().query.from, "20260501");
+  assert.equal(ranged.json().query.to, "20260531");
+  assert.ok(fetchedUrls[0].includes("open.neis.go.kr/hub/SchoolSchedule"));
+  assert.ok(fetchedUrls[0].includes("AA_FROM_YMD=20260501"));
+  assert.ok(fetchedUrls[0].includes("AA_TO_YMD=20260531"));
+
+  const singleDay = await app.inject({
+    method: "GET",
+    url: "/v1/neis/schedule?educationOfficeCode=B10&schoolCode=7010057&from=20260505"
+  });
+
+  assert.equal(singleDay.statusCode, 200);
+  assert.equal(singleDay.json().query.to, "20260505", "to 미지정 시 from과 같아야 한다");
+  assert.ok(fetchedUrls[1].includes("AA_TO_YMD=20260505"));
+});
+
+test("neis schedule endpoint validates the date range", async (t) => {
+  const app = buildServer({ env: { KEDU_INFO_KEY: "neis-key" } });
+
+  t.after(async () => {
+    await app.close();
+  });
+
+  const reversed = await app.inject({
+    method: "GET",
+    url: "/v1/neis/schedule?educationOfficeCode=B10&schoolCode=7010057&from=20260401&to=20260301"
+  });
+  assert.equal(reversed.statusCode, 400);
+  assert.equal(reversed.json().error, "bad_request");
+
+  const tooWide = await app.inject({
+    method: "GET",
+    url: "/v1/neis/schedule?educationOfficeCode=B10&schoolCode=7010057&from=20260301&to=20260402"
+  });
+  assert.equal(tooWide.statusCode, 400);
+  assert.match(tooWide.json().message, /31/);
+
+  const missingFrom = await app.inject({
+    method: "GET",
+    url: "/v1/neis/schedule?educationOfficeCode=B10&schoolCode=7010057"
+  });
+  assert.equal(missingFrom.statusCode, 400);
+});
+
 test("household waste info endpoint requires SGG_NM filter", async (t) => {
   const app = buildServer({
     env: { DATA_GO_KR_API_KEY: "test-key" }

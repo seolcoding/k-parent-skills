@@ -18,6 +18,9 @@
 - `GET /v1/parking-lots/search` — 전국주차장정보표준데이터 기반 근처 공영주차장 검색(`DATA_GO_KR_API_KEY`)
 - `GET /v1/neis/school-search` — 나이스 학교기본정보(교육청명·학교명 검색)
 - `GET /v1/neis/school-meal` — 나이스 급식식단정보(일자별 메뉴)
+- `GET /v1/neis/timetable` — 나이스 시간표(초·중·고·특수, `level`로 학교급 선택; 일자·학년 기준, AY/SEM 자동 도출)
+- `GET /v1/neis/classes` — 나이스 학급정보(학년도별 학년·반 목록, 숫자 정렬)
+- `GET /v1/neis/schedule` — 나이스 학사일정(기간 조회 최대 31일, 휴업일 여부 `day_off` 플래그)
 - `GET /v1/mfds/drug-safety/lookup` — 식약처 의약품개요정보(e약은요) + 안전상비의약품 정보(`DATA_GO_KR_API_KEY`)
 - `GET /v1/mfds/food-safety/search` — 식약처 부적합 식품 + 식품안전나라 회수 정보(`DATA_GO_KR_API_KEY`, 선택적 `FOODSAFETYKOREA_API_KEY`)
 - `GET /v1/mfds/food-safety/health-food-ingredient` — 식약처 건강기능식품 원재료성 제품 조회
@@ -54,7 +57,7 @@
 - `HRFCO_OPEN_API_KEY` — 프록시 서버 쪽 한강홍수통제소 upstream key
 - `BLUE_RIBBON_SESSION_ID` — 프록시 서버 쪽 블루리본 공개 검색 세션 식별자
 - `OPINET_API_KEY` — 프록시 서버 쪽 Opinet upstream key
-- `KEDU_INFO_KEY` — 프록시 서버 쪽 나이스(NEIS) 교육정보 개방 포털 Open API 인증키 (`school-search`, `school-meal`)
+- `KEDU_INFO_KEY` — 프록시 서버 쪽 나이스(NEIS) 교육정보 개방 포털 Open API 인증키 (`school-search`, `school-meal`, `timetable`, `classes`, `schedule`)
 - `DATA4LIBRARY_AUTH_KEY` — 프록시 서버 쪽 도서관 정보나루 Open API 인증키 (`data4library/*`)
 - `FOODSAFETYKOREA_API_KEY` — 프록시 서버 쪽 식품안전나라 회수정보 live key (`mfds/food-safety/search`; 없으면 sample feed fallback)
 - `KRX_API_KEY` — 프록시 서버 쪽 KRX Open API upstream key
@@ -63,6 +66,7 @@
 - `KSKILL_PROXY_PORT` — 기본 `4020`
 - `KSKILL_PROXY_NAME` — 기본 `k-skill-proxy`
 - `KSKILL_PROXY_CACHE_TTL_MS` — 기본 `300000`
+- `KSKILL_PROXY_NEIS_DAILY_CACHE_TTL_MS` — 나이스 `timetable`/`classes`/`schedule` 라우트 전용 캐시 TTL, 기본 `86400000` (24시간). 시간표·학사일정은 일 단위 적재라 길게 캐시하며, INFO-200 빈 결과도 같은 TTL로 캐시해 재조회 폭주를 막는다
 - `KSKILL_PROXY_RATE_LIMIT_WINDOW_MS` — 기본 `60000`
 - `KSKILL_PROXY_RATE_LIMIT_MAX` — 기본 `60`
 - `DATA_GO_KR_API_KEY` - 공공데이터포털 에서 쓰이는 API 인증키 (`household-waste`, `parking-lots`, `real-estate`, `mfds-drug-safety`, `mfds-food-safety`, `lh-notice`). 각 서비스는 공공데이터포털에서 별도 "활용신청" 승인이 필요하다. 키를 발급받은 뒤에는 [LH 임대공고문 정보](https://www.data.go.kr/data/15058530/openapi.do) 페이지에서도 활용신청을 눌러 동일 키를 활성화해야 `lh-notice` 라우트가 성공한다. 미활성 상태에서는 upstream이 HTTP 403 Forbidden을 돌려주고 proxy는 `upstream_error`로 변환한다.
@@ -117,6 +121,38 @@ curl -fsS --get 'http://127.0.0.1:4020/v1/neis/school-meal' \
   --data-urlencode 'schoolCode=7010123' \
   --data-urlencode 'mealDate=20260410'
 ```
+
+시간표 (`level`은 `els` 초등(기본)/`mis` 중/`his` 고/`sps` 특수; `ay`/`sem` 미지정 시 `date`에서 학년도·학기 자동 도출):
+
+```bash
+curl -fsS --get 'http://127.0.0.1:4020/v1/neis/timetable' \
+  --data-urlencode 'educationOfficeCode=B10' \
+  --data-urlencode 'schoolCode=7130110' \
+  --data-urlencode 'date=20260410' \
+  --data-urlencode 'grade=3' \
+  --data-urlencode 'classNm=2'
+```
+
+학급 목록 (`year` 미지정 시 KST 오늘 기준 학년도, 1~2월은 전년도):
+
+```bash
+curl -fsS --get 'http://127.0.0.1:4020/v1/neis/classes' \
+  --data-urlencode 'educationOfficeCode=B10' \
+  --data-urlencode 'schoolCode=7130110' \
+  --data-urlencode 'year=2026'
+```
+
+학사일정 (`to` 미지정 시 `from`과 동일, 범위는 최대 31일):
+
+```bash
+curl -fsS --get 'http://127.0.0.1:4020/v1/neis/schedule' \
+  --data-urlencode 'educationOfficeCode=B10' \
+  --data-urlencode 'schoolCode=7010057' \
+  --data-urlencode 'from=20260501' \
+  --data-urlencode 'to=20260531'
+```
+
+시간표·학급·학사일정 라우트는 NEIS 원본 row를 소문자 스키마로 정규화해 `rows` 배열로 돌려주고, 조건에 맞는 데이터가 없으면(INFO-200) `rows: []` + `info: {code: "INFO-200", message, hint}` 형태의 200 응답을 준다(빈 결과도 daily TTL 캐시).
 
 생활쓰레기 배출정보 예시 (`DATA_GO_KR_API_KEY` 필요). `pageNo`·`numOfRows`는 반드시 `1`·`100`:
 
