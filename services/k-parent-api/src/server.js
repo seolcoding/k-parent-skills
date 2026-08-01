@@ -22,6 +22,7 @@ function assertLoopbackHost(host) {
 
 function createKParentApiServer(options = {}) {
   const memory = options.memoryStore || createInMemoryStore({ now: options.now });
+  const actions = options.actionStore || new Map();
   const now = typeof options.now === "function" ? options.now : () => new Date();
 
   return http.createServer(async (request, response) => {
@@ -35,20 +36,21 @@ function createKParentApiServer(options = {}) {
           mode: "local-only",
           memory: "ephemeral",
           sideEffectExecution: "disabled",
-          layers: ["skill", "policy", "memory", "tool"],
+          layers: ["runtime", "policy", "memory"],
         });
       }
 
       if (request.method === "POST" && url.pathname === "/v1/actions") {
         const body = await readJsonBody(request);
-        const action = createActionRequest(body, { now: now() });
-        storeAction(memory, action, now());
+        const { id: _ignoredClientId, ...actionInput } = body;
+        const action = createActionRequest(actionInput, { now: now() });
+        storeAction(actions, memory, action, now());
         return sendJson(response, 201, action);
       }
 
       const actionMatch = url.pathname.match(/^\/v1\/actions\/([^/]+)$/);
       if (request.method === "GET" && actionMatch) {
-        const action = getAction(memory, decodeURIComponent(actionMatch[1]));
+        const action = getAction(actions, decodeURIComponent(actionMatch[1]));
         if (!action) return sendError(response, 404, "action_not_found", "Action request was not found.");
         return sendJson(response, 200, action);
       }
@@ -56,11 +58,11 @@ function createKParentApiServer(options = {}) {
       const decisionMatch = url.pathname.match(/^\/v1\/actions\/([^/]+)\/decision$/);
       if (request.method === "POST" && decisionMatch) {
         const id = decodeURIComponent(decisionMatch[1]);
-        const action = getAction(memory, id);
+        const action = getAction(actions, id);
         if (!action) return sendError(response, 404, "action_not_found", "Action request was not found.");
         const body = await readJsonBody(request);
         const decided = decideActionRequest(action, body, { now: now() });
-        storeAction(memory, decided, now());
+        storeAction(actions, memory, decided, now());
         return sendJson(response, 200, decided);
       }
 
@@ -91,18 +93,35 @@ function createKParentApiServer(options = {}) {
   });
 }
 
-function storeAction(memory, action, now) {
+function storeAction(actions, memory, action, now) {
+  actions.set(action.id, action);
   memory.set({
     scope: MEMORY_SCOPE.APPROVAL_AUDIT,
     key: action.id,
-    value: action,
+    value: toAuditEnvelope(action),
     ttlSeconds: 24 * 60 * 60,
     createdAt: now,
   });
 }
 
-function getAction(memory, id) {
-  return memory.get(MEMORY_SCOPE.APPROVAL_AUDIT, id)?.value || null;
+function getAction(actions, id) {
+  return actions.get(id) || null;
+}
+
+function toAuditEnvelope(action) {
+  return {
+    actionId: action.id,
+    type: action.type,
+    status: action.status,
+    risk: action.risk,
+    scopeDigest: action.scopeDigest,
+    approvalDigest: action.approvalDigest,
+    decision: action.approval?.decision || null,
+    actor: action.approval?.actor || null,
+    createdAt: action.createdAt,
+    decidedAt: action.approval?.decidedAt || null,
+    expiresAt: action.approval?.expiresAt || null,
+  };
 }
 
 function readJsonBody(request) {
@@ -161,4 +180,5 @@ module.exports = {
   getAction,
   readJsonBody,
   storeAction,
+  toAuditEnvelope,
 };

@@ -4,7 +4,7 @@
 
 ## 경계
 
-- 네트워크 호출은 k-skill-proxy(`/v1/...`)만. 다른 도메인 호출·클라이언트 API 키 내장 금지.
+- 네트워크 호출은 k-parent-proxy(`/v1/...`)만. 다른 도메인 호출·클라이언트 API 키 내장 금지.
 - 아이 식별정보는 학교/학년/반까지만, SharedPreferences 로컬 저장. 이름 등 개인정보는 받지 않는다. 서버 전송 없음.
 - fixture-first: 오프라인 데모 경로(번들 fixture + 문항 은행)가 항상 동작해야 한다. proxy 연동은 `--dart-define=PROXY_BASE_URL=...` 오버라이드.
 

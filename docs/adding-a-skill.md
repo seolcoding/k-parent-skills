@@ -161,10 +161,10 @@ packages/k-parent-my-new-skill/
 
 ### C. 프록시 경유 스킬
 
-upstream API 키를 사용자에게 노출하지 않으려면 `k-skill-proxy`를 경유한다.
+NEIS 읽기 API 키를 사용자에게 노출하지 않으려면 `k-parent-proxy`를 경유한다.
 
-1. `packages/k-skill-proxy/src/server.js`에 새 route 추가
-2. `SKILL.md` `전형적 흐름`에 `curl $KSKILL_PROXY_BASE_URL/v1/...` 형태로 호출 작성
+1. 부모용 read-only NEIS 범위인지 먼저 확인하고 `packages/k-parent-proxy/src/server.js`에 allowlist route 추가
+2. `SKILL.md` `전형적 흐름`에 `curl $KPARENT_PROXY_BASE_URL/v1/...` 형태로 호출 작성
 3. upstream API 키는 서버의 `~/.config/k-parent-skills/secrets.env`에만 보관
 
 프록시 서버는 main 브랜치에 merge되어야 프로덕션에 반영된다 (`AGENTS.md` 참고; `CLAUDE.md`는 호환 symlink).
@@ -237,7 +237,7 @@ npm run ci
 - [ ] `docs/features/k-parent-my-new-skill.md` 작성
 - [ ] 새 제품 스킬이면 `README.md`, `docs/skill-routing.md`, `docs/roadmap.md`, `docs/departments/README.md` 갱신
 - [ ] `ssot/registry/skills.json`에 ID·layer·상태·canonical 경로를 등록하고 `npm run ssot:generate` 실행
-- [ ] 프록시 경유라면 `packages/k-skill-proxy/src/server.js`에 route 추가, `packages/k-skill-proxy/README.md`와 `docs/features/k-skill-proxy.md`에 route/env 문서화, main merge 전에는 프로덕션 미반영임을 기록
+- [ ] 프록시 경유라면 `packages/k-parent-proxy/src/server.js`에 route 추가, `packages/k-parent-proxy/README.md`와 `docs/features/k-parent-proxy.md`에 route/env 문서화, main merge 전에는 프로덕션 미반영임을 기록
 - [ ] 프록시 경유 또는 시크릿 경계가 있으면 `docs/setup.md`, `docs/security-and-secrets.md`, `docs/sources.md`, `.env.example`, `OWNER-TASKS.md` 중 관련 표면 갱신
 - [ ] 시크릿이 있다면 사용자/client env와 proxy 운영자 env를 구분하고 `docs/security-and-secrets.md`의 기본 secrets 파일에 운영자 전용 key를 넣지 않음
 - [ ] 범위나 아키텍처가 바뀌면 `docs/architecture.md`, `AGENTS.md` 중 관련 파일 업데이트 (`CLAUDE.md`는 `AGENTS.md` symlink)

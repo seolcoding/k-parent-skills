@@ -84,15 +84,15 @@ Base `https://open.neis.go.kr/hub/<endpoint>`, 인증키 `KEDU_INFO_KEY`(발급 
 
 아키텍처 원칙 (기존 컨벤션 재사용):
 
-- 안드로이드 앱은 NEIS·LLM 키를 절대 내장하지 않는다. `packages/k-skill-proxy` 패턴대로 좁은 allowlist 라우트(`/api/neis/school-search`, `/api/neis/timetable` 등)를 추가하고 캐시(시간표는 일 단위)로 감싼다.
-- 퀴즈 생성 LLM 호출도 proxy를 경유시켜 키를 서버에 둔다.
+- 안드로이드 앱은 NEIS·LLM 키를 절대 내장하지 않는다. `packages/k-parent-proxy` 패턴대로 좁은 allowlist 라우트(`/api/neis/school-search`, `/api/neis/timetable` 등)를 추가하고 캐시(시간표는 일 단위)로 감싼다.
+- 퀴즈 생성 LLM은 현재 범위 밖이다. 도입 시 read-only NEIS proxy와 분리된 인증 runtime에 키를 둔다.
 - 아이 식별정보(학교/학년/반)는 앱 로컬(DataStore)에만 저장하고 서버에 남기지 않는다.
 - 부모 도메인 출력 필드 규약(학년, 지역, 날짜, 출처, 확인일)을 퀴즈 메타데이터에도 적용한다.
 
 ## 다음 단계
 
 1. `skills/k-parent-quiz-maker` concept `SKILL.md` 스캐폴딩 (저장소 규칙: SKILL.md-only로 시작).
-2. `k-skill-proxy`에 NEIS 학교검색/시간표 allowlist 라우트 추가 + 캐시.
+2. `k-parent-proxy`에 NEIS 학교검색/시간표 allowlist 라우트 추가 + 캐시.
 3. 2022 개정 성취기준 과목×학년 JSON 번들 1차 수집(초등 우선; NCIC 자료실 문서 기반, 확인일 기록).
 4. 안드로이드 MVP: 온보딩(학교/학년/반) → 오늘 시간표 → 퀴즈 5문항 화면.
 5. 에듀넷 콘텐츠 API 신청 조건 확인(로그인 후) 및 `OWNER-TASKS.md` 반영.

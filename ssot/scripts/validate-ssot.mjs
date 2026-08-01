@@ -1,6 +1,8 @@
 import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import Ajv2020 from "ajv/dist/2020.js";
+import addFormats from "ajv-formats";
 
 const ssotRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repoRoot = path.resolve(ssotRoot, "..");
@@ -34,7 +36,7 @@ const enums = {
   verification: new Set(["undocumented", "documented", "fixture-tested", "offline-tested", "live-probed", "production-verified"]),
   deployment: new Set(["not-applicable", "repo-only", "local-only", "not-deployed", "deployment-unverified", "deployed", "archived"]),
   availability: new Set(["current", "archived", "historical-evidence", "remote-pointer"]),
-  tracking: new Set(["git", "ignored", "external", "git-history"]),
+  tracking: new Set(["git", "ignored", "external", "local-pointer", "git-history"]),
   sensitivity: new Set(["public", "synthetic", "internal", "personal-pointer", "restricted"]),
 };
 
@@ -46,6 +48,18 @@ const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
 const errors = [];
 const registries = [];
+const schemaPath = path.join(ssotRoot, "schema", "artifact.schema.json");
+let validateSchema;
+
+try {
+  const schema = JSON.parse(await readFile(schemaPath, "utf8"));
+  const ajv = new Ajv2020({ allErrors: true, strict: true });
+  addFormats(ajv);
+  validateSchema = ajv.compile(schema);
+} catch (error) {
+  console.error(`SSOT schema cannot be compiled: ${error.message}`);
+  process.exit(1);
+}
 
 for (const registryName of registryNames) {
   const registryPath = path.join(ssotRoot, "registry", `${registryName}.json`);
@@ -56,6 +70,13 @@ for (const registryName of registryNames) {
   } catch (error) {
     errors.push(`${registryName}: cannot parse registry: ${error.message}`);
     continue;
+  }
+
+  if (!validateSchema(parsed)) {
+    for (const schemaError of validateSchema.errors || []) {
+      const location = schemaError.instancePath || "/";
+      errors.push(`${registryName}${location}: schema ${schemaError.message}`);
+    }
   }
 
   if (parsed.schemaVersion !== 1) {
@@ -77,6 +98,7 @@ for (const registryName of registryNames) {
 
 const allItems = registries.flatMap(({ items }) => items);
 const ids = new Set();
+const canonicalOwners = new Map();
 
 for (const { name: registryName, defaultLayer, items } of registries) {
   for (const [index, item] of items.entries()) {
@@ -136,8 +158,25 @@ for (const { name: registryName, defaultLayer, items } of registries) {
       }
     }
 
-    if (item.tracking === "external" && !path.isAbsolute(item.canonicalPath) && !/^https:\/\//.test(item.canonicalPath)) {
-      errors.push(`${label}: external canonicalPath must be absolute or HTTPS`);
+    if (item.tracking === "external" && !/^https:\/\//.test(item.canonicalPath)) {
+      errors.push(`${label}: public external canonicalPath must use HTTPS`);
+    }
+
+    if (item.tracking === "local-pointer" && !/^local:\/\/[a-z0-9][a-z0-9._/-]+$/.test(item.canonicalPath)) {
+      errors.push(`${label}: local-pointer canonicalPath must use a redacted local:// identifier`);
+    }
+
+    if (typeof item.canonicalPath === "string") {
+      if (/^(?:\/Users\/|\/home\/|[A-Za-z]:\\\\)/.test(item.canonicalPath)) {
+        errors.push(`${label}: canonicalPath must not expose a machine-specific absolute path`);
+      }
+      const canonicalKey = `${item.tracking}:${item.canonicalPath}`;
+      const existingOwner = canonicalOwners.get(canonicalKey);
+      if (existingOwner) {
+        errors.push(`${label}: canonicalPath is already owned by ${existingOwner}`);
+      } else {
+        canonicalOwners.set(canonicalKey, label);
+      }
     }
 
     for (const field of referenceArrays) {

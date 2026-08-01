@@ -65,13 +65,15 @@ function createActionRequest(action = {}, options = {}) {
   if (!action.label && !action.title) throw new Error("action label or title is required.");
 
   const createdAt = toIso(options.now || new Date());
+  const id = action.id || randomUUID();
   const scope = action.scope || {};
+  const officialUrl = action.officialUrl || null;
   assertSafeApprovalScope(scope);
   const actionPolicy = getActionPolicy(action.type);
   const status = actionPolicy.requiresApproval ? HITL_STATUS.AWAITING_APPROVAL : HITL_STATUS.APPROVED;
 
   return {
-    id: action.id || randomUUID(),
+    id,
     type: action.type,
     label: action.label || action.title,
     status,
@@ -81,7 +83,8 @@ function createActionRequest(action = {}, options = {}) {
     oneTimeApproval: true,
     scope,
     scopeDigest: digestApprovalScope(scope),
-    officialUrl: action.officialUrl || null,
+    approvalDigest: digestActionApproval({ id, type: action.type, scope, officialUrl }),
+    officialUrl,
     requestedBy: action.requestedBy || "agent",
     createdAt,
     approval: actionPolicy.requiresApproval
@@ -106,12 +109,15 @@ function decideActionRequest(request, decision = {}, options = {}) {
   if (!["approved", "rejected"].includes(decision.decision)) {
     throw new Error("decision must be approved or rejected.");
   }
+  if (Object.prototype.hasOwnProperty.call(decision, "expiresAt")) {
+    throw new Error("approval expiry is fixed by action policy and cannot be overridden.");
+  }
 
   const decidedAt = toIso(options.now || decision.decidedAt || new Date());
   const nextStatus = decision.decision === "approved" ? HITL_STATUS.APPROVED : HITL_STATUS.REJECTED;
   const ttlMinutes = getActionPolicy(request.type).approvalTtlMinutes;
   const expiresAt = nextStatus === HITL_STATUS.APPROVED
-    ? toIso(decision.expiresAt || new Date(Date.parse(decidedAt) + ttlMinutes * 60_000))
+    ? toIso(new Date(Date.parse(decidedAt) + ttlMinutes * 60_000))
     : null;
 
   return {
@@ -135,17 +141,27 @@ function assertActionExecutable(request, options = {}) {
     throw new Error(`action is not approved: ${request.status || "unknown"}`);
   }
   if (request.execution) throw new Error("one-time approval has already been consumed.");
+  if (!Object.prototype.hasOwnProperty.call(options, "scope")) {
+    throw new Error("execution scope is required.");
+  }
 
   const now = Date.parse(toIso(options.now || new Date()));
   if (request.approval?.expiresAt && now >= Date.parse(request.approval.expiresAt)) {
     throw new Error("approval has expired.");
   }
 
-  if (options.scope) {
-    assertSafeApprovalScope(options.scope);
-    if (digestApprovalScope(options.scope) !== request.scopeDigest) {
-      throw new Error("execution scope does not match the approved scope.");
-    }
+  assertSafeApprovalScope(options.scope);
+  if (digestApprovalScope(options.scope) !== request.scopeDigest) {
+    throw new Error("execution scope does not match the approved scope.");
+  }
+  if (digestActionApproval(request) !== request.approvalDigest) {
+    throw new Error("action id, type, official URL, or approved scope was modified after approval.");
+  }
+  const actionPolicy = getActionPolicy(request.type);
+  if (request.risk !== actionPolicy.risk
+    || request.requiresApproval !== actionPolicy.requiresApproval
+    || request.requiresOfficialSiteHandoff !== actionPolicy.requiresOfficialSiteHandoff) {
+    throw new Error("action policy fields were modified after request creation.");
   }
 
   return true;
@@ -155,6 +171,14 @@ function markActionExecuted(request, execution = {}, options = {}) {
   assertActionExecutable(request, { now: options.now, scope: execution.scope });
   const executedAt = toIso(options.now || execution.executedAt || new Date());
   const actor = execution.actor || "executor";
+  if (getActionPolicy(request.type).requiresOfficialSiteHandoff) {
+    if (!isHttpsUrl(request.officialUrl)) {
+      throw new Error("official HTTPS URL is required for this action.");
+    }
+    if (actor !== "official-site-handoff") {
+      throw new Error("this action must be executed through official-site-handoff.");
+    }
+  }
 
   return {
     ...request,
@@ -181,6 +205,24 @@ function expireActionRequest(request, options = {}) {
 function digestApprovalScope(scope) {
   assertSafeApprovalScope(scope);
   return createHash("sha256").update(stableStringify(scope)).digest("hex");
+}
+
+function digestActionApproval(request) {
+  if (!request?.id || !request?.type) throw new Error("action id and type are required for approval digest.");
+  return createHash("sha256").update(stableStringify({
+    id: request.id,
+    type: request.type,
+    scope: request.scope,
+    officialUrl: request.officialUrl || null,
+  })).digest("hex");
+}
+
+function isHttpsUrl(value) {
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 function assertSafeApprovalScope(value, currentPath = "scope") {
@@ -229,6 +271,7 @@ module.exports = {
   assertSafeApprovalScope,
   createActionRequest,
   decideActionRequest,
+  digestActionApproval,
   digestApprovalScope,
   expireActionRequest,
   getActionPolicy,

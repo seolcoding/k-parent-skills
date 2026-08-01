@@ -66,6 +66,7 @@ k-parent-skills/
 ├── packages/
 │   ├── k-parent-core/            # 공통 스키마·가드레일·freshness
 │   ├── k-parent-memory/          # 최소화된 세션·참조·공개 캐시·승인 감사 메모리
+│   ├── k-parent-proxy/           # 부모 전용 NEIS 읽기 allowlist proxy
 │   ├── k-parent-brief/           # 부모용 Today Brief 합성
 │   ├── k-parent-calendar/        # 캘린더 후보·중복제거·ICS
 │   ├── k-parent-doc-extract/     # 안내문 텍스트 → 일정·준비물·마감 추출

@@ -32,6 +32,39 @@ const FORBIDDEN_MEMORY_KEYS = Object.freeze([
   "paymentpassword",
 ]);
 
+const SESSION_FIELDS = Object.freeze([
+  "region",
+  "date",
+  "dateRange",
+  "workflowStep",
+  "locale",
+  "timezone",
+  "publicResourceRefs",
+  "selectionRefs",
+]);
+
+const KNOWLEDGE_FIELDS = Object.freeze([
+  "sourceUrl",
+  "fetchedAt",
+  "resourceId",
+  "etag",
+  "payloadDigest",
+]);
+
+const APPROVAL_AUDIT_FIELDS = Object.freeze([
+  "actionId",
+  "type",
+  "status",
+  "risk",
+  "scopeDigest",
+  "approvalDigest",
+  "decision",
+  "actor",
+  "createdAt",
+  "decidedAt",
+  "expiresAt",
+]);
+
 function createMemoryRecord(input = {}, options = {}) {
   const scope = input.scope;
   if (!Object.values(MEMORY_SCOPE).includes(scope)) {
@@ -45,9 +78,11 @@ function createMemoryRecord(input = {}, options = {}) {
   }
 
   assertSafeMemoryValue(input.value);
-  if (scope === MEMORY_SCOPE.PROFILE_REF) assertProfileReference(input.value);
-  if (scope === MEMORY_SCOPE.KNOWLEDGE && input.sensitivity && input.sensitivity !== "public") {
-    throw new Error("knowledge memory must contain public data only.");
+  assertScopeValue(scope, input.value, input);
+
+  const sensitivity = input.sensitivity || "internal";
+  if (scope === MEMORY_SCOPE.KNOWLEDGE && sensitivity !== "public") {
+    throw new Error("knowledge memory requires explicit public sensitivity and provenance.");
   }
 
   const createdAt = toIso(options.now || input.createdAt || new Date());
@@ -67,7 +102,7 @@ function createMemoryRecord(input = {}, options = {}) {
     scope,
     key: input.key,
     value: clone(input.value),
-    sensitivity: input.sensitivity || (scope === MEMORY_SCOPE.KNOWLEDGE ? "public" : "internal"),
+    sensitivity,
     sourceRef: input.sourceRef || null,
     createdAt,
     updatedAt: createdAt,
@@ -149,6 +184,79 @@ function assertProfileReference(value) {
   }
 }
 
+function assertScopeValue(scope, value, input) {
+  if (scope === MEMORY_SCOPE.PROFILE_REF) {
+    assertProfileReference(value);
+    return;
+  }
+  if (scope === MEMORY_SCOPE.SESSION) {
+    assertAllowlistedObject(value, SESSION_FIELDS, "session");
+    for (const [key, child] of Object.entries(value)) assertSessionField(key, child);
+    return;
+  }
+  if (scope === MEMORY_SCOPE.KNOWLEDGE) {
+    assertAllowlistedObject(value, KNOWLEDGE_FIELDS, "knowledge");
+    if (!isHttpsUrl(value.sourceUrl) || !isIsoTimestamp(value.fetchedAt)) {
+      throw new Error("knowledge memory requires sourceUrl (HTTPS) and fetchedAt (ISO timestamp).");
+    }
+    if (input.sourceRef !== value.sourceUrl) {
+      throw new Error("knowledge memory sourceRef must match value.sourceUrl provenance.");
+    }
+    for (const [key, child] of Object.entries(value)) assertBoundedScalar(key, child);
+    return;
+  }
+  if (scope === MEMORY_SCOPE.APPROVAL_AUDIT) {
+    assertAllowlistedObject(value, APPROVAL_AUDIT_FIELDS, "approval_audit");
+    for (const field of ["actionId", "type", "status", "risk", "scopeDigest", "approvalDigest", "createdAt"]) {
+      if (typeof value[field] !== "string" || !value[field]) {
+        throw new Error(`approval_audit.${field} is required.`);
+      }
+    }
+    for (const [key, child] of Object.entries(value)) assertBoundedScalar(key, child);
+  }
+}
+
+function assertAllowlistedObject(value, allowedFields, label) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${label} memory must be a structured object.`);
+  }
+  const unknown = Object.keys(value).filter((key) => !allowedFields.includes(key));
+  if (unknown.length) throw new Error(`${label} memory field is not allowed: ${unknown[0]}`);
+}
+
+function assertSessionField(key, value) {
+  if (key === "dateRange") {
+    assertAllowlistedObject(value, ["start", "end"], "session.dateRange");
+    for (const [rangeKey, child] of Object.entries(value)) assertBoundedScalar(rangeKey, child);
+    return;
+  }
+  if (key === "publicResourceRefs" || key === "selectionRefs") {
+    if (!Array.isArray(value) || value.length > 20) throw new Error(`session.${key} must be an array of at most 20 references.`);
+    value.forEach((child) => assertBoundedScalar(key, child));
+    return;
+  }
+  assertBoundedScalar(key, value);
+}
+
+function assertBoundedScalar(key, value) {
+  if (value === null || typeof value === "boolean") return;
+  if (typeof value === "number" && Number.isFinite(value)) return;
+  if (typeof value === "string" && value.length <= 256 && !/[\r\n]/.test(value)) return;
+  throw new Error(`${key} must be a bounded scalar value.`);
+}
+
+function isHttpsUrl(value) {
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function isIsoTimestamp(value) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}T/.test(value) && !Number.isNaN(Date.parse(value));
+}
+
 function isExpired(record, now) {
   return Boolean(record.expiresAt && Date.parse(record.expiresAt) <= new Date(now).getTime());
 }
@@ -173,9 +281,12 @@ function clone(value) {
 }
 
 module.exports = {
+  APPROVAL_AUDIT_FIELDS,
   DEFAULT_TTL_SECONDS,
   FORBIDDEN_MEMORY_KEYS,
+  KNOWLEDGE_FIELDS,
   MEMORY_SCOPE,
+  SESSION_FIELDS,
   assertProfileReference,
   assertSafeMemoryValue,
   createInMemoryStore,

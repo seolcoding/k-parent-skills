@@ -66,14 +66,14 @@ packages/
 ├── k-parent-source-naver/         # Naver shopping/blog and collector runner
 ├── k-parent-source-coupang/       # Coupang Partners product adapter
 ├── k-parent-source-youtube/       # YouTube safe-search content adapter
-└── k-skill-proxy/                 # existing free/public API proxy extended with parent-domain routes
+└── k-parent-proxy/                 # parent-only read-only NEIS app proxy
 
 scripts/
 ├── validate-skills.sh
 ├── build-region-codes.js
 ├── data_portal_k_parent_*.mjs
 ├── neis_*_probe.py
-└── run-k-skill-proxy.sh
+└── run-k-parent-proxy.sh
 
 python-packages/
 └── README.md                      # no Python package exists yet

@@ -151,7 +151,7 @@ OAS 기준 2026-04-30 row column은 다음 36개다.
 1. 최신 OAS에서 `YYYYMMDD`가 가장 큰 endpoint를 선택한다.
 2. `목록명`, `설명`, `키워드`, `분류체계`, `제공기관`, `공간범위`를 대상으로 검색한다.
 3. `목록유형`이 API이거나 `제공형태`/`확장자(데이터포맷)`이 OpenAPI/JSON/XML인 항목을 우선 본다.
-4. `비용부과유무`가 무료인지 확인한다. 이 repo의 `k-skill-proxy`는 무료 API만 붙인다.
+4. `비용부과유무`가 무료인지 확인한다. 이 repo의 `k-parent-proxy`는 무료 API만 붙인다.
 5. `심의 유형`, `신청가능 트래픽`, `업데이트 주기`, `데이터 한계`, `기타 유의사항`을 기록한다.
 6. `목록 URL`로 상세 페이지를 열어 실제 endpoint, request parameter, 활용신청 필요 여부를 확인한다.
 7. 부모용 정규화 필드(`child age/grade`, `region`, `date range`, `source URL`, `deadline`, `cost`, `required documents`, `reservation/application status`, `confirmation date`)에 매핑 가능한지 판단한다.

@@ -14,7 +14,7 @@
 ## P1 — Runtime과 데이터 운영
 
 - [ ] crawler/adapter refresh scheduler, retry, provenance, freshness monitor를 설계한다.
-- [ ] `k-skill-proxy`의 부모용 NEIS·교육 route를 전용 `k-parent-proxy`로 추출한다.
+- [ ] `k-parent-proxy`의 부모용 NEIS·교육 route를 전용 `k-parent-proxy`로 추출한다.
 - [ ] 부모와 무관한 전환용 proxy route 제거 계획을 별도 변경으로 실행한다.
 - [ ] 학교알리미·유치원알리미·data.go.kr 후보 endpoint를 live probe로 재확인한다.
 - [ ] 운영 관측성, rate limit, alert, backup/restore, incident runbook을 갖춘다.

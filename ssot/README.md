@@ -32,6 +32,11 @@ first, then update the corresponding registry entry and regenerate the index.
 | `products.json` | Apps, proxy surfaces, collections, and development tools |
 | `legacy.json` | Historical, archived, adjacent, and predecessor artifacts |
 
+Machine-specific archives and private documents use redacted `local://`
+identifiers with `tracking: "local-pointer"`. Their actual paths belong only in
+the gitignored `ssot/local/paths.json`; see `ssot/local/README.md`. Public
+registries and the generated index must never expose home-directory paths.
+
 Every registry item separates three dimensions:
 
 - `maturity`: how much product or implementation exists;

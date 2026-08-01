@@ -31,7 +31,7 @@
 
 - `apps/k-parent-quiz-app` — Flutter 단일 앱(안드로이드 1차 표면 + 웹 데모).
 - 아이 식별정보(학교/학년/반)는 기기 로컬(SharedPreferences)에만 저장하고 서버에 남기지 않는다. 이름 등 개인정보는 받지 않는다.
-- 클라이언트에는 어떤 API 키도 넣지 않는다. 네트워크 호출은 `packages/k-skill-proxy`의 allowlist 라우트만 쓰고, 기본은 번들 fixture 기반 오프라인 모드다.
+- 클라이언트에는 어떤 API 키도 넣지 않는다. 네트워크 호출은 `packages/k-parent-proxy`의 allowlist 라우트만 쓰고, 기본은 번들 fixture 기반 오프라인 모드다.
 - 문항은 기기에서 생성하지 않는다. 사전 생성 은행 `assets/data/quiz_bank.json`에서 과목+학년군 필터 → 날짜 seed 셔플 → 5문항 선별만 한다(재도전 시 attempt를 seed에 가산).
 
 ## proxy 계약
@@ -44,7 +44,7 @@ GET /v1/neis/schedule?educationOfficeCode=<교육청코드>&schoolCode=<학교�
 ```
 
 - 시간표·학급·학사일정 응답은 NEIS 원본 row를 소문자 스키마 `rows` 배열로 정규화하고, 조건에 맞는 데이터가 없으면(INFO-200) `rows: []`와 `info` 힌트를 담은 200을 준다.
-- 빈 결과를 포함해 일 단위 TTL 캐시를 적용한다. 파라미터 상세는 `packages/k-skill-proxy/README.md` 참고.
+- 빈 결과를 포함해 일 단위 TTL 캐시를 적용한다. 파라미터 상세는 `packages/k-parent-proxy/README.md` 참고.
 
 ## 환경변수
 

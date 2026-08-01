@@ -1,13 +1,13 @@
 <!-- GENERATED FILE: run `npm run ssot:generate`; do not edit by hand. -->
 # K-Parent SSOT index
 
-This index contains **89 artifacts** from the machine-readable registries in [`ssot/registry/`](registry/).
+This index contains **90 artifacts** from the machine-readable registries in [`ssot/registry/`](registry/).
 Maturity, verification, and deployment are independent status axes.
 
 | Registry | Artifacts |
 | --- | ---: |
 | [skills](registry/skills.json) | 18 |
-| [packages](registry/packages.json) | 19 |
+| [packages](registry/packages.json) | 20 |
 | [apis](registry/apis.json) | 12 |
 | [crawlers](registry/crawlers.json) | 10 |
 | [datasets](registry/datasets.json) | 13 |
@@ -46,6 +46,7 @@ Maturity, verification, and deployment are independent status axes.
 | `packages.k-parent-core` | k-parent-core | `policy` | `implemented` | `offline-tested` | `not-applicable` | [`packages/k-parent-core`](../packages/k-parent-core) |
 | `packages.k-parent-doc-extract` | k-parent-doc-extract | `domain` | `implemented` | `offline-tested` | `not-applicable` | [`packages/k-parent-doc-extract`](../packages/k-parent-doc-extract) |
 | `packages.k-parent-memory` | k-parent-memory | `memory` | `implemented` | `offline-tested` | `not-applicable` | [`packages/k-parent-memory`](../packages/k-parent-memory) |
+| `packages.k-parent-proxy` | k-parent-proxy | `tool` | `implemented` | `offline-tested` | `not-applicable` | [`packages/k-parent-proxy`](../packages/k-parent-proxy) |
 | `packages.k-parent-quiz-core` | k-parent-quiz-core | `domain` | `implemented` | `offline-tested` | `not-applicable` | [`packages/k-parent-quiz-core`](../packages/k-parent-quiz-core) |
 | `packages.k-parent-source-childinfo` | k-parent-source-childinfo | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | [`packages/k-parent-source-childinfo`](../packages/k-parent-source-childinfo) |
 | `packages.k-parent-source-coupang` | k-parent-source-coupang | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | [`packages/k-parent-source-coupang`](../packages/k-parent-source-coupang) |
@@ -66,17 +67,17 @@ Maturity, verification, and deployment are independent status axes.
 | ID | Name | Layer | Maturity | Verification | Deployment | Canonical path |
 | --- | --- | --- | --- | --- | --- | --- |
 | `apis.childschoolinfo-open-api` | Kindergarten Info Open API | `adapter` | `research` | `live-probed` | `not-applicable` | [`docs/childschoolinfo_api_ref.md`](../docs/childschoolinfo_api_ref.md) |
-| `apis.coupang-partners` | Coupang Partners API | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | [`packages/k-parent-source-coupang`](../packages/k-parent-source-coupang) |
-| `apis.culture-portal` | Culture Portal API | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | [`packages/k-parent-source-culture`](../packages/k-parent-source-culture) |
+| `apis.coupang-partners` | Coupang Partners API | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | `https://developers.coupangcorp.com/` |
+| `apis.culture-portal` | Culture Portal API | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | `https://www.culture.go.kr/data/openapi/openapiList.do` |
 | `apis.data-go-kr-parent-catalog` | data.go.kr K-Parent catalog | `adapter` | `research` | `live-probed` | `not-applicable` | [`docs/data_portal_api_list.md`](../docs/data_portal_api_list.md) |
-| `apis.data4library` | Data4Library API | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | [`packages/k-parent-source-library`](../packages/k-parent-source-library) |
-| `apis.k-skill-proxy-neis` | k-skill proxy NEIS surface | `adapter` | `implemented` | `offline-tested` | `deployment-unverified` | [`packages/k-skill-proxy/src/server.js`](../packages/k-skill-proxy/src/server.js) |
-| `apis.naver-search` | Naver Search APIs | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | [`packages/k-parent-source-naver`](../packages/k-parent-source-naver) |
+| `apis.data4library` | Data4Library API | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | `https://data4library.kr/apiUtilization` |
+| `apis.k-parent-proxy-neis` | K-Parent proxy NEIS surface | `adapter` | `implemented` | `offline-tested` | `local-only` | [`packages/k-parent-proxy/src/server.js`](../packages/k-parent-proxy/src/server.js) |
+| `apis.naver-search` | Naver Search APIs | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | `https://developers.naver.com/docs/serviceapi/search/blog/blog.md` |
 | `apis.neis-open-api` | NEIS Open API | `adapter` | `operational` | `live-probed` | `not-applicable` | [`docs/neis_api_ref.md`](../docs/neis_api_ref.md) |
 | `apis.schoolinfo-open-api` | Schoolinfo Open API | `adapter` | `research` | `live-probed` | `not-applicable` | [`docs/schoolinfo_api_ref.md`](../docs/schoolinfo_api_ref.md) |
-| `apis.seoul-public-service` | Seoul Public Service Reservation API | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | [`packages/k-parent-source-seoul`](../packages/k-parent-source-seoul) |
-| `apis.tourapi` | Korea Tourism TourAPI | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | [`packages/k-parent-source-tourapi`](../packages/k-parent-source-tourapi) |
-| `apis.youtube-data` | YouTube Data API | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | [`packages/k-parent-source-youtube`](../packages/k-parent-source-youtube) |
+| `apis.seoul-public-service` | Seoul Public Service Reservation API | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | `https://data.seoul.go.kr/dataList/OA-2266/S/1/datasetView.do` |
+| `apis.tourapi` | Korea Tourism TourAPI | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | `https://apis.data.go.kr/B551011/KorService2` |
+| `apis.youtube-data` | YouTube Data API | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | `https://developers.google.com/youtube/v3/docs/search/list` |
 
 ## crawlers
 
@@ -102,8 +103,8 @@ Maturity, verification, and deployment are independent status axes.
 | `datasets.data-portal-candidates` | data.go.kr K-Parent candidate catalog | `data` | `research` | `live-probed` | `not-applicable` | `tmp/data_portal_k_parent_candidates.json` |
 | `datasets.data-portal-queue` | data.go.kr K-Parent apply review queue | `data` | `research` | `offline-tested` | `not-applicable` | `tmp/data_portal_k_parent_apply_queue.json` |
 | `datasets.data-portal-targets` | data.go.kr K-Parent integration targets | `data` | `research` | `offline-tested` | `not-applicable` | `tmp/data_portal_k_parent_targets.json` |
-| `datasets.kosis-child-safety-mortality` | KOSIS child safety accident mortality by region | `data` | `research` | `documented` | `not-applicable` | `/Users/sdh/100_Dev/120_Building/remotion-bar-race-chart/public/rawData/DT_1YL10005_아동_십만명당_안전사고사망률(시도).json` |
-| `datasets.kosis-parent-living-expenses` | KOSIS parent living-expense financing by region | `data` | `research` | `documented` | `not-applicable` | `/Users/sdh/100_Dev/120_Building/remotion-bar-race-chart/public/rawData/INH_1SSFA021R_부모_생활비_마련_방법(시도).json` |
+| `datasets.kosis-child-safety-mortality` | KOSIS child safety accident mortality by region | `data` | `research` | `documented` | `not-applicable` | `local://datasets/kosis-child-safety-mortality` |
+| `datasets.kosis-parent-living-expenses` | KOSIS parent living-expense financing by region | `data` | `research` | `documented` | `not-applicable` | `local://datasets/kosis-parent-living-expenses` |
 | `datasets.neis-notices-final-raw` | Nationwide school notice crawl final raw output | `data` | `operational` | `live-probed` | `not-applicable` | `tmp/neis_homepage_notice_all_schools_probe.json` |
 | `datasets.neis-notices-first-pass` | Nationwide school notice crawl first pass | `data` | `historical` | `live-probed` | `not-applicable` | `tmp/neis_homepage_notice_all_schools_probe.first_pass_12519.json` |
 | `datasets.neis-notices-report` | Nationwide school notice crawl archived generated report | `data` | `implemented` | `documented` | `not-applicable` | `https://github.com/seolcoding/k-parent-skill/blob/28462cdc547eccd13dafc0e3d526202c64ead1a0/docs/neis_homepage_notice_all_schools_probe.md` |
@@ -117,23 +118,23 @@ Maturity, verification, and deployment are independent status axes.
 | --- | --- | --- | --- | --- | --- | --- |
 | `products.k-parent-api` | K-Parent local runtime API | `runtime` | `prototype` | `offline-tested` | `local-only` | [`services/k-parent-api`](../services/k-parent-api) |
 | `products.k-parent-mobile-agent` | K-Parent mobile agent | `experience` | `concept` | `documented` | `not-deployed` | [`docs/features/k-parent-mobile-agent.md`](../docs/features/k-parent-mobile-agent.md) |
+| `products.k-parent-proxy` | K-Parent read-only NEIS proxy | `tool` | `implemented` | `offline-tested` | `local-only` | [`docs/features/k-parent-proxy.md`](../docs/features/k-parent-proxy.md) |
 | `products.k-parent-quiz-app` | K-Parent Quiz Flutter app | `experience` | `prototype` | `offline-tested` | `deployment-unverified` | [`apps/k-parent-quiz-app`](../apps/k-parent-quiz-app) |
 | `products.k-parent-skills-collection` | K-Parent skill collection | `experience` | `implemented` | `offline-tested` | `repo-only` | [`README.md`](../README.md) |
-| `products.k-skill-proxy` | K-Skill proxy parent API surface | `tool` | `implemented` | `offline-tested` | `deployment-unverified` | [`packages/k-skill-proxy`](../packages/k-skill-proxy) |
 | `products.quiz-dev-mcp` | Quiz development MCP server | `tool` | `implemented` | `offline-tested` | `local-only` | [`tools/quiz-dev-mcp`](../tools/quiz-dev-mcp) |
 
 ## legacy
 
 | ID | Name | Layer | Maturity | Verification | Deployment | Canonical path |
 | --- | --- | --- | --- | --- | --- | --- |
-| `legacy.busan-aidio` | Busan AIDIO parenting-radio deliverable | `archive` | `archived` | `documented` | `archived` | `/Users/sdh/200_Vault/280_Archives/281_Projects/Archived_Projects/부산_AIDIO` |
-| `legacy.edu-data-contest` | Education data contest archive | `archive` | `archived` | `documented` | `archived` | `/Users/sdh/800_Archives/880_ColdArchive/180_Archive/edu-data-contest` |
-| `legacy.forever-learn` | Forever Learn archive | `archive` | `archived` | `documented` | `archived` | `/Users/sdh/800_Archives/880_ColdArchive/180_Archive/forever_learn` |
-| `legacy.k-parent-ralphthon-video` | K-Parent Ralphthon demo video | `archive` | `archived` | `documented` | `archived` | `/Users/sdh/내 드라이브/k-parent-skill-ralphthon.mp4` |
+| `legacy.busan-aidio` | Busan AIDIO parenting-radio deliverable | `archive` | `archived` | `documented` | `archived` | `local://archives/busan-parenting-radio` |
+| `legacy.edu-data-contest` | Education data contest archive | `archive` | `archived` | `documented` | `archived` | `local://archives/education-data-contest` |
+| `legacy.forever-learn` | Forever Learn archive | `archive` | `archived` | `documented` | `archived` | `local://archives/forever-learn` |
+| `legacy.k-parent-ralphthon-video` | K-Parent Ralphthon demo video | `archive` | `archived` | `documented` | `archived` | `local://archives/k-parent-demo-video` |
 | `legacy.k-parent-skill-hackathon` | K-Parent hackathon prototype | `archive` | `historical` | `documented` | `archived` | `https://github.com/seolcoding/k-parent-skill-hackathon` |
-| `legacy.k-skill-ancestor` | k-skill ancestor repository | `archive` | `operational` | `documented` | `not-applicable` | `/Users/sdh/100_Dev/120_Building/k-skill` |
-| `legacy.kids-safe-browser` | Kids Safe Browser archive | `archive` | `archived` | `documented` | `archived` | `/Users/sdh/800_Archives/880_ColdArchive/Gdrive/externalSD/내 드라이브/Google AI Studio/Kids Safe Browser` |
+| `legacy.k-skill-ancestor` | k-skill ancestor repository | `archive` | `operational` | `documented` | `not-applicable` | `https://github.com/NomaDamas/k-skill` |
+| `legacy.kids-safe-browser` | Kids Safe Browser archive | `archive` | `archived` | `documented` | `archived` | `local://archives/kids-safe-browser` |
 | `legacy.kosis-mcp-history` | KOSIS MCP historical childcare artifacts | `archive` | `historical` | `documented` | `archived` | `kosis-mcp git history` |
-| `legacy.parent-master-plan` | Parental leave and revenue master-plan pointer | `archive` | `research` | `documented` | `not-applicable` | `/Users/sdh/내 드라이브/육아휴직 및 수익 파이프라인 구축 마스터 플랜.gdoc` |
+| `legacy.parent-master-plan` | Private parent business-plan pointer | `archive` | `research` | `documented` | `not-applicable` | `local://private-documents/parent-plan` |
 | `legacy.skillbuilder-crawler` | Skillbuilder crawler history | `archive` | `historical` | `documented` | `archived` | `skillbuilder_crawler` |
-| `legacy.windows-android-parental-control` | Windows and Android parental control research | `archive` | `research` | `documented` | `not-deployed` | `/Users/sdh/100_Dev/120_Building/windows_android_parental_control` |
+| `legacy.windows-android-parental-control` | Windows and Android parental control research | `archive` | `research` | `documented` | `not-deployed` | `local://repositories/windows-android-parental-control` |

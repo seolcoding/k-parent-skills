@@ -5,14 +5,16 @@ K-Parent 메모리는 대화를 전부 기억하는 데이터베이스가 아니
 
 | Scope | 저장 가능 항목 | 기본 보존 | 저장 금지 |
 | --- | --- | --- | --- |
-| `session` | 지역, 날짜 범위, 화면 단계 같은 일시 context | 30분 | 대화 원문, 자녀 식별자, credentials |
+| `session` | 지역, 날짜·날짜 범위, workflow 단계, locale/timezone, 공개 resource·selection reference | 30분 | 대화 원문, 자녀 식별자, credentials, 임의 필드 |
 | `profile_ref` | `local://`, `vault://`, `user-store://` opaque reference | 명시 삭제 전 | profile 본문, 이름, 생년월일, 학교 식별자 |
-| `knowledge` | 출처가 있는 공개 API/cache metadata | 24시간 | 가족·학생·계정 데이터 |
-| `approval_audit` | HITL 요청, scope digest, 결정, 만료 상태 | 24시간 | password, token, cookie, 인증서, 결제 비밀번호 |
+| `knowledge` | HTTPS 출처 URL·확인 시각·resource ID·etag·payload digest만 있는 공개 metadata | 24시간 | API payload 원문, 가족·학생·계정 데이터 |
+| `approval_audit` | action ID/type/status/risk, scope·approval digest, 결정·만료 metadata | 24시간 | action scope/label, password, token, cookie, 인증서, 결제 비밀번호 |
 
 `packages/k-parent-memory`는 이 계약과 process-local in-memory reference
 implementation을 제공한다. 레코드는 16 KiB로 제한되고 TTL은 최대 30일이다.
 이 구현은 재시작 시 모두 사라지므로 운영 persistence로 간주하지 않는다.
+각 scope는 allowlist 밖의 필드를 거부하며 `knowledge`는 호출자가
+`sensitivity: "public"`과 동일한 HTTPS `sourceRef`를 명시해야 한다.
 
 ## 서버 사용
 

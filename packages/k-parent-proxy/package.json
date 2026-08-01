@@ -1,0 +1,21 @@
+{
+  "name": "k-parent-proxy",
+  "version": "0.1.0",
+  "description": "Parent-only read-only NEIS proxy for K-Parent apps",
+  "license": "MIT",
+  "main": "src/server.js",
+  "files": ["src", "README.md"],
+  "engines": {"node": ">=18"},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seolcoding/k-parent-skills.git"
+  },
+  "dependencies": {
+    "k-parent-source-neis": "0.1.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "lint": "node --check src/server.js && node --check test/server.test.js",
+    "test": "node --test"
+  }
+}

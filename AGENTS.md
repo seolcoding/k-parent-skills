@@ -21,7 +21,7 @@ These rules are repo-specific and apply to everything under this directory.
 - Detailed user/developer docs live in `docs/features/<skill-name>.md`.
 - Node implementations live in `packages/<skill-name>` and are called from the skill folder.
 - Small deterministic Python or shell helpers live in `scripts/` or `<skill-name>/scripts/` depending on whether they are shared or skill-specific.
-- Free public API aggregation should use the existing `k-skill-proxy` pattern: narrow allowlisted routes, cache/rate-limit where useful, and no user-side API key exposure.
+- Parent app API aggregation uses `k-parent-proxy`: parent-only read routes, narrow allowlists, cache/rate-limit where useful, and no user-side API key exposure.
 - `apps/<app-name>` holds product surfaces (e.g. the Flutter quiz app) that consume skill/package assets. Apps live outside npm workspaces and `npm run ci`; they carry their own gates in a nested `AGENTS.md`. This coexists with the "do not flatten" rule — the skill collection stays the core.
 - `tools/<tool-name>` holds repo development tooling (e.g. the quiz-dev MCP server) outside npm workspaces, with zero or minimal dependencies.
 - Parent-specific outputs should normalize around: child age/grade, region, date range, source URL, deadline, cost, required documents, reservation/application status, and confirmation date.
@@ -85,17 +85,16 @@ These rules are repo-specific and apply to everything under this directory.
 
 ## Free API proxy policy
 
-- The built-in `k-skill-proxy` is for **free APIs only**.
-- Default posture: public read-only endpoint, **no proxy auth by default**.
-- Keep free-API proxy surfaces narrow, allowlisted, cache-backed, and rate-limited.
-- If abuse or operational issues appear later, add stricter controls then instead of preemptively requiring auth.
+- The built-in `k-parent-proxy` is for **free APIs only**.
+- Default posture is loopback/local or explicitly managed self-hosting; no public hosted endpoint is claimed.
+- Keep free-API proxy surfaces narrow, read-only, allowlisted, cache-backed, and rate-limited before any public exposure.
+- A future public deployment requires abuse controls, managed secrets, authentication or an explicitly reviewed anonymous-access policy, observability, and live canary evidence.
 
 ## Proxy server development
 
-- 개발 repo에서 proxy 코드를 수정하고, main에 merge하면 운영 배포 흐름으로 반영한다.
-- 운영 배포본은 환경별로 다를 수 있다. 새 환경에서는 `docs/architecture.md`와 실제 deploy 설정을 먼저 확인한다.
-- cron/pm2 방식의 자동 배포를 쓸 경우 원본 k-skill처럼 origin/main fetch → fast-forward pull → package-lock 변경 시 npm ci → pm2 restart 순서를 따른다.
-- proxy 서버 코드: `packages/k-skill-proxy/src/server.js`
-- proxy 서버 테스트: `packages/k-skill-proxy/test/server.test.js`
+- 현재 proxy는 local/self-host only이며 공개 hosted endpoint를 주장하지 않는다.
+- 운영 승격 전에는 rate limit, managed secret, 관측성, deploy pipeline, live canary evidence를 갖춘다.
+- proxy 서버 코드: `packages/k-parent-proxy/src/server.js`
+- proxy 서버 테스트: `packages/k-parent-proxy/test/server.test.js`
 - proxy 환경변수(API key 등)는 `~/.config/k-parent-skills/secrets.env` 또는 환경별 secret store에 넣고, 실행 스크립트에서 source한다. 기존 단수 경로는 읽기 호환만 제공한다.
-- **dev에서 route를 추가/수정한 뒤 main에 merge되기 전까지는 프로덕션 proxy에 반영되지 않는다.** 로컬 테스트는 `node packages/k-skill-proxy/src/server.js`로 직접 실행한다.
+- 로컬 테스트는 `node packages/k-parent-proxy/src/server.js`로 직접 실행한다.

@@ -2,14 +2,16 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 
 const { assertLoopbackHost, createKParentApiServer } = require("../src/server");
+const { MEMORY_SCOPE, createInMemoryStore } = require("../../../packages/k-parent-memory");
 
 test("runtime refuses non-loopback binding before authentication exists", () => {
   assert.equal(assertLoopbackHost("127.0.0.1"), "127.0.0.1");
   assert.throws(() => assertLoopbackHost("0.0.0.0"), /loopback/);
 });
 
-async function withServer(run) {
-  const server = createKParentApiServer({ now: () => new Date("2026-08-01T00:00:00.000Z") });
+async function withServer(run, options = {}) {
+  const now = options.now || (() => new Date("2026-08-01T00:00:00.000Z"));
+  const server = createKParentApiServer({ ...options, now });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const address = server.address();
   try {
@@ -30,6 +32,7 @@ test("health declares local ephemeral mode with effects disabled", async () => {
 });
 
 test("action approval API records but does not execute a side effect", async () => {
+  const memoryStore = createInMemoryStore({ now: () => new Date("2026-08-01T00:00:00.000Z") });
   await withServer(async (baseUrl) => {
     const createdResponse = await fetch(`${baseUrl}/v1/actions`, {
       method: "POST",
@@ -44,6 +47,12 @@ test("action approval API records but does not execute a side effect", async () 
     const created = await createdResponse.json();
     assert.equal(createdResponse.status, 201);
     assert.equal(created.status, "awaiting_approval");
+    assert.notEqual(created.id, "action-test-1");
+
+    const audit = memoryStore.get(MEMORY_SCOPE.APPROVAL_AUDIT, created.id).value;
+    assert.equal(audit.actionId, created.id);
+    assert.equal(audit.scope, undefined);
+    assert.equal(audit.label, undefined);
 
     const decisionResponse = await fetch(`${baseUrl}/v1/actions/${created.id}/decision`, {
       method: "POST",
@@ -56,7 +65,7 @@ test("action approval API records but does not execute a side effect", async () 
 
     const executeResponse = await fetch(`${baseUrl}/v1/actions/${created.id}/execute`, { method: "POST" });
     assert.equal(executeResponse.status, 404);
-  });
+  }, { memoryStore });
 });
 
 test("session memory is retrievable and rejects sensitive values", async () => {

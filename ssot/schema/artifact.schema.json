@@ -117,7 +117,7 @@
           "minLength": 1
         },
         "tracking": {
-          "enum": ["git", "ignored", "external", "git-history"]
+          "enum": ["git", "ignored", "external", "local-pointer", "git-history"]
         },
         "lastVerified": {
           "type": "string",

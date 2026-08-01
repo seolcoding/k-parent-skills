@@ -72,7 +72,7 @@ Department membership is metadata and documentation. A skill may belong to one p
 2. Feature doc: source surfaces, output format, and known limitations.
 3. Script helper: small one-off deterministic task.
 4. Package helper: reusable Node package under `packages/*`.
-5. Proxy route: free/public API aggregation via `packages/k-skill-proxy`.
+5. Parent proxy route: read-only NEIS app aggregation via `packages/k-parent-proxy`.
 
 ## 공공 데이터 통합 패턴
 

@@ -114,7 +114,13 @@ test("HITL approval is scoped, expiring, and consumed once", () => {
     childProfileRef: "local-profile-1",
   };
   const request = createActionRequest(
-    { id: "action-1", type: "application", label: "돌봄 신청", scope },
+    {
+      id: "action-1",
+      type: "application",
+      label: "돌봄 신청",
+      scope,
+      officialUrl: "https://www.gov.kr/",
+    },
     { now: "2026-08-01T00:00:00.000Z" },
   );
 
@@ -128,6 +134,10 @@ test("HITL approval is scoped, expiring, and consumed once", () => {
     { now: "2026-08-01T00:01:00.000Z" },
   );
   assert.equal(approved.status, HITL_STATUS.APPROVED);
+  assert.throws(
+    () => assertActionExecutable(approved, { now: "2026-08-01T00:02:00.000Z" }),
+    /scope is required/,
+  );
   assert.equal(assertActionExecutable(approved, { now: "2026-08-01T00:02:00.000Z", scope }), true);
   assert.throws(
     () => assertActionExecutable(approved, {
@@ -135,6 +145,28 @@ test("HITL approval is scoped, expiring, and consumed once", () => {
       scope: { ...scope, target: "different-application" },
     }),
     /does not match/,
+  );
+  assert.throws(
+    () => assertActionExecutable({ ...approved, id: "tampered" }, {
+      now: "2026-08-01T00:02:00.000Z",
+      scope,
+    }),
+    /modified after approval/,
+  );
+  assert.throws(
+    () => assertActionExecutable({ ...approved, officialUrl: "https://example.com/other" }, {
+      now: "2026-08-01T00:02:00.000Z",
+      scope,
+    }),
+    /modified after approval/,
+  );
+  assert.throws(
+    () => markActionExecuted(
+      { ...approved, requiresOfficialSiteHandoff: false },
+      { actor: "executor", scope },
+      { now: "2026-08-01T00:03:00.000Z" },
+    ),
+    /policy fields were modified/,
   );
 
   const executed = markActionExecuted(
@@ -158,17 +190,31 @@ test("HITL rejects denied, expired, and sensitive persisted scopes", () => {
   );
   assert.throws(() => assertActionExecutable(rejected), /not approved/);
 
+  assert.throws(
+    () => decideActionRequest(
+      request,
+      { decision: "approved", actor: "parent-1", expiresAt: "2099-01-01T00:00:00.000Z" },
+      { now: "2026-08-01T00:01:00.000Z" },
+    ),
+    /cannot be overridden/,
+  );
   const approved = decideActionRequest(
     request,
-    { decision: "approved", actor: "parent-1", expiresAt: "2026-08-01T00:02:00.000Z" },
+    { decision: "approved", actor: "parent-1" },
     { now: "2026-08-01T00:01:00.000Z" },
   );
   assert.throws(
-    () => assertActionExecutable(approved, { now: "2026-08-01T00:02:00.000Z" }),
+    () => assertActionExecutable(approved, {
+      now: "2026-08-01T00:06:00.000Z",
+      scope: request.scope,
+    }),
     /expired/,
   );
   assert.throws(
-    () => assertActionExecutable(approved, { now: "2026-08-01T00:03:00.000Z" }),
+    () => assertActionExecutable(approved, {
+      now: "2026-08-01T00:07:00.000Z",
+      scope: request.scope,
+    }),
     /expired/,
   );
 

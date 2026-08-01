@@ -174,8 +174,8 @@
       "verification": "documented",
       "deployment": "not-applicable",
       "availability": "current",
-      "canonicalPath": "/Users/sdh/100_Dev/120_Building/remotion-bar-race-chart/public/rawData/DT_1YL10005_아동_십만명당_안전사고사망률(시도).json",
-      "tracking": "external",
+      "canonicalPath": "local://datasets/kosis-child-safety-mortality",
+      "tracking": "local-pointer",
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
       "metrics": {"rows": 1201, "bytes": 396659}
@@ -188,8 +188,8 @@
       "verification": "documented",
       "deployment": "not-applicable",
       "availability": "current",
-      "canonicalPath": "/Users/sdh/100_Dev/120_Building/remotion-bar-race-chart/public/rawData/INH_1SSFA021R_부모_생활비_마련_방법(시도).json",
-      "tracking": "external",
+      "canonicalPath": "local://datasets/kosis-parent-living-expenses",
+      "tracking": "local-pointer",
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
       "metrics": {"rows": 1142, "bytes": 350989}

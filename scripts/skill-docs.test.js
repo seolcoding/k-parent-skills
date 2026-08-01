@@ -25,7 +25,7 @@ test("repository is scoped to K-Parent products", () => {
   assert.equal(fs.existsSync(path.join(repoRoot, "examples")), false);
 
   const packageNames = directories("packages");
-  const unexpected = packageNames.filter((name) => !name.startsWith("k-parent-") && name !== "k-skill-proxy");
+  const unexpected = packageNames.filter((name) => !name.startsWith("k-parent-"));
   assert.deepEqual(unexpected, []);
 
   const skillNames = directories("skills");

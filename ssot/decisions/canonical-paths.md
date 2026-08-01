@@ -21,10 +21,10 @@ tracked report, generator, or schema must be linked when one exists.
 
 ## External and archived artifacts
 
-Absolute paths are allowed only for local archive assets outside the repository.
-Use `tracking: external` and either `availability: archived` or
-`availability: remote-pointer`. Do not copy an archive solely to make the path
-repository-relative.
+Public external artifacts use an HTTPS canonical URL. Machine-specific archive
+assets use a redacted `local://` identifier with `tracking: local-pointer`.
+The private physical-path map lives in ignored `ssot/local/paths.json`; absolute
+home paths and personal document names never enter the public registry.
 
 Artifacts that no longer exist locally use `availability: historical-evidence`
 and `tracking: git-history`. Their evidence path belongs in `evidence`, while

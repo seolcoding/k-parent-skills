@@ -1,9 +1,9 @@
 module.exports = {
   apps: [
     {
-      name: "k-skill-proxy",
+      name: "k-parent-proxy",
       cwd: __dirname,
-      script: "./scripts/run-k-skill-proxy.sh",
+      script: "./scripts/run-k-parent-proxy.sh",
       interpreter: "/bin/bash",
       exec_mode: "fork",
       autorestart: true,

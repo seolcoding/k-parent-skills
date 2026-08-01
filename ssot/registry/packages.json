@@ -34,6 +34,22 @@
       "role": "Privacy-minimized session, profile-reference, public-knowledge, and approval-audit memory contracts"
     },
     {
+      "id": "packages.k-parent-proxy",
+      "name": "k-parent-proxy",
+      "kind": "package",
+      "layer": "tool",
+      "maturity": "implemented",
+      "verification": "offline-tested",
+      "deployment": "not-applicable",
+      "availability": "current",
+      "canonicalPath": "packages/k-parent-proxy",
+      "tracking": "git",
+      "lastVerified": "2026-08-01",
+      "sensitivity": "public",
+      "role": "Parent-only read-only NEIS allowlist proxy for app clients",
+      "dependsOn": ["packages.k-parent-source-neis"]
+    },
+    {
       "id": "packages.k-parent-brief",
       "name": "k-parent-brief",
       "kind": "package",
