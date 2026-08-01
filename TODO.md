@@ -7,7 +7,7 @@
 
 - [x] `k-parent-api`에 Bearer 인증과 tenant별 namespace 격리를 구현했다.
 - [x] local durable memory adapter에 AES-256-GCM, TTL 삭제, export/delete, 동의 철회를 구현했다.
-- [ ] HITL 승인 UI가 scope, 위험도, 만료, official-site handoff를 명확히 보여주게 한다.
+- [x] Flutter 재사용 HITL 승인 UI가 scope, 위험도, 만료, official-site handoff를 명확히 보여준다.
 - [ ] 실행 worker를 추가할 때 approval digest 검증과 one-time consumption을 강제한다.
 - [x] raw 가족 대화·학교 문서·credential을 막는 log/trace/error redaction gate를 구현했다.
 
@@ -28,7 +28,7 @@
 
 ## P2 — 제품화
 
-- [ ] Flutter 앱에 HITL·memory consent UX를 연결한다.
+- [ ] Flutter의 HITL surface를 실제 외부 작업 workflow에 연결한다. memory consent UX는 오늘 화면에 연결됐다.
 - [ ] mobile/web 배포 후에만 SSOT deployment와 verification을 승격한다.
 - [ ] 성취기준 범위를 통합교과·도덕·실과·체육·예술과와 중학교로 확장한다.
 - [ ] 첫 실제 배포 대상이 확정되면 release/publish automation을 도입한다.

@@ -37,7 +37,7 @@
       "sensitivity": "synthetic",
       "skills": ["skills.k-parent-quiz-maker"],
       "datasets": ["datasets.quiz-bank", "datasets.curriculum-achievement-standards"],
-      "gap": "No verified production mobile or web deployment"
+      "gap": "Reusable offline HITL and local memory-consent UI exist, but no action transport/workflow integration or verified production mobile/web deployment"
     },
     {
       "id": "products.k-parent-api",
