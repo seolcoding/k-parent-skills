@@ -42,6 +42,12 @@ test("health is public but reports missing NEIS configuration", async () => {
     const health = await (await fetch(`${baseUrl}/health`)).json();
     assert.equal(health.readOnly, true);
     assert.equal(health.neisConfigured, false);
+    assert.equal(health.capabilities.routePrefix, "/v1/neis");
+    assert.deepEqual(health.capabilities.methods, ["GET"]);
+    assert.equal(health.capabilities.cache.kind, "process-memory");
+    assert.equal(health.capabilities.rateLimit.retryAfter, true);
+    assert.equal(health.capabilities.upstream.provider, "NEIS");
+    assert.equal(health.deployment.productionReady, false);
     assert.equal((await fetch(`${baseUrl}/v1/neis/school-search?schoolName=x`)).status, 503);
   });
 });
@@ -75,4 +81,137 @@ test("proxy rejects invalid or non-allowlisted routes", async () => {
     assert.equal((await fetch(reversedRange)).status, 400);
     assert.equal((await fetch(`${baseUrl}/v1/neis/timetable`, { method: "POST" })).status, 405);
   });
+});
+
+test("rate limiting is per client and sends Retry-After on 429", async () => {
+  let currentTime = new Date("2026-08-01T00:00:00.000Z");
+  await withServer({
+    apiKey: "fixture-key",
+    adapter: fixtureAdapter([]),
+    getClientId: (request) => request.headers["x-test-client"],
+    now: () => currentTime,
+    rateLimitMaxRequests: 2,
+    rateLimitWindowMs: 2_000,
+  }, async (baseUrl) => {
+    const url = `${baseUrl}/v1/neis/school-search?schoolName=미래`;
+    const clientA = { headers: { "x-test-client": "client-a" } };
+    assert.equal((await fetch(url, clientA)).status, 200);
+    assert.equal((await fetch(url, clientA)).status, 200);
+
+    const limited = await fetch(url, clientA);
+    assert.equal(limited.status, 429);
+    assert.equal(limited.headers.get("retry-after"), "2");
+    assert.equal((await limited.json()).error, "rate_limited");
+    assert.equal((await fetch(url, { headers: { "x-test-client": "client-b" } })).status, 200);
+
+    currentTime = new Date("2026-08-01T00:00:02.000Z");
+    assert.equal((await fetch(url, clientA)).status, 200);
+  });
+});
+
+test("rate limiter bounds tracked clients with least-recently-used eviction", async () => {
+  await withServer({
+    apiKey: "fixture-key",
+    adapter: fixtureAdapter([]),
+    getClientId: (request) => request.headers["x-test-client"],
+    now: () => new Date("2026-08-01T00:00:00.000Z"),
+    rateLimitMaxClients: 2,
+    rateLimitMaxRequests: 1,
+  }, async (baseUrl) => {
+    const url = `${baseUrl}/v1/neis/school-search?schoolName=미래`;
+    const requestAs = (clientId) => fetch(url, { headers: { "x-test-client": clientId } });
+    assert.equal((await requestAs("client-a")).status, 200);
+    assert.equal((await requestAs("client-a")).status, 429);
+    assert.equal((await requestAs("client-b")).status, 200);
+    assert.equal((await requestAs("client-c")).status, 200);
+    assert.equal((await requestAs("client-a")).status, 200);
+  });
+});
+
+test("retryable upstream failures use capped injected backoff", async () => {
+  const calls = [];
+  const backoffs = [];
+  const adapter = fixtureAdapter([]);
+  adapter.requestNeisJson = async (dataset) => {
+    calls.push(dataset);
+    if (calls.length < 4) {
+      throw Object.assign(new Error("temporary upstream failure"), { status: "upstream_error" });
+    }
+    return fixtureEnvelope(dataset, [{ AY: "2026", GRADE: "3", CLASS_NM: "2" }]);
+  };
+
+  await withServer({
+    apiKey: "fixture-key",
+    adapter,
+    retryBackoffMaxMs: 15,
+    retryBackoffMs: 10,
+    sleep: async (delayMs) => backoffs.push(delayMs),
+    upstreamMaxRetries: 99,
+  }, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/v1/neis/classes?educationOfficeCode=B10&schoolCode=7010001`);
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).rows[0].class_nm, "2");
+  });
+
+  assert.equal(calls.length, 4);
+  assert.deepEqual(backoffs, [10, 15, 15]);
+});
+
+test("upstream timeout aborts the attempt and returns 504 with injected timers", async () => {
+  let capturedSignal;
+  const adapter = fixtureAdapter([]);
+  adapter.searchSchools = async (options) => {
+    capturedSignal = options.signal;
+    return new Promise(() => {});
+  };
+
+  await withServer({
+    apiKey: "fixture-key",
+    adapter,
+    clearTimer: () => {},
+    setTimer: (callback) => {
+      queueMicrotask(callback);
+      return 1;
+    },
+    upstreamMaxRetries: 0,
+    upstreamTimeoutMs: 25,
+  }, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/v1/neis/school-search?schoolName=미래`);
+    const body = await response.json();
+    assert.equal(response.status, 504);
+    assert.equal(body.error, "upstream_timeout");
+    assert.equal(capturedSignal.aborted, true);
+  });
+});
+
+test("process cache evicts least-recently-used entries at its configured bound", async () => {
+  const cache = new Map();
+  const calls = [];
+  const adapter = fixtureAdapter([]);
+  adapter.searchSchools = async ({ schoolName }) => {
+    calls.push(schoolName);
+    return {
+      ok: true,
+      schools: [{
+        atptOfcdcScCode: "B10",
+        schoolCode: `code-${schoolName}`,
+        name: schoolName,
+        schoolLevel: "초등학교",
+        address: "서울",
+      }],
+    };
+  };
+
+  await withServer({ apiKey: "fixture-key", adapter, cache, cacheMaxEntries: 2 }, async (baseUrl) => {
+    const requestSchool = (name) => fetch(`${baseUrl}/v1/neis/school-search?schoolName=${name}`);
+    assert.equal((await requestSchool("가람초")).status, 200);
+    assert.equal((await requestSchool("나래초")).status, 200);
+    assert.equal((await (await requestSchool("가람초")).json()).cache.hit, true);
+    assert.equal((await requestSchool("다온초")).status, 200);
+    assert.equal(cache.size, 2);
+    assert.equal((await (await requestSchool("나래초")).json()).cache.hit, false);
+  });
+
+  assert.deepEqual(calls, ["가람초", "나래초", "다온초", "나래초"]);
+  assert.equal(cache.size, 2);
 });
