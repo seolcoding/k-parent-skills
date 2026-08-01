@@ -72,6 +72,18 @@ const completed = markActionExecuted(approved, {
 handoff가 필요한 작업은 HTTPS 공식 URL과 `official-site-handoff` 실행 actor가 모두
 확인되어야 완료 상태로 바뀐다.
 
+## Experience 표면
+
+`apps/k-parent-quiz-app`은 transport-free `HitlApprovalGateway`와 재사용 가능한
+`ActionConfirmationSurface`를 제공한다. 화면은 작업명, 위험도, scope summary,
+승인 만료와 공식 HTTPS 사이트 handoff를 보여주며, 승인 뒤에도 자동 실행하거나
+사이트를 자동으로 열지 않는다. 오류 원문도 UI에 렌더링하지 않는다.
+
+오프라인 preview/test gateway는 typed fixture를 주입받을 뿐 risk·expiry 정책을
+소유하지 않는다. 현재 퀴즈 흐름에는 외부 작업이 없어 이 surface가 실제 runtime
+transport에 연결되어 있지 않다. 앱의 네트워크 경계와 서버 인증 계약을 함께 설계한
+후 별도 변경으로 연결해야 한다.
+
 ## 감사·데이터 최소화
 
 - 승인 기록에는 actor reference, 시각, 결정, 만료, constraints, scope digest만 둔다.

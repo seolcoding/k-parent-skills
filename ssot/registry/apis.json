@@ -177,7 +177,7 @@
         "/v1/neis/classes",
         "/v1/neis/schedule"
       ],
-      "gap": "No public hosted endpoint, rate limit, observability, or production canary evidence"
+      "gap": "No authentication, tenant isolation, public hosted endpoint, durable cache, observability, or production canary evidence"
     }
   ]
 }

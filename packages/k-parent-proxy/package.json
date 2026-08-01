@@ -11,6 +11,7 @@
     "url": "git+https://github.com/seolcoding/k-parent-skills.git"
   },
   "dependencies": {
+    "k-parent-redaction": "0.1.0",
     "k-parent-source-neis": "0.1.0"
   },
   "scripts": {

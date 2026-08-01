@@ -66,13 +66,16 @@ k-parent-skills/
 ├── packages/
 │   ├── k-parent-core/            # 공통 스키마·가드레일·freshness
 │   ├── k-parent-memory/          # 최소화된 세션·참조·공개 캐시·승인 감사 메모리
+│   ├── k-parent-redaction/       # 로그·trace·error payload redaction 경계
 │   ├── k-parent-proxy/           # 부모 전용 NEIS 읽기 allowlist proxy
 │   ├── k-parent-brief/           # 부모용 Today Brief 합성
 │   ├── k-parent-calendar/        # 캘린더 후보·중복제거·ICS
 │   ├── k-parent-doc-extract/     # 안내문 텍스트 → 일정·준비물·마감 추출
 │   └── k-parent-source-*/        # 공식·공개 데이터 어댑터
 ├── apps/k-parent-quiz-app/       # Flutter 퀴즈 제품 표면
-├── services/k-parent-api/        # localhost HITL·메모리 runtime prototype
+├── services/
+│   ├── k-parent-api/             # 인증·tenant·HITL·메모리 local runtime
+│   └── k-parent-refresh/         # crawler/adapter local refresh scheduler
 ├── tools/quiz-dev-mcp/           # 퀴즈 개발 MCP
 └── scripts/                      # 검증, probe, catalog 도구
 ```
@@ -106,7 +109,7 @@ k-parent-skills/
 | [기여 가이드](CONTRIBUTING.md) | 부모 전용 저장소 경계, 변경 단위, 검증 절차 |
 | [HITL 레이어](docs/hitl.md) | 로그인·개인정보·신청·예약·캘린더·구매·결제의 공통 승인 상태와 런타임 계약 |
 | [메모리 레이어](docs/memory.md) | 세션·profile reference·공개 지식 cache·승인 감사의 저장·보존·금지 경계 |
-| [서버 런타임](services/k-parent-api/README.md) | localhost 전용 HITL·임시 메모리 API와 운영 승격 조건 |
+| [서버 런타임](services/README.md) | localhost HITL·메모리 API, refresh scheduler와 운영 승격 조건 |
 | [레이어 모델](docs/layers.md) | Experience·Skill·Policy/HITL·Memory·Tool·Domain·Adapter·Data·Runtime·Governance 책임 경계 |
 | [소유자 작업·크레덴셜](OWNER-TASKS.md) | 발급해야 할 API 키, 가입 URL, 라이브 fixture 재생성 명령, 가드레일 |
 | [환경변수 템플릿](.env.example) | `KEDU_INFO_KEY` + 모든 `KSKILL_*` 변수 |

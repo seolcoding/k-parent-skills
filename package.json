@@ -12,9 +12,9 @@
     "ssot:validate": "node ssot/scripts/validate-ssot.mjs",
     "ssot:generate": "node ssot/scripts/generate-index.mjs",
     "ssot:check": "npm run ssot:validate && node ssot/scripts/generate-index.mjs --check",
-    "lint": "node --check ssot/scripts/validate-ssot.mjs ssot/scripts/generate-index.mjs scripts/data_portal_apply_headless.mjs scripts/data_portal_k_parent_audit.mjs scripts/data_portal_k_parent_queue.mjs scripts/data_portal_k_parent_spec_matrix.mjs scripts/skill-docs.test.js tools/quiz-dev-mcp/server.mjs services/k-parent-api/src/server.js services/k-parent-api/test/server.test.js && python3 -m py_compile scripts/childschoolinfo_live_probe.py scripts/neis_homepage_notice_probe.py scripts/neis_live_probe.py scripts/neis_parent_scenario_probe.py scripts/neis_playwright_recover_notices.py scripts/schoolinfo_live_probe.py && npm run lint --workspaces --if-present && ./scripts/validate-skills.sh",
+    "lint": "node --check ssot/scripts/validate-ssot.mjs ssot/scripts/generate-index.mjs scripts/data_portal_apply_headless.mjs scripts/data_portal_k_parent_audit.mjs scripts/data_portal_k_parent_queue.mjs scripts/data_portal_k_parent_spec_matrix.mjs scripts/skill-docs.test.js tools/quiz-dev-mcp/server.mjs services/k-parent-api/src/server.js services/k-parent-api/test/server.test.js && python3 -m py_compile scripts/childschoolinfo_live_probe.py scripts/neis_homepage_notice_probe.py scripts/neis_live_probe.py scripts/neis_parent_scenario_probe.py scripts/neis_playwright_recover_notices.py scripts/schoolinfo_live_probe.py && npm run lint --workspaces --if-present && npm run lint --prefix services/k-parent-refresh && ./scripts/validate-skills.sh",
     "typecheck": "tsc --noEmit",
-    "test": "node --test scripts/skill-docs.test.js && npm run test --workspaces --if-present && npm test --prefix services/k-parent-api && ./scripts/validate-skills.sh",
+    "test": "node --test scripts/skill-docs.test.js && npm run test --workspaces --if-present && npm test --prefix services/k-parent-api && npm test --prefix services/k-parent-refresh && ./scripts/validate-skills.sh",
     "pack:dry-run": "npm pack --workspaces --if-present --dry-run",
     "ci": "npm run ssot:check && npm run lint && npm run typecheck && npm run test && npm run pack:dry-run"
   },

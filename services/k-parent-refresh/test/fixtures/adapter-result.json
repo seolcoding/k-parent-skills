@@ -1,0 +1,25 @@
+{
+  "data": [
+    {
+      "schoolCode": "B100000001",
+      "schoolName": "Fixture Elementary School"
+    },
+    {
+      "schoolCode": "B100000002",
+      "schoolName": "Fixture Middle School"
+    }
+  ],
+  "provenance": {
+    "sourceType": "official",
+    "sourceName": "Fixture Education API",
+    "sourceUrl": "https://api.example.test/schools?serviceKey=fixture-secret#private",
+    "fetchedAt": "2026-08-01T00:00:00.000Z",
+    "confirmedAt": "2026-08-01T00:00:00.000Z"
+  },
+  "summary": {
+    "itemCount": 2,
+    "addedCount": 1,
+    "cursor": "must-not-enter-status",
+    "apiKey": "must-not-enter-status"
+  }
+}

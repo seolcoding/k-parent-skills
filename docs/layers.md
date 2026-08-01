@@ -36,8 +36,10 @@ Runtime       services/* — API/worker composition and hosting (cross-cutting)
 ## Policy/HITL 레이어
 
 `packages/k-parent-core`가 데이터 최소화, source freshness, 위험 작업 분류와
-HITL 상태를 소유한다. 외부 부작용은 이 레이어를 우회할 수 없다. 상세 계약은
-[HITL 레이어](hitl.md)를 본다.
+HITL 상태를 소유한다. `packages/k-parent-redaction`은 log, trace, error payload가
+관측 경계를 넘기 전에 credential, 가족·자녀 식별정보, raw 대화·문서 본문을
+제거한다. 외부 부작용은 이 레이어를 우회할 수 없다. 상세 계약은 [HITL
+레이어](hitl.md)를 본다.
 
 ## Memory 레이어
 
@@ -77,9 +79,12 @@ ignored 상태로 둔다. 실제 가족 대화·학생 기록·자녀 식별자�
 ## Runtime 레이어
 
 `services/*`는 Skill, Policy/HITL, Memory, Tool을 HTTP API, worker, scheduler로
-조합하는 실행 평면이다. 현재 `services/k-parent-api`는 localhost 전용 prototype이며
-HITL 요청·결정과 session memory만 제공한다. 인증, 영구 DB, tenant 격리, 실제
-부작용 executor는 아직 없으므로 운영 서버로 표시하지 않는다.
+조합하는 실행 평면이다. 현재 `services/k-parent-api`는 localhost 전용으로 Bearer
+인증, tenant 격리, HITL 요청·결정, session memory를 제공한다. 메모리는 기본
+휘발성이며 명시적 key/path가 있을 때만 encrypted local-file adapter를 사용한다.
+`services/k-parent-refresh`는 allowlisted crawler/adapter의 process-local timer,
+중복 방지, 제한 재시도와 provenance/freshness 상태를 제공한다. 실제 부작용 executor,
+영구 DB/분산 queue, 배포·관측성 증거는 없으므로 둘 다 운영 서버로 표시하지 않는다.
 
 ## 의존성 규칙
 
