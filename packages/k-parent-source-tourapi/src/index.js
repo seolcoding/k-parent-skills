@@ -47,7 +47,7 @@ async function requestTourapiJson(operation, params, options = {}) {
     headers: {
       accept: "application/json",
       "accept-language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
-      "user-agent": "k-parent-skill/tourapi",
+      "user-agent": "k-parent-skills/tourapi",
       ...(options.headers || {}),
     },
     signal: options.signal,

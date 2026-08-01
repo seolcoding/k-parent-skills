@@ -9,9 +9,6 @@ k-parent-skills/
 ├── skills/                  # product skills (install/trigger unit, flat)
 │   └── <skill-name>/
 │       └── SKILL.md
-├── examples/                # inherited upstream k-skill demo skills (reference only)
-│   └── <skill-name>/
-│       └── SKILL.md
 ├── docs/
 │   ├── architecture.md
 │   ├── adding-a-skill.md
@@ -19,11 +16,18 @@ k-parent-skills/
 │   └── features/<skill-name>.md
 ├── packages/
 │   └── <skill-name>/
+├── apps/                    # user-facing experience surfaces
+├── services/                # local/server runtime composition
+├── tools/                   # repository-scoped callable tools
 ├── scripts/
-└── python-packages/
+└── ssot/                    # cross-layer governance registry
 ```
 
-`skills/` is the canonical container the `skills` installer resolves `--skill <name>` against (`skills/<name>/SKILL.md`). `examples/` holds inherited upstream demo skills and is discovered only with `--full-depth`.
+`skills/` is the canonical container the installer resolves with `--skill <name>` (`skills/<name>/SKILL.md`). Generic upstream examples are intentionally not copied into this repository.
+
+Repository ownership follows the explicit [layer model](layers.md): Experience
+→ Skill → Policy/HITL → Memory → Tool → Domain → Adapter → Data, with SSOT
+Governance and Runtime composition across every layer.
 
 ## 스킬 우선 패턴
 
@@ -42,7 +46,7 @@ Parent skills should preserve the upstream `k-skill` context-budget pattern:
 | --- | --- | --- |
 | 1 | Advertise | `SKILL.md` frontmatter `name` and `description` should be enough for semantic routing. Descriptions are written for agent matching, not humans browsing a catalog. For k-parent skills write the description in Korean, include 2-3 concrete trigger utterances, and add a boundary sentence when a sibling skill overlaps. See `docs/adding-a-skill.md` and the cross-skill map in `docs/skill-routing.md`. |
 | 2 | Load | The `SKILL.md` body should stay compact and procedural: when to use, what to ask, workflow, output fields, failure modes. When a deterministic package backs the skill, add a `## 데이터 소스` section naming the package, functions, and env vars. |
-| 3 | Read resources | Long API field maps, policy manuals, PDF-derived tables, and crawler schemas should live in `skills/<skill>/references/*.md` or `examples/<skill>/references/*.md` (e.g. `skills/k-parent-meal-planner/references/allergen-codes.md`) and be read only when needed. |
+| 3 | Read resources | Long API field maps, policy manuals, PDF-derived tables, and crawler schemas should live in `skills/<skill>/references/*.md` (e.g. `skills/k-parent-meal-planner/references/allergen-codes.md`) and be read only when needed. |
 
 This keeps many parent skills installable together without flooding an agent's initial context.
 
@@ -68,7 +72,7 @@ Department membership is metadata and documentation. A skill may belong to one p
 2. Feature doc: source surfaces, output format, and known limitations.
 3. Script helper: small one-off deterministic task.
 4. Package helper: reusable Node package under `packages/*`.
-5. Proxy route: free/public API aggregation via `packages/k-skill-proxy`.
+5. Parent proxy route: read-only NEIS app aggregation via `packages/k-parent-proxy`.
 
 ## 공공 데이터 통합 패턴
 
@@ -156,6 +160,11 @@ Shopping recommendations may monetize through Coupang Partners or other affiliat
 7. Keep commercial ranking explainable: relevance, deadline fit, price, reviews, delivery, and stock should be visible signals.
 
 ## 민감 거래 경계
+
+모든 외부 부작용은 [HITL 레이어](hitl.md)를 통과한다. `k-parent-core`가 작업
+유형별 위험도, 승인 필요 여부, scope digest, 승인 만료, one-time consumption을
+검증한다. 등록되지 않은 작업 유형도 기본 high-risk로 다룬다. 각 스킬과 앱은
+승인 UI를 직접 새로 정의하지 말고 이 공통 상태 모델을 사용한다.
 
 Government services, care applications, reservations, payments, academy account actions, and child-data writes require a hard boundary:
 

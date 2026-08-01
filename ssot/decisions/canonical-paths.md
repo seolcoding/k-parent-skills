@@ -3,7 +3,7 @@
 ## Repository-owned artifacts
 
 Use repository-relative paths for files and directories owned by
-`k-parent-skill`. The registry points to the implementation; it never becomes a
+`k-parent-skills`. The registry points to the implementation; it never becomes a
 second copy of that implementation.
 
 Examples:
@@ -21,10 +21,10 @@ tracked report, generator, or schema must be linked when one exists.
 
 ## External and archived artifacts
 
-Absolute paths are allowed only for local archive assets outside the repository.
-Use `tracking: external` and either `availability: archived` or
-`availability: remote-pointer`. Do not copy an archive solely to make the path
-repository-relative.
+Public external artifacts use an HTTPS canonical URL. Machine-specific archive
+assets use a redacted `local://` identifier with `tracking: local-pointer`.
+The private physical-path map lives in ignored `ssot/local/paths.json`; absolute
+home paths and personal document names never enter the public registry.
 
 Artifacts that no longer exist locally use `availability: historical-evidence`
 and `tracking: git-history`. Their evidence path belongs in `evidence`, while

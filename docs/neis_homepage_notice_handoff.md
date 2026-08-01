@@ -3,7 +3,7 @@
 - Last updated: 2026-05-31 KST
 - Scope: 전국 NEIS `schoolInfo.HMPG_ADRES` 12,521개 학교 행의 홈페이지/공지사항 수집 가능성 반복 검증
 - Current source of truth: `tmp/neis_homepage_notice_all_schools_probe.json`
-- Human-readable report: `docs/neis_homepage_notice_all_schools_probe.md`
+- Human-readable report: `tmp/neis_homepage_notice_all_schools_probe.md`
 - Audit/history: `docs/neis_homepage_notice_all_schools_first_run_audit.md`
 
 ## Current Status
@@ -26,7 +26,7 @@ Final residual: 274 rows. These were repeatedly retried with Scrapling and Playw
 - `scripts/neis_playwright_recover_notices.py`: Playwright DOM recovery for JS-rendered or Scrapling-invisible pages.
 - `tmp/neis_homepage_notice_all_schools_probe.json`: current 70 MB result JSON. This is the authoritative machine-readable state.
 - `tmp/neis_homepage_notice_all_schools_probe.first_pass_12519.json`: first-pass 55 MB backup before later recovery passes.
-- `docs/neis_homepage_notice_all_schools_probe.md`: generated summary/table from the current JSON.
+- `tmp/neis_homepage_notice_all_schools_probe.md`: generated summary/table from the current JSON.
 - `docs/neis_homepage_notice_all_schools_first_run_audit.md`: narrative audit and commands.
 
 Do not assume every dirty file in the repository belongs to this NEIS work. The worktree contains many unrelated pre-existing changes and moves. Only the files above plus this handoff document are part of the NEIS homepage notice probe handoff.
@@ -102,7 +102,7 @@ uv run --with 'scrapling[fetchers]' python3 scripts/neis_homepage_notice_probe.p
   --workers 8 --max-in-flight 16 --checkpoint-every 50 \
   --sleep 0.02 --resume --quiet-skips \
   --json-output tmp/neis_homepage_notice_all_schools_probe.json \
-  --md-output docs/neis_homepage_notice_all_schools_probe.md
+  --md-output tmp/neis_homepage_notice_all_schools_probe.md
 ```
 
 Retry residual statuses with Scrapling:
@@ -116,7 +116,7 @@ uv run --with 'scrapling[fetchers]' python3 scripts/neis_homepage_notice_probe.p
   --retry-status no_notice_candidates \
   --retry-status found_notice_page \
   --json-output tmp/neis_homepage_notice_all_schools_probe.json \
-  --md-output docs/neis_homepage_notice_all_schools_probe.md
+  --md-output tmp/neis_homepage_notice_all_schools_probe.md
 ```
 
 Retry residual statuses with Playwright:
@@ -174,7 +174,7 @@ for line in Path(".env").read_text(errors="ignore").splitlines():
 paths = [
     "scripts/neis_homepage_notice_probe.py",
     "scripts/neis_playwright_recover_notices.py",
-    "docs/neis_homepage_notice_all_schools_probe.md",
+    "tmp/neis_homepage_notice_all_schools_probe.md",
     "docs/neis_homepage_notice_all_schools_first_run_audit.md",
     "docs/neis_homepage_notice_handoff.md",
     "tmp/neis_homepage_notice_all_schools_probe.json",

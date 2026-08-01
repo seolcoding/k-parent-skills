@@ -1,7 +1,7 @@
 {
   "name": "k-parent-source-youtube",
   "version": "0.1.0",
-  "description": "YouTube Data API v3 source connector for k-parent-skill (parent content recommendations).",
+  "description": "YouTube Data API v3 source connector for k-parent-skills (parent content recommendations).",
   "license": "MIT",
   "main": "src/index.js",
   "files": [

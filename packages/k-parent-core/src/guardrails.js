@@ -1,3 +1,5 @@
+const { getActionPolicy } = require("./hitl");
+
 const ERROR_STATUS = Object.freeze({
   AMBIGUOUS: "ambiguous",
   NOT_FOUND: "not_found",
@@ -14,6 +16,10 @@ const SENSITIVE_ACTION_TYPES = Object.freeze([
   "payment",
   "message_send",
   "cancellation",
+  "login",
+  "credential_entry",
+  "child_personal_data_entry",
+  "external_data_share",
 ]);
 
 const OFFICIAL_SITE_HANDOFF_TYPES = Object.freeze([
@@ -21,6 +27,9 @@ const OFFICIAL_SITE_HANDOFF_TYPES = Object.freeze([
   "application",
   "payment",
   "purchase",
+  "login",
+  "credential_entry",
+  "child_personal_data_entry",
 ]);
 
 function isSensitiveActionType(type) {
@@ -38,6 +47,7 @@ function guardActionCandidate(action = {}) {
 
   const sensitive = isSensitiveActionType(action.type);
   const requiresHandoff = requiresOfficialSiteHandoff(action.type);
+  const hitlPolicy = getActionPolicy(action.type);
 
   return {
     id: action.id || null,
@@ -50,6 +60,8 @@ function guardActionCandidate(action = {}) {
     requiresConfirmation: action.requiresConfirmation === true || sensitive,
     requiresOfficialSiteHandoff: action.requiresOfficialSiteHandoff === true || requiresHandoff,
     executable: sensitive ? false : action.executable === true,
+    approvalState: hitlPolicy.requiresApproval ? "awaiting_approval" : "approved",
+    hitl: hitlPolicy,
     source: action.source || null,
     metadata: action.metadata || {},
   };

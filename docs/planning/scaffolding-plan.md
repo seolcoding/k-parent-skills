@@ -6,12 +6,12 @@ This document describes how to move from the current documentation-first repo to
 
 Keep:
 
-- container skill directories with `skills/<skill>/SKILL.md` for product skills and `examples/<skill>/SKILL.md` for inherited upstream demos
+- container skill directories with `skills/<skill>/SKILL.md` for parent product skills
 - `docs/features/<skill>.md`
 - `docs/departments/*.md`
 - `docs/specs/*.md`
 - `scripts/skill-docs.test.js`
-- optional future `packages/`, `scripts/`, and `python-packages/`
+- `packages/`, `tools/`, `scripts/`, and `ssot/` separated by the layer model
 
 Do not create runtime packages until an adapter boundary is proven by fixtures and repeated workflows.
 
@@ -46,6 +46,7 @@ packages/k-parent-core/
 │   ├── index.js
 │   ├── freshness.js
 │   ├── guardrails.js
+│   ├── hitl.js
 │   └── schemas.js
 └── test/
 ```

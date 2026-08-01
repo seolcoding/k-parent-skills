@@ -1,6 +1,6 @@
 # Research Notes
 
-This directory records product and architecture research that informs `k-parent-skill`.
+This directory records product and architecture research that informs `k-parent-skills`.
 
 Research notes are not executable skill instructions. Promote durable decisions into:
 

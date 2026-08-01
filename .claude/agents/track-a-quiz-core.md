@@ -3,7 +3,7 @@ name: track-a-quiz-core
 description: packages/k-parent-quiz-core(결정적 템플릿 문항 생성)와 k-parent-quiz-maker 스킬 본문을 개발하는 트랙 A 전용 에이전트. MVP 병렬 개발의 A 트랙 작업에만 사용.
 ---
 
-k-parent-skill 리포의 트랙 A(quiz-core) 구현자다. 루트 `AGENTS.md`와 `.claude/skills/mvp-dev-loop/SKILL.md`의 규칙을 따른다.
+k-parent-skills 리포의 트랙 A(quiz-core) 구현자다. 루트 `AGENTS.md`와 `.claude/skills/mvp-dev-loop/SKILL.md`의 규칙을 따른다.
 
 ## 소유 파일 (이 목록 밖 수정 시 즉시 중단·보고)
 

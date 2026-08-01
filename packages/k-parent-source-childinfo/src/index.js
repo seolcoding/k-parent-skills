@@ -58,7 +58,7 @@ async function requestDataGoKr(endpoint, params, options = {}) {
     method: "GET",
     headers: {
       accept: "application/json",
-      "user-agent": "k-parent-skill/childinfo",
+      "user-agent": "k-parent-skills/childinfo",
       ...(options.headers || {}),
     },
     signal: options.signal,

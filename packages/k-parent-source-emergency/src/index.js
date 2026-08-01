@@ -53,7 +53,7 @@ async function requestEgen(endpoint, params, options = {}) {
     method: "GET",
     headers: {
       accept: "application/json",
-      "user-agent": "k-parent-skill/emergency",
+      "user-agent": "k-parent-skills/emergency",
       ...(options.headers || {}),
     },
     signal: options.signal,

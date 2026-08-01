@@ -2,7 +2,7 @@
 
 대한민국 부모가 매주 반복해서 확인하는 아이 관련 생활 정보를 모바일에서 에이전틱하게 사용할 수 있도록 만드는 스킬·데이터·상품화 실험 저장소입니다.
 
-원본 [`NomaDamas/k-skill`](https://github.com/NomaDamas/k-skill)의 컬렉션형 구조를 승계하되, 스킬 디렉토리는 `skills/`(제품)와 `examples/`(상속 예제) 컨테이너 아래에 평면 배치합니다. 필요해지면 `packages/`, `scripts/`, `docs/features/`로 구현과 문서를 확장합니다.
+원본 [`NomaDamas/k-skill`](https://github.com/NomaDamas/k-skill)의 컬렉션형 운영 구조를 승계하되, 부모 제품 스킬만 `skills/` 아래에 평면 배치합니다. 범용 한국 생활 스킬은 복제하지 않고 upstream에 남기며, 필요한 구현은 `packages/`, `apps/`, `services/`, `scripts/`, `tools/`로 확장합니다.
 
 Claude Code, Codex, OpenCode, OpenClaw/ClawHub 등 각종 코딩 에이전트에서 사용할 수 있는 `SKILL.md` 중심 구조입니다.
 
@@ -44,17 +44,7 @@ K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영합�
 | 놀이 | 콘텐츠 추천 | `k-parent-content-recommender` | 차 안에서 듣기 좋은 유튜브 채널·영상, 교과 연계 콘텐츠, 부모-자녀 대화 주제 추천 | 불필요 | [콘텐츠 추천 기능 문서](docs/features/k-parent-content-recommender.md) |
 | 학교 | 오늘 배운 퀴즈 | `k-parent-quiz-maker` | 나이스 시간표로 오늘 배운 과목을 확인하고 성취기준 기반 결정적 문항 은행으로 복습 퀴즈 생성(Flutter 앱 `apps/k-parent-quiz-app`) | 불필요 | [오늘 배운 퀴즈 기능 문서](docs/features/k-parent-quiz-maker.md) |
 
-### 바로 쓸 수 있는 hosted proxy 예제
-
-상속 예제 스킬 중 일부는 기본 hosted proxy(`k-skill-proxy.nomadamas.org`)를 경유하므로 사용자 쪽 API key 없이 바로 쓸 수 있습니다. self-host proxy 운영자만 upstream key를 서버 환경변수로 관리합니다.
-
-| 할 수 있는 일 | 스킬 이름 | 사용자 시크릿 | 문서 |
-| --- | --- | --- | --- |
-| 블루리본 맛집 조회 | `blue-ribbon-nearby` | 불필요 | [블루리본 맛집 조회 가이드](docs/features/blue-ribbon-nearby.md) |
-| 근처 공영주차장 찾기 | `parking-lot-search` | 불필요 | [근처 공영주차장 찾기 가이드](docs/features/parking-lot-search.md) |
-| 네이버 쇼핑 가격비교 | `naver-shopping-search` | 불필요 | [네이버 쇼핑 검색 가이드](docs/features/naver-shopping-search.md) |
-| 네이버 뉴스 검색 | `naver-news-search` | 불필요 | [네이버 뉴스 검색 가이드](docs/features/naver-news-search.md) |
-| LH 청약 공고 조회 | `lh-notice-search` | 불필요 | [LH 청약 공고 조회 가이드](docs/features/lh-notice-search.md) |
+공통 설치·환경 진단은 `k-parent-setup` 스킬이 담당합니다.
 
 ## 구조
 
@@ -65,9 +55,7 @@ k-parent-skills/
 │   │   └── SKILL.md
 │   ├── k-parent-school-info/
 │   │   └── SKILL.md
-│   └── …                         # k-parent-*, k-skill-setup, k-skill-cleaner
-├── examples/                     # 원본 NomaDamas/k-skill 상속 참고용 예제 스킬 (제품 아님)
-│   └── …                         # hwp, lotto-results, daiso-product-search …
+│   └── k-parent-setup/           # 설치·환경 진단
 ├── docs/features/
 │   └── k-parent-*.md
 ├── ssot/                         # 생태계 자산·상태·경로의 기계 판독형 SSOT
@@ -77,22 +65,26 @@ k-parent-skills/
 │   └── school.md, academy.md, play.md, life.md, trend.md, shopping.md, nutrition.md
 ├── packages/
 │   ├── k-parent-core/            # 공통 스키마·가드레일·freshness
+│   ├── k-parent-memory/          # 최소화된 세션·참조·공개 캐시·승인 감사 메모리
+│   ├── k-parent-proxy/           # 부모 전용 NEIS 읽기 allowlist proxy
 │   ├── k-parent-brief/           # 부모용 Today Brief 합성
 │   ├── k-parent-calendar/        # 캘린더 후보·중복제거·ICS
 │   ├── k-parent-doc-extract/     # 안내문 텍스트 → 일정·준비물·마감 추출
-│   └── k-parent-source-*/        # NEIS·TourAPI·서울·도서관·문화·어린이집·응급·네이버·쿠팡·유튜브·복지 어댑터
-└── scripts/
-    └── 단일 실행 스크립트가 필요할 때 추가
+│   └── k-parent-source-*/        # 공식·공개 데이터 어댑터
+├── apps/k-parent-quiz-app/       # Flutter 퀴즈 제품 표면
+├── services/k-parent-api/        # localhost HITL·메모리 runtime prototype
+├── tools/quiz-dev-mcp/           # 퀴즈 개발 MCP
+└── scripts/                      # 검증, probe, catalog 도구
 ```
 
-제품 스킬은 `skills/<skill-name>/SKILL.md` 컨테이너에 평면 배치한다(원본 k-skill의 루트 평면 배치를 단일 컨테이너로 정리). `skills/` 는 `skills` 설치 CLI 가 `--skill <name>` 으로 해석하는 표준 컨테이너이며, 상속받은 upstream 예제는 `examples/` 에 두고 `--full-depth` 로만 설치한다.
+제품 스킬은 `skills/<skill-name>/SKILL.md` 컨테이너에 평면 배치합니다. `skills/`는 설치 CLI가 `--skill <name>`으로 해석하는 표준 컨테이너입니다.
 
 ## 처음 시작하는 순서
 
-1. 필요한 제품 스킬(`skills/*`) 또는 예제 스킬(`examples/*`)의 `SKILL.md`를 에이전트 스킬 경로에 설치합니다.
-2. 사용자가 지역, 아이 나이, 날짜, 예산, 이동수단 같은 조건을 말하면 스킬 워크플로우를 따릅니다.
-3. 실제 조회가 필요한 정보는 현재 날짜 기준으로 공식/공개 출처를 확인하고, 출처와 마감일을 함께 답합니다.
-4. 반복 수요가 확인된 스킬부터 `packages/` 또는 `scripts/` 구현으로 승격합니다.
+1. `npx --yes skills add seolcoding/k-parent-skills --all -g`로 제품 스킬을 설치합니다.
+2. `k-parent-setup`으로 fixture 또는 라이브 API 환경을 점검합니다.
+3. 사용자가 지역, 아이 나이, 날짜, 예산, 이동수단 같은 조건을 말하면 스킬 워크플로우를 따릅니다.
+4. 실제 조회가 필요한 정보는 현재 날짜 기준으로 공식/공개 출처를 확인하고, 출처와 마감일을 함께 답합니다.
 
 ## 구현 원칙
 
@@ -103,7 +95,7 @@ k-parent-skills/
 - 준비물 쇼핑 추천과 쿠팡 어필리에이트는 핵심 로직이 아니라 구매 의도가 있을 때의 보조 기능입니다.
 - 아이 관련 정보는 오래된 결과를 그대로 쓰지 않고 현재 출처를 확인합니다.
 - 로그인, 결제, 신청서 제출은 사용자의 명시적 승인 없이는 실행하지 않습니다.
-- 개인정보와 아동 정보는 로컬 입력값으로만 취급하고 저장하지 않습니다.
+- 개인정보와 아동 정보는 사용자 소유 저장소의 참조로만 연결하고, 서버 메모리에 원문을 저장하지 않습니다.
 
 ## 문서
 
@@ -111,6 +103,11 @@ k-parent-skills/
 | --- | --- |
 | [SSOT 운영 규칙](ssot/README.md) | 스킬·패키지·API·크롤러·데이터셋·제품·레거시의 canonical 경로와 상태 관리 규칙 |
 | [SSOT 인덱스](ssot/INDEX.md) | JSON 레지스트리에서 자동 생성한 전체 자산 목록 |
+| [기여 가이드](CONTRIBUTING.md) | 부모 전용 저장소 경계, 변경 단위, 검증 절차 |
+| [HITL 레이어](docs/hitl.md) | 로그인·개인정보·신청·예약·캘린더·구매·결제의 공통 승인 상태와 런타임 계약 |
+| [메모리 레이어](docs/memory.md) | 세션·profile reference·공개 지식 cache·승인 감사의 저장·보존·금지 경계 |
+| [서버 런타임](services/k-parent-api/README.md) | localhost 전용 HITL·임시 메모리 API와 운영 승격 조건 |
+| [레이어 모델](docs/layers.md) | Experience·Skill·Policy/HITL·Memory·Tool·Domain·Adapter·Data·Runtime·Governance 책임 경계 |
 | [소유자 작업·크레덴셜](OWNER-TASKS.md) | 발급해야 할 API 키, 가입 URL, 라이브 fixture 재생성 명령, 가드레일 |
 | [환경변수 템플릿](.env.example) | `KEDU_INFO_KEY` + 모든 `KSKILL_*` 변수 |
 | [처음 사용자 온보딩](docs/onboarding.md) | 저장소 목적, 기능 지형도, 설치 후 확인, fixture-first 동작, 검증 명령 |
@@ -122,8 +119,8 @@ k-parent-skills/
 | [로드맵](docs/roadmap.md) | 부모용 스킬 확장 후보 |
 | [EDSS/KERIS 소스 후보](docs/edss_k_parent_sources.md) | 한국교육학술정보원 EDSS와 학교알리미·NEIS·유치원알리미 API 후보 |
 | [브리핑 HTML](docs/briefing.html) | 리포·리서치·기능 계획을 한 번에 설명하는 공유용 HTML |
-| [설치 방법](docs/install.md) | `k-parent-skill` 전체 설치, parent 제품 스킬 선택 설치, 예제 스킬 `--full-depth` 안내 |
-| [연구 기록](docs/research/k-parent-skill-architecture-ecosystem-2026-05-01.md) | k-skill 기반 부모 타깃 스킬 아키텍처와 연동 생태계 분석 |
-| [전환 전략 연구](docs/research/k-parent-skill-conversion-strategy-2026-05-01.md) | 부모용 보이스/어시스턴트 전환, API 우선순위, 딥링크형 신청 보조 전략 |
+| [설치 방법](docs/install.md) | `seolcoding/k-parent-skills` 전체 또는 선택 설치 안내 |
+| [연구 기록](docs/research/k-parent-skills-architecture-ecosystem-2026-05-01.md) | k-skill 기반 부모 타깃 스킬 아키텍처와 연동 생태계 분석 |
+| [전환 전략 연구](docs/research/k-parent-skills-conversion-strategy-2026-05-01.md) | 부모용 보이스/어시스턴트 전환, API 우선순위, 딥링크형 신청 보조 전략 |
 | [스펙 인덱스](docs/specs/README.md) | 제품 스펙, 데이터 계약, 프로젝트 구조와 향후 계획 |
 | [플래닝 인덱스](docs/planning/README.md) | OMC 기반 PRD, 스캐폴딩 계획, 기능별 플래닝, 에이전트 운용 계획 |

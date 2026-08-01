@@ -44,7 +44,7 @@ async function fetchJson(dataset, params) {
     headers: {
       accept: "application/json",
       "accept-language": "ko-KR,ko;q=0.9",
-      "user-agent": "k-parent-skill/neis-refresh",
+      "user-agent": "k-parent-skills/neis-refresh",
     },
   });
   if (!response.ok) {

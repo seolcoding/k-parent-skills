@@ -10,7 +10,8 @@ Flutter 앱. 화면 흐름: 온보딩(학교 검색→학년/반) → 오늘(과
 ```bash
 flutter pub get
 flutter run -d web-server --web-port 8787          # fixture 모드 (기본, 오프라인)
-flutter run --dart-define=PROXY_BASE_URL=https://k-skill-proxy.nomadamas.org  # proxy 연동
+flutter run --dart-define=PROXY_BASE_URL=http://127.0.0.1:4020  # 로컬 웹/desktop proxy
+flutter run --dart-define=PROXY_BASE_URL=http://10.0.2.2:4020   # Android emulator
 ```
 
 fixture 모드 데모: 학교 검색에 `미래` 입력 → 서울미래초등학교 → 1학년 2반.

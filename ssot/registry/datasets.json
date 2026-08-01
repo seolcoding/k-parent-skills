@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "registry": "datasets",
+  "defaultLayer": "data",
   "items": [
     {
       "id": "datasets.neis-notices-final-raw",
@@ -42,14 +43,14 @@
     },
     {
       "id": "datasets.neis-notices-report",
-      "name": "Nationwide school notice crawl tracked report",
+      "name": "Nationwide school notice crawl archived generated report",
       "kind": "dataset",
       "maturity": "implemented",
       "verification": "documented",
       "deployment": "not-applicable",
-      "availability": "current",
-      "canonicalPath": "docs/neis_homepage_notice_all_schools_probe.md",
-      "tracking": "git",
+      "availability": "remote-pointer",
+      "canonicalPath": "https://github.com/seolcoding/k-parent-skill/blob/28462cdc547eccd13dafc0e3d526202c64ead1a0/docs/neis_homepage_notice_all_schools_probe.md",
+      "tracking": "external",
       "lastVerified": "2026-05-31",
       "sensitivity": "public"
     },
@@ -70,14 +71,14 @@
     },
     {
       "id": "datasets.neis-parent-scenarios-report",
-      "name": "Synthetic NEIS parent scenario report",
+      "name": "Synthetic NEIS parent scenario archived generated report",
       "kind": "dataset",
       "maturity": "implemented",
       "verification": "documented",
       "deployment": "not-applicable",
-      "availability": "current",
-      "canonicalPath": "docs/neis_parent_scenario_report.md",
-      "tracking": "git",
+      "availability": "remote-pointer",
+      "canonicalPath": "https://github.com/seolcoding/k-parent-skill/blob/28462cdc547eccd13dafc0e3d526202c64ead1a0/docs/neis_parent_scenario_report.md",
+      "tracking": "external",
       "lastVerified": "2026-05-31",
       "sensitivity": "synthetic"
     },
@@ -173,8 +174,8 @@
       "verification": "documented",
       "deployment": "not-applicable",
       "availability": "current",
-      "canonicalPath": "/Users/sdh/100_Dev/120_Building/remotion-bar-race-chart/public/rawData/DT_1YL10005_아동_십만명당_안전사고사망률(시도).json",
-      "tracking": "external",
+      "canonicalPath": "local://datasets/kosis-child-safety-mortality",
+      "tracking": "local-pointer",
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
       "metrics": {"rows": 1201, "bytes": 396659}
@@ -187,8 +188,8 @@
       "verification": "documented",
       "deployment": "not-applicable",
       "availability": "current",
-      "canonicalPath": "/Users/sdh/100_Dev/120_Building/remotion-bar-race-chart/public/rawData/INH_1SSFA021R_부모_생활비_마련_방법(시도).json",
-      "tracking": "external",
+      "canonicalPath": "local://datasets/kosis-parent-living-expenses",
+      "tracking": "local-pointer",
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
       "metrics": {"rows": 1142, "bytes": 350989}

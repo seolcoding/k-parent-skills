@@ -1,6 +1,6 @@
 # k-parent-source-youtube
 
-YouTube Data API v3 source connector for `k-parent-skill`. Provides
+YouTube Data API v3 source connector for `k-parent-skills`. Provides
 parent-friendly video search used by the content-recommender skill.
 
 ## Configuration

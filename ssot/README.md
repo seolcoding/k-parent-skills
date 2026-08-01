@@ -12,11 +12,10 @@ it was verified, and whether it is actually deployed.
   canonical paths, maturity, verification, deployment, and relationships.
 - `skills/*/SKILL.md` remains authoritative for agent routing and workflow
   behavior.
-- `packages/*`, `apps/*`, `scripts/*`, and `tools/*` remain authoritative for
-  implementation and runtime contracts.
+- `packages/*`, `apps/*`, `services/*`, `scripts/*`, and `tools/*` remain
+  authoritative for implementation and runtime contracts.
 - `docs/features/*` remains the detailed human-facing explanation layer.
-- `ssot/INDEX.md` is generated from the registries and must not be edited by
-  hand.
+- `ssot/INDEX.md` is generated from the registries and must not be edited by hand.
 
 When these surfaces disagree, fix the implementation or behavioral source
 first, then update the corresponding registry entry and regenerate the index.
@@ -33,6 +32,11 @@ first, then update the corresponding registry entry and regenerate the index.
 | `products.json` | Apps, proxy surfaces, collections, and development tools |
 | `legacy.json` | Historical, archived, adjacent, and predecessor artifacts |
 
+Machine-specific archives and private documents use redacted `local://`
+identifiers with `tracking: "local-pointer"`. Their actual paths belong only in
+the gitignored `ssot/local/paths.json`; see `ssot/local/README.md`. Public
+registries and the generated index must never expose home-directory paths.
+
 Every registry item separates three dimensions:
 
 - `maturity`: how much product or implementation exists;
@@ -41,6 +45,10 @@ Every registry item separates three dimensions:
 
 Do not infer one dimension from another. An implemented, offline-tested item
 may still be `repo-only` or `deployment-unverified`.
+
+Every registry also declares `defaultLayer`; items override `layer` only when
+needed. Layer describes architectural ownership and remains independent from
+kind and status. See `decisions/layer-model.md` and `docs/layers.md`.
 
 ## Update workflow
 

@@ -174,8 +174,8 @@ Guardrails:
 Use this when asking OMC or another agent to plan a bounded slice:
 
 ```text
-You are working in /Users/sdh/10_Dev/k-parent-skill.
-Preserve upstream k-skill conventions through the current containers: product skills under `skills/*`, inherited examples under `examples/*`, SKILL.md progressive disclosure, docs/features, optional packages only when implementation begins.
+You are working in the root of the k-parent-skills repository.
+Preserve the parent-only repository boundary: product skills under `skills/*`, generic skills left in upstream `k-skill`, SKILL.md progressive disclosure, docs/features, explicit HITL, and layer-aware packages/tools.
 Use docs/research, docs/specs, and docs/planning as source of truth.
 Plan only for [FEATURE].
 Return:

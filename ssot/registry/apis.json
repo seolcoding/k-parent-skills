@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "registry": "apis",
+  "defaultLayer": "adapter",
   "items": [
     {
       "id": "apis.neis-open-api",
@@ -67,8 +68,8 @@
       "verification": "fixture-tested",
       "deployment": "not-applicable",
       "availability": "current",
-      "canonicalPath": "packages/k-parent-source-tourapi",
-      "tracking": "git",
+      "canonicalPath": "https://apis.data.go.kr/B551011/KorService2",
+      "tracking": "external",
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
       "backingPackages": ["packages.k-parent-source-tourapi"]
@@ -81,8 +82,8 @@
       "verification": "fixture-tested",
       "deployment": "not-applicable",
       "availability": "current",
-      "canonicalPath": "packages/k-parent-source-seoul",
-      "tracking": "git",
+      "canonicalPath": "https://data.seoul.go.kr/dataList/OA-2266/S/1/datasetView.do",
+      "tracking": "external",
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
       "backingPackages": ["packages.k-parent-source-seoul"]
@@ -95,8 +96,8 @@
       "verification": "fixture-tested",
       "deployment": "not-applicable",
       "availability": "current",
-      "canonicalPath": "packages/k-parent-source-library",
-      "tracking": "git",
+      "canonicalPath": "https://data4library.kr/apiUtilization",
+      "tracking": "external",
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
       "backingPackages": ["packages.k-parent-source-library"]
@@ -109,8 +110,8 @@
       "verification": "fixture-tested",
       "deployment": "not-applicable",
       "availability": "current",
-      "canonicalPath": "packages/k-parent-source-culture",
-      "tracking": "git",
+      "canonicalPath": "https://www.culture.go.kr/data/openapi/openapiList.do",
+      "tracking": "external",
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
       "backingPackages": ["packages.k-parent-source-culture"]
@@ -123,8 +124,8 @@
       "verification": "fixture-tested",
       "deployment": "not-applicable",
       "availability": "current",
-      "canonicalPath": "packages/k-parent-source-naver",
-      "tracking": "git",
+      "canonicalPath": "https://developers.naver.com/docs/serviceapi/search/blog/blog.md",
+      "tracking": "external",
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
       "backingPackages": ["packages.k-parent-source-naver"]
@@ -137,8 +138,8 @@
       "verification": "fixture-tested",
       "deployment": "not-applicable",
       "availability": "current",
-      "canonicalPath": "packages/k-parent-source-coupang",
-      "tracking": "git",
+      "canonicalPath": "https://developers.coupangcorp.com/",
+      "tracking": "external",
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
       "backingPackages": ["packages.k-parent-source-coupang"]
@@ -151,33 +152,32 @@
       "verification": "fixture-tested",
       "deployment": "not-applicable",
       "availability": "current",
-      "canonicalPath": "packages/k-parent-source-youtube",
-      "tracking": "git",
+      "canonicalPath": "https://developers.google.com/youtube/v3/docs/search/list",
+      "tracking": "external",
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
       "backingPackages": ["packages.k-parent-source-youtube"],
       "gap": "Strict SafeSearch is implemented; age suitability and ads/shorts filtering are not"
     },
     {
-      "id": "apis.k-skill-proxy-neis",
-      "name": "k-skill proxy NEIS surface",
+      "id": "apis.k-parent-proxy-neis",
+      "name": "K-Parent proxy NEIS surface",
       "kind": "api",
       "maturity": "implemented",
       "verification": "offline-tested",
-      "deployment": "deployment-unverified",
+      "deployment": "local-only",
       "availability": "current",
-      "canonicalPath": "packages/k-skill-proxy/src/server.js",
+      "canonicalPath": "packages/k-parent-proxy/src/server.js",
       "tracking": "git",
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
       "operations": [
         "/v1/neis/school-search",
-        "/v1/neis/school-meal",
         "/v1/neis/timetable",
         "/v1/neis/classes",
         "/v1/neis/schedule"
       ],
-      "gap": "Current feature-branch routes have not been canary-verified in production"
+      "gap": "No public hosted endpoint, rate limit, observability, or production canary evidence"
     }
   ]
 }

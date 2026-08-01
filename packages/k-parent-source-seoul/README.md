@@ -1,6 +1,6 @@
 # k-parent-source-seoul
 
-서울 열린데이터광장 공공서비스예약(OpenAPI) source adapter for k-parent-skill.
+서울 열린데이터광장 공공서비스예약(OpenAPI) source adapter for k-parent-skills.
 
 ## Usage
 

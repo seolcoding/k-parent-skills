@@ -2,7 +2,7 @@
 ///
 /// 구현체는 두 가지뿐이다:
 /// - [FixtureQuizRepository]: 번들 fixture + 문항 은행 (오프라인 데모, 기본값)
-/// - [ProxyQuizRepository]: k-skill-proxy `/v1/neis/*` (실데이터, 키 없음)
+/// - [ProxyQuizRepository]: k-parent-proxy `/v1/neis/*` (실데이터, 키 없음)
 library;
 
 import 'dart:convert';

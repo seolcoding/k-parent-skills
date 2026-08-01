@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "registry": "crawlers",
+  "defaultLayer": "tool",
   "items": [
     {
       "id": "crawlers.neis-homepage-notices",

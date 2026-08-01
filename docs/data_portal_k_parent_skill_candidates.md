@@ -1,4 +1,4 @@
-# k-parent-skill 공공데이터포털 API 후보
+# k-parent-skills 공공데이터포털 API 후보
 
 카탈로그 스냅샷: `20260430`, 전체 95,805건.
 

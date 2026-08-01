@@ -1,4 +1,4 @@
-/// k-skill-proxy 연동 저장소.
+/// k-parent-proxy 연동 저장소.
 ///
 /// 호출 표면은 `GET {base}/v1/neis/school-search|classes|timetable|schedule`
 /// 뿐이다. 다른 도메인 호출 금지, 클라이언트 API 키 없음(키는 proxy 서버 소관).
@@ -23,8 +23,8 @@ class ProxyQuizRepository with QuizBuilding implements QuizRepository {
        _client = client ?? http.Client(),
        bank = quizBank ?? QuizBank();
 
-  /// 운영 proxy 기본 주소 (docs/features/k-skill-proxy.md 참고).
-  static const String defaultBaseUrl = 'https://k-skill-proxy.nomadamas.org';
+  /// 로컬 proxy 기본 주소 (docs/features/k-parent-proxy.md 참고).
+  static const String defaultBaseUrl = 'http://127.0.0.1:4020';
 
   /// `--dart-define=PROXY_BASE_URL=...` 오버라이드 반영값.
   static const String configuredBaseUrl = String.fromEnvironment(

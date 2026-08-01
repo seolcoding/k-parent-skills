@@ -1,6 +1,6 @@
 # k-parent-source-library
 
-도서관정보나루(data4library.kr) source adapter for k-parent-skill.
+도서관정보나루(data4library.kr) source adapter for k-parent-skills.
 
 ## Usage
 

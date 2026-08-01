@@ -1,9 +1,10 @@
 {
   "schemaVersion": 1,
   "registry": "products",
+  "defaultLayer": "experience",
   "items": [
     {
-      "id": "products.k-parent-skill-collection",
+      "id": "products.k-parent-skills-collection",
       "name": "K-Parent skill collection",
       "kind": "product",
       "maturity": "implemented",
@@ -39,24 +40,42 @@
       "gap": "No verified production mobile or web deployment"
     },
     {
-      "id": "products.k-skill-proxy",
-      "name": "K-Skill proxy parent API surface",
+      "id": "products.k-parent-api",
+      "name": "K-Parent local runtime API",
       "kind": "product",
+      "layer": "runtime",
+      "maturity": "prototype",
+      "verification": "offline-tested",
+      "deployment": "local-only",
+      "availability": "current",
+      "canonicalPath": "services/k-parent-api",
+      "tracking": "git",
+      "lastVerified": "2026-08-01",
+      "sensitivity": "synthetic",
+      "dependsOn": ["packages.k-parent-core", "packages.k-parent-memory"],
+      "gap": "No authentication, durable storage, tenant isolation, execution worker, scheduler, or production deployment"
+    },
+    {
+      "id": "products.k-parent-proxy",
+      "name": "K-Parent read-only NEIS proxy",
+      "kind": "product",
+      "layer": "tool",
       "maturity": "implemented",
       "verification": "offline-tested",
-      "deployment": "deployment-unverified",
+      "deployment": "local-only",
       "availability": "current",
-      "canonicalPath": "packages/k-skill-proxy",
+      "canonicalPath": "docs/features/k-parent-proxy.md",
       "tracking": "git",
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
-      "apis": ["apis.k-skill-proxy-neis"],
-      "gap": "Hosted production exists for the upstream project, but this branch's parent routes were not canary-verified"
+      "apis": ["apis.k-parent-proxy-neis"],
+      "gap": "No public hosted endpoint, rate limit, durable cache, deploy pipeline, or production canary evidence"
     },
     {
       "id": "products.quiz-dev-mcp",
       "name": "Quiz development MCP server",
       "kind": "tool",
+      "layer": "tool",
       "maturity": "implemented",
       "verification": "offline-tested",
       "deployment": "local-only",

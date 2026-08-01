@@ -1,6 +1,6 @@
 # 릴리스와 자동 배포
 
-현재 `k-parent-skill`은 부모용 스킬 컨셉과 워크플로우를 정리하는 저장소다. 실제 npm/Python 패키지 배포 대상이 확정되기 전까지 release workflow는 비활성 상태로 둔다.
+현재 `k-parent-skills`은 부모용 스킬 컨셉과 워크플로우를 정리하는 저장소다. 실제 npm/Python 패키지 배포 대상이 확정되기 전까지 release workflow는 비활성 상태로 둔다.
 
 ## 현재 정책
 

@@ -2,7 +2,7 @@
 
 - 확인일: 2026-07-07
 - 목적: 아이가 학교에서 그날 배운 내용을 바탕으로 퀴즈를 출력해주는 안드로이드 앱을 이 저장소 자산 위에서 시작할 수 있는지 판단한다.
-- 선행 자산: `docs/neis_api_ref.md`(라이브 검증 완료), `docs/neis_parent_scenario_report.md`(300 시나리오 통과), `docs/edss_k_parent_sources.md`, `docs/data_portal_k_parent_api_specs.md`
+- 선행 자산: `docs/neis_api_ref.md`(라이브 검증 완료), SSOT `datasets.neis-parent-scenarios-report`의 archived report(300 시나리오 통과), `docs/edss_k_parent_sources.md`, `docs/data_portal_k_parent_api_specs.md`
 
 ## 한눈에 보기
 
@@ -37,7 +37,7 @@ Base `https://open.neis.go.kr/hub/<endpoint>`, 인증키 `KEDU_INFO_KEY`(발급 
 
 핵심 제약: 시간표의 `ITRT_CNTNT`는 **과목명 수준**이다(예: "수학", "공통수학1", "도덕"). 교과서 단원·차시 수준은 NEIS에 없다. 또한 시간표 4종은 2025학년도 이후 데이터만 제공되며, 학교·날짜 조합에 따라 `INFO-200`(데이터 없음)이 정상적으로 발생한다.
 
-기존 구현: `packages/k-parent-source-neis`(fixture-first 어댑터), 300개 부모 시나리오 라이브 통과 기록(`docs/neis_parent_scenario_report.md`).
+기존 구현: `packages/k-parent-source-neis`(fixture-first 어댑터), 300개 부모 시나리오 라이브 통과 기록(SSOT `datasets.neis-parent-scenarios-report`).
 
 ## 축 2. 공시 포털 — 키 발급·검증 완료 (2026-07-07)
 
@@ -84,15 +84,15 @@ Base `https://open.neis.go.kr/hub/<endpoint>`, 인증키 `KEDU_INFO_KEY`(발급 
 
 아키텍처 원칙 (기존 컨벤션 재사용):
 
-- 안드로이드 앱은 NEIS·LLM 키를 절대 내장하지 않는다. `packages/k-skill-proxy` 패턴대로 좁은 allowlist 라우트(`/api/neis/school-search`, `/api/neis/timetable` 등)를 추가하고 캐시(시간표는 일 단위)로 감싼다.
-- 퀴즈 생성 LLM 호출도 proxy를 경유시켜 키를 서버에 둔다.
+- 안드로이드 앱은 NEIS·LLM 키를 절대 내장하지 않는다. `packages/k-parent-proxy` 패턴대로 좁은 allowlist 라우트(`/api/neis/school-search`, `/api/neis/timetable` 등)를 추가하고 캐시(시간표는 일 단위)로 감싼다.
+- 퀴즈 생성 LLM은 현재 범위 밖이다. 도입 시 read-only NEIS proxy와 분리된 인증 runtime에 키를 둔다.
 - 아이 식별정보(학교/학년/반)는 앱 로컬(DataStore)에만 저장하고 서버에 남기지 않는다.
 - 부모 도메인 출력 필드 규약(학년, 지역, 날짜, 출처, 확인일)을 퀴즈 메타데이터에도 적용한다.
 
 ## 다음 단계
 
 1. `skills/k-parent-quiz-maker` concept `SKILL.md` 스캐폴딩 (저장소 규칙: SKILL.md-only로 시작).
-2. `k-skill-proxy`에 NEIS 학교검색/시간표 allowlist 라우트 추가 + 캐시.
+2. `k-parent-proxy`에 NEIS 학교검색/시간표 allowlist 라우트 추가 + 캐시.
 3. 2022 개정 성취기준 과목×학년 JSON 번들 1차 수집(초등 우선; NCIC 자료실 문서 기반, 확인일 기록).
 4. 안드로이드 MVP: 온보딩(학교/학년/반) → 오늘 시간표 → 퀴즈 5문항 화면.
 5. 에듀넷 콘텐츠 API 신청 조건 확인(로그인 후) 및 `OWNER-TASKS.md` 반영.

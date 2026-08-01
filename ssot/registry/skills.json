@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "registry": "skills",
+  "defaultLayer": "skill",
   "items": [
     {
       "id": "skills.k-parent-academy-connector",
@@ -256,6 +257,21 @@
       "sensitivity": "public",
       "declaredPhase": "implemented",
       "backingPackages": ["packages.k-parent-source-naver", "packages.k-parent-source-coupang"]
+    },
+    {
+      "id": "skills.k-parent-setup",
+      "name": "k-parent-setup",
+      "kind": "skill",
+      "maturity": "implemented",
+      "verification": "offline-tested",
+      "deployment": "repo-only",
+      "availability": "current",
+      "canonicalPath": "skills/k-parent-setup/SKILL.md",
+      "tracking": "git",
+      "lastVerified": "2026-08-01",
+      "sensitivity": "internal",
+      "declaredPhase": "implemented",
+      "backingPackages": ["packages.k-parent-core"]
     },
     {
       "id": "skills.k-parent-travel-recommender",

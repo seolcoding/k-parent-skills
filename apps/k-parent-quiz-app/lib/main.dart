@@ -10,7 +10,7 @@ import 'screens/today_screen.dart';
 import 'theme/app_theme.dart';
 
 /// fixture-first: 기본은 번들 fixture + 문항 은행(오프라인 데모).
-/// `--dart-define=PROXY_BASE_URL=...` 를 주면 k-skill-proxy 연동으로 바뀐다.
+/// `--dart-define=PROXY_BASE_URL=...` 를 주면 k-parent-proxy 연동으로 바뀐다.
 const String _proxyBaseOverride = String.fromEnvironment('PROXY_BASE_URL');
 
 QuizRepository _buildRepository() {

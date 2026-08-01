@@ -5,11 +5,8 @@
 Keep the inherited `NomaDamas/k-skill` structure:
 
 ```text
-k-parent-skill/
+k-parent-skills/
 ├── skills/
-│   └── <skill-name>/
-│       └── SKILL.md
-├── examples/
 │   └── <skill-name>/
 │       └── SKILL.md
 ├── docs/
@@ -24,10 +21,10 @@ k-parent-skill/
 ├── tools/
 │   └── quiz-dev-mcp/              # repo-scoped dev MCP (stdio, zero-dep, read-only over repo files)
 ├── scripts/
-└── python-packages/
+└── ssot/                           # cross-layer governance and generated index
 ```
 
-Product skill directories under `skills/` are the installable unit. Inherited upstream demos live under `examples/` and require `--full-depth` when installing. Departments are product taxonomy, not nested folders.
+Product skill directories under `skills/` are the installable unit. Generic upstream demos are not copied into this repository. Departments are product taxonomy, not nested folders.
 
 ## Documentation structure
 
@@ -69,14 +66,14 @@ packages/
 ├── k-parent-source-naver/         # Naver shopping/blog and collector runner
 ├── k-parent-source-coupang/       # Coupang Partners product adapter
 ├── k-parent-source-youtube/       # YouTube safe-search content adapter
-└── k-skill-proxy/                 # existing free/public API proxy extended with parent-domain routes
+└── k-parent-proxy/                 # parent-only read-only NEIS app proxy
 
 scripts/
 ├── validate-skills.sh
 ├── build-region-codes.js
 ├── data_portal_k_parent_*.mjs
 ├── neis_*_probe.py
-└── run-k-skill-proxy.sh
+└── run-k-parent-proxy.sh
 
 python-packages/
 └── README.md                      # no Python package exists yet
@@ -224,6 +221,6 @@ Current durable decisions:
 - No ranking UX for schools, kindergarten, or childcare.
 - Shopping and affiliate are secondary.
 - Private scraping comes after official-data MVP.
-- Product skill folders stay flat under `skills/*`; inherited reference skills stay under `examples/*`.
+- Product skill folders stay flat under `skills/*`; generic reference skills stay in upstream `k-skill`.
 - Departments stay documentation/product taxonomy.
 - Product app surfaces live under `apps/*` (outside npm workspaces and `npm run ci`, gated by their own nested `AGENTS.md`); repo-scoped dev tooling lives under `tools/*`; repo-scoped agent infrastructure (`.claude/agents`, `.claude/skills`, `.mcp.json`) is committed (owner request, 2026-07).

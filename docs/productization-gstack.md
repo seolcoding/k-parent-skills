@@ -1,6 +1,6 @@
 # gstack Development and Productization Plan
 
-`k-parent-skill` starts as a skill repository, but the product direction should move toward tested parent workflows. gstack is the operating loop for turning each department into a usable product surface, not just a document set.
+`k-parent-skills` starts as a skill repository, but the product direction should move toward tested parent workflows. gstack is the operating loop for turning each department into a usable product surface, not just a document set.
 
 ## Product Thesis
 
@@ -79,7 +79,7 @@ Use this loop for every product surface.
 
 ### Phase 0: Skill OS and Data Contracts
 
-- Maintain product skill folders under `skills/*`, inherited example skills under `examples/*`, and department docs.
+- Maintain parent product skill folders under `skills/*`, the explicit layer model, HITL gates, and department docs.
 - Define shared schemas for child profile, school source, timetable, notices, schedule item, crawl record, recommendation, document capture, calendar candidates, shopping candidates, and affiliate disclosure.
 - Define resolver contracts for school, education office, kindergarten/childcare institution, district, event source, program source, and official application URL.
 - Define the initial storage model: `parent_profile`, `child_profile`, `region_code_map`, `institution`, `content_item`, `application_service`, and `consent_log`.

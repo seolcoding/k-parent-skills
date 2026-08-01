@@ -1,6 +1,8 @@
 import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import Ajv2020 from "ajv/dist/2020.js";
+import addFormats from "ajv-formats";
 
 const ssotRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repoRoot = path.resolve(ssotRoot, "..");
@@ -34,17 +36,30 @@ const enums = {
   verification: new Set(["undocumented", "documented", "fixture-tested", "offline-tested", "live-probed", "production-verified"]),
   deployment: new Set(["not-applicable", "repo-only", "local-only", "not-deployed", "deployment-unverified", "deployed", "archived"]),
   availability: new Set(["current", "archived", "historical-evidence", "remote-pointer"]),
-  tracking: new Set(["git", "ignored", "external", "git-history"]),
+  tracking: new Set(["git", "ignored", "external", "local-pointer", "git-history"]),
   sensitivity: new Set(["public", "synthetic", "internal", "personal-pointer", "restricted"]),
 };
 
 const referenceArrays = ["backingPackages", "products", "crawlers", "apis", "skills", "datasets", "dependsOn", "related"];
 const referenceScalars = ["duplicateOf", "supersedes", "report"];
+const layers = new Set(["experience", "skill", "policy", "memory", "tool", "domain", "adapter", "data", "governance", "runtime", "archive"]);
 const idPattern = /^[a-z][a-z0-9-]*(\.[a-z0-9-]+)+$/;
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
 const errors = [];
 const registries = [];
+const schemaPath = path.join(ssotRoot, "schema", "artifact.schema.json");
+let validateSchema;
+
+try {
+  const schema = JSON.parse(await readFile(schemaPath, "utf8"));
+  const ajv = new Ajv2020({ allErrors: true, strict: true });
+  addFormats(ajv);
+  validateSchema = ajv.compile(schema);
+} catch (error) {
+  console.error(`SSOT schema cannot be compiled: ${error.message}`);
+  process.exit(1);
+}
 
 for (const registryName of registryNames) {
   const registryPath = path.join(ssotRoot, "registry", `${registryName}.json`);
@@ -57,24 +72,35 @@ for (const registryName of registryNames) {
     continue;
   }
 
+  if (!validateSchema(parsed)) {
+    for (const schemaError of validateSchema.errors || []) {
+      const location = schemaError.instancePath || "/";
+      errors.push(`${registryName}${location}: schema ${schemaError.message}`);
+    }
+  }
+
   if (parsed.schemaVersion !== 1) {
     errors.push(`${registryName}: schemaVersion must be 1`);
   }
   if (parsed.registry !== registryName) {
     errors.push(`${registryName}: registry field must match the filename`);
   }
+  if (!layers.has(parsed.defaultLayer)) {
+    errors.push(`${registryName}: invalid or missing defaultLayer`);
+  }
   if (!Array.isArray(parsed.items)) {
     errors.push(`${registryName}: items must be an array`);
     continue;
   }
 
-  registries.push({ name: registryName, items: parsed.items });
+  registries.push({ name: registryName, defaultLayer: parsed.defaultLayer, items: parsed.items });
 }
 
 const allItems = registries.flatMap(({ items }) => items);
 const ids = new Set();
+const canonicalOwners = new Map();
 
-for (const { name: registryName, items } of registries) {
+for (const { name: registryName, defaultLayer, items } of registries) {
   for (const [index, item] of items.entries()) {
     const label = item?.id ?? `${registryName}[${index}]`;
 
@@ -107,6 +133,11 @@ for (const { name: registryName, items } of registries) {
       }
     }
 
+    const resolvedLayer = item.layer || defaultLayer;
+    if (!layers.has(resolvedLayer)) {
+      errors.push(`${label}: invalid resolved layer ${JSON.stringify(resolvedLayer)}`);
+    }
+
     if (typeof item.lastVerified !== "string" || !datePattern.test(item.lastVerified) || Number.isNaN(Date.parse(`${item.lastVerified}T00:00:00Z`))) {
       errors.push(`${label}: lastVerified must be a valid YYYY-MM-DD date`);
     }
@@ -127,8 +158,25 @@ for (const { name: registryName, items } of registries) {
       }
     }
 
-    if (item.tracking === "external" && !path.isAbsolute(item.canonicalPath) && !/^https:\/\//.test(item.canonicalPath)) {
-      errors.push(`${label}: external canonicalPath must be absolute or HTTPS`);
+    if (item.tracking === "external" && !/^https:\/\//.test(item.canonicalPath)) {
+      errors.push(`${label}: public external canonicalPath must use HTTPS`);
+    }
+
+    if (item.tracking === "local-pointer" && !/^local:\/\/[a-z0-9][a-z0-9._/-]+$/.test(item.canonicalPath)) {
+      errors.push(`${label}: local-pointer canonicalPath must use a redacted local:// identifier`);
+    }
+
+    if (typeof item.canonicalPath === "string") {
+      if (/^(?:\/Users\/|\/home\/|[A-Za-z]:\\\\)/.test(item.canonicalPath)) {
+        errors.push(`${label}: canonicalPath must not expose a machine-specific absolute path`);
+      }
+      const canonicalKey = `${item.tracking}:${item.canonicalPath}`;
+      const existingOwner = canonicalOwners.get(canonicalKey);
+      if (existingOwner) {
+        errors.push(`${label}: canonicalPath is already owned by ${existingOwner}`);
+      } else {
+        canonicalOwners.set(canonicalKey, label);
+      }
     }
 
     for (const field of referenceArrays) {

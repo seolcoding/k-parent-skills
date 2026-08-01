@@ -156,7 +156,7 @@ function toICS(candidates = [], options = {}) {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//k-parent-skill//k-parent-calendar//KO",
+    "PRODID:-//k-parent-skills//k-parent-calendar//KO",
     "CALSCALE:GREGORIAN",
   ];
 
@@ -168,7 +168,7 @@ function toICS(candidates = [], options = {}) {
     if (!icsDate) {
       continue;
     }
-    const uid = `${candidate.id || candidateId(candidate.title, candidate.date, candidate.location)}@k-parent-skill`;
+    const uid = `${candidate.id || candidateId(candidate.title, candidate.date, candidate.location)}@k-parent-skills`;
     lines.push("BEGIN:VEVENT");
     lines.push(foldLine(`UID:${uid}`));
     lines.push(`DTSTAMP:${dtstamp}`);

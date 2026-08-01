@@ -145,7 +145,7 @@ async function fetchJson(url, options = {}) {
   const response = await fetch(url, {
     headers: {
       accept: "application/json,text/xml,*/*",
-      "user-agent": "k-parent-skill-data-portal-audit",
+      "user-agent": "k-parent-skills-data-portal-audit",
       ...(options.headers || {}),
     },
   });
@@ -258,7 +258,7 @@ function parseSwaggerJson(html) {
 async function extractTargetSpec(target) {
   const url = `https://www.data.go.kr/data/${target.id}/openapi.do`;
   const response = await fetch(url, {
-    headers: { "user-agent": "k-parent-skill-data-portal-audit" },
+    headers: { "user-agent": "k-parent-skills-data-portal-audit" },
   });
   const html = await response.text();
   let spec = null;
@@ -357,7 +357,7 @@ function stripSpec(target) {
 
 function renderMarkdown(targets, curated) {
   const lines = [];
-  lines.push("# k-parent-skill 공공데이터포털 API 후보");
+  lines.push("# k-parent-skills 공공데이터포털 API 후보");
   lines.push("");
   lines.push(`카탈로그 스냅샷: \`${curated.snapshot.date}\`, 전체 ${curated.totalRows.toLocaleString("ko-KR")}건.`);
   lines.push("");

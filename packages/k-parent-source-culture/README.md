@@ -1,6 +1,6 @@
 # k-parent-source-culture
 
-문화포털(culture.go.kr) 공연전시정보 source adapter for k-parent-skill.
+문화포털(culture.go.kr) 공연전시정보 source adapter for k-parent-skills.
 
 ## Usage
 
