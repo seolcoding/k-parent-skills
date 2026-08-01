@@ -1,0 +1,15 @@
+{
+  "name": "k-parent-refresh",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Zero-dependency local refresh scheduler for K-Parent adapters",
+  "license": "MIT",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "lint": "node --check src/index.js && node --check test/index.test.js",
+    "test": "node --test"
+  }
+}
