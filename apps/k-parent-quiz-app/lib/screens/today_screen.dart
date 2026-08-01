@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../data/memory_consent_store.dart';
 import '../data/quiz_repository.dart';
 import '../models/models.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_shell.dart';
+import '../widgets/memory_consent_card.dart';
 import '../widgets/subject_sticker.dart';
 import 'quiz_screen.dart';
 
@@ -13,12 +15,14 @@ class TodayScreen extends StatefulWidget {
     required this.repository,
     required this.profile,
     required this.onEditProfile,
+    this.memoryConsentStore = const SharedPreferencesMemoryConsentStore(),
     super.key,
   });
 
   final QuizRepository repository;
   final ChildProfile profile;
   final VoidCallback onEditProfile;
+  final MemoryConsentStore memoryConsentStore;
 
   @override
   State<TodayScreen> createState() => _TodayScreenState();
@@ -130,6 +134,8 @@ class _TodayScreenState extends State<TodayScreen> {
                 );
               },
             ),
+            const SizedBox(height: 24),
+            MemoryConsentCard(store: widget.memoryConsentStore),
           ],
         ),
       ),
