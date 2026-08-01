@@ -1,4 +1,4 @@
-const { normalizeParkingLotRows } = require("../../parking-lot-search/src/parse");
+const { normalizeParkingLotRows } = require("./parking-lot-normalize");
 
 // Data.go.kr now serves this endpoint over HTTPS and redirects HTTP requests
 // with a 301 Moved Permanently, which causes Node `fetch` to surface a

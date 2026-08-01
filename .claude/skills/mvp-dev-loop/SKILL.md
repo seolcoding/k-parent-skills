@@ -3,7 +3,7 @@ name: mvp-dev-loop
 description: 초등 퀴즈 MVP 병렬 개발 루프 운영 가이드. 트랙별 게이트 명령·worktree 절차·머지 순서·드리프트 체크를 담은 리포 전용 개발 스킬. "트랙 게이트 돌려줘", "MVP 개발 루프", "worktree로 트랙 시작" 같은 요청에 사용.
 ---
 
-# MVP 개발 루프 (k-parent-skill 전용)
+# MVP 개발 루프 (k-parent-skills 전용)
 
 초등 퀴즈 MVP를 트랙 4개(A: quiz-core, B: proxy 라우트, C: Flutter 앱, 마감: docs-sync)로 병렬 개발할 때의 운영 절차다. 서브에이전트 정의는 `.claude/agents/track-*.md`, 계획 원문은 승인된 플랜 파일을 따른다.
 
@@ -21,11 +21,11 @@ description: 초등 퀴즈 MVP 병렬 개발 루프 운영 가이드. 트랙별 
 ## worktree 절차
 
 ```bash
-git worktree add ../k-parent-skill-track-a -b track/quiz-core   # A
-git worktree add ../k-parent-skill-track-b -b track/proxy-neis  # B
-git worktree add ../k-parent-skill-track-c -b track/flutter-app # C
+git worktree add ../k-parent-skills-track-a -b track/quiz-core   # A
+git worktree add ../k-parent-skills-track-b -b track/proxy-neis  # B
+git worktree add ../k-parent-skills-track-c -b track/flutter-app # C
 # 각 worktree에서 npm install 후 작업. 완료 트랙부터 base 브랜치로 병합.
-git worktree remove ../k-parent-skill-track-a                   # 병합 후 정리
+git worktree remove ../k-parent-skills-track-a                   # 병합 후 정리
 ```
 
 ## 머지 순서와 이유

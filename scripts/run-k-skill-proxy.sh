@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SECRETS_FILE="${KSKILL_SECRETS_FILE:-$HOME/.config/k-parent-skill/secrets.env}"
+SECRETS_FILE="${KSKILL_SECRETS_FILE:-$HOME/.config/k-parent-skills/secrets.env}"
 
 if [[ -f "$SECRETS_FILE" ]]; then
   set -a

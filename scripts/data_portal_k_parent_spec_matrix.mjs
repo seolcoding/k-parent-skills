@@ -145,7 +145,7 @@ async function fetchWithTimeout(url, timeoutMs = 10000) {
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(url, {
-      headers: { "user-agent": "k-parent-skill-spec-matrix" },
+      headers: { "user-agent": "k-parent-skills-spec-matrix" },
       signal: controller.signal,
     });
     return { response, text: await response.text() };
@@ -223,7 +223,7 @@ async function mapLimit(items, limit, mapper) {
 
 function renderMarkdown(items) {
   const lines = [];
-  lines.push("# k-parent-skill data.go.kr API 스펙/래핑 매트릭스");
+  lines.push("# k-parent-skills data.go.kr API 스펙/래핑 매트릭스");
   lines.push("");
   lines.push("`tmp/data_portal_k_parent_apply_queue.json`의 신청/검토/관측 완료 후보를 기준으로 공개 상세 페이지에서 swagger 명세를 다시 추출한 결과다.");
   lines.push("");

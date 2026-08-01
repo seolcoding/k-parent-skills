@@ -57,7 +57,7 @@ async function requestDatagokrJson(servicePath, params, options = {}) {
     headers: {
       accept: "application/json",
       "accept-language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
-      "user-agent": "k-parent-skill/playground",
+      "user-agent": "k-parent-skills/playground",
       ...(options.headers || {}),
     },
     signal: options.signal,

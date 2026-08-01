@@ -3,7 +3,7 @@
 ## Repository-owned artifacts
 
 Use repository-relative paths for files and directories owned by
-`k-parent-skill`. The registry points to the implementation; it never becomes a
+`k-parent-skills`. The registry points to the implementation; it never becomes a
 second copy of that implementation.
 
 Examples:

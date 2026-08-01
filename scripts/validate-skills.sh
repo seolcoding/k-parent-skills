@@ -8,6 +8,11 @@ while IFS= read -r -d '' skill_dir; do
   skill_name="$(basename "$skill_dir")"
   skill_file="$skill_dir/SKILL.md"
 
+  if [[ "$skill_name" != k-parent-* ]]; then
+    echo "non-parent skill directory is not allowed: $skill_name"
+    status=1
+  fi
+
   if [[ ! -f "$skill_file" ]]; then
     echo "missing SKILL.md: $skill_name"
     status=1
@@ -62,13 +67,7 @@ while IFS= read -r -d '' skill_dir; do
     fi
   fi
 done < <(
-  # Skills live under skills/ (product) and examples/ (inherited upstream demos),
-  # one directory deep. Only scan containers that actually exist.
-  containers=()
-  for c in "$root/skills" "$root/examples"; do
-    [[ -d "$c" ]] && containers+=("$c")
-  done
-  find "${containers[@]}" -mindepth 1 -maxdepth 1 -type d \
+  find "$root/skills" -mindepth 1 -maxdepth 1 -type d \
     ! -name '.*' \
     -print0
 )

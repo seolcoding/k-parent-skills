@@ -1,4 +1,4 @@
-# k-parent-skill data.go.kr 신청 큐
+# k-parent-skills data.go.kr 신청 큐
 
 공공데이터포털 목록개방현황 스냅샷과 상세 페이지 공개 HTML을 기준으로 만든 신청/검토 큐다.
 

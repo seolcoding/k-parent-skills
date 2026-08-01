@@ -1,6 +1,6 @@
 # k-skill-proxy
 
-`k-parent-skill`에서 부모용 무료/공공 API를 중계하는 Fastify 기반 프록시 서버입니다. 기존 `k-skill-proxy` 패키지명을 유지하며 AirKorea 미세먼지 조회, 기상청 단기예보, 서울 지하철 실시간 도착정보, 한강홍수통제소 수위 정보를 감싸고, 이후 무료/공공 API adapter를 추가하는 베이스로 씁니다.
+`k-parent-skills`에서 부모용 무료/공공 API를 중계하는 Fastify 기반 프록시 서버입니다. 기존 `k-skill-proxy` 패키지명을 유지하며 AirKorea 미세먼지 조회, 기상청 단기예보, 서울 지하철 실시간 도착정보, 한강홍수통제소 수위 정보를 감싸고, 이후 무료/공공 API adapter를 추가하는 베이스로 씁니다.
 
 ## 현재 제공 엔드포인트
 
@@ -79,7 +79,7 @@
 node packages/k-skill-proxy/src/server.js
 ```
 
-환경변수(`AIR_KOREA_OPEN_API_KEY` 등)가 이미 설정되어 있거나 `~/.config/k-parent-skill/secrets.env`를 source한 상태에서 실행한다.
+환경변수(`AIR_KOREA_OPEN_API_KEY` 등)가 이미 설정되어 있거나 `~/.config/k-parent-skills/secrets.env`를 source한 상태에서 실행한다.
 
 서울 지하철 도착정보 예시:
 

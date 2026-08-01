@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "registry": "legacy",
+  "defaultLayer": "archive",
   "items": [
     {
       "id": "legacy.k-skill-ancestor",

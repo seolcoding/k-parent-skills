@@ -1,0 +1,16 @@
+{
+  "name": "k-parent-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-first K-Parent runtime API for HITL and ephemeral memory",
+  "license": "MIT",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "lint": "node --check src/server.js && node --check test/server.test.js",
+    "test": "node --test"
+  }
+}

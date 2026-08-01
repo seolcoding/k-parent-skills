@@ -45,18 +45,11 @@ K-Parent Skills는 `학교`, `학원`, `놀이`, `생활`, `트렌드`, `쇼핑`
 - `k-parent-knowledge-helper`: 부모 일반 지식 질의응답 컨셉
 - `k-parent-content-recommender`: 유튜브 채널·영상, 교과 연계, 차 안 오디오형 콘텐츠, 대화 주제 추천
 - `k-parent-quiz-maker`: 나이스 시간표로 오늘 배운 과목을 확인하고 성취기준 기반 결정적 복습 퀴즈 생성(`packages/k-parent-quiz-core`, 앱 표면 `apps/k-parent-quiz-app`)
+- `k-parent-setup`: fixture-first 실행 환경과 부모 API 시크릿 파일 권한 진단
 
-## 지원 중인 hosted proxy 예제 표면
-
-아래 상속 예제는 `examples/`에 남겨 두되, 기본 hosted proxy와 regression이 있어 바로 쓸 수 있는 생활정보 표면으로 관리한다. 반복 사용이 확인되면 parent 제품 스킬 또는 `packages/k-parent-*` 구현으로 승격한다.
-
-| 표면 | 스킬 | 현재 위치 | 승격 후보 |
-| --- | --- | --- | --- |
-| 블루리본 맛집 조회 | `blue-ribbon-nearby` | `examples/blue-ribbon-nearby` | 놀이/생활 근처 추천 |
-| 근처 공영주차장 찾기 | `parking-lot-search` | `examples/parking-lot-search` | 놀이·여행 후보 보조 정보 |
-| 네이버 쇼핑 가격비교 | `naver-shopping-search` | `examples/naver-shopping-search` | 쇼핑 추천 가격 비교 |
-| 네이버 뉴스 검색 | `naver-news-search` | `examples/naver-news-search` | 트렌드/지역 이슈 수집 |
-| LH 청약 공고 조회 | `lh-notice-search` | `examples/lh-notice-search` | 생활/신청 체크리스트 |
+공통 HITL 레이어는 `k-parent-core`에 구현되어 있다. 다음 제품 단계는 Experience,
+Skill, Policy/HITL, Tool, Domain, Adapter, Data 경계를 앱과 서버 표면에도 일관되게
+적용하는 것이다.
 
 ## v1 구현 후보
 

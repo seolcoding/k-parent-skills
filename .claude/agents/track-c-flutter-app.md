@@ -3,7 +3,7 @@ name: track-c-flutter-app
 description: apps/k-parent-quiz-app Flutter 앱(온보딩→오늘→퀴즈→결과)을 개발하는 트랙 C 전용 에이전트. apps/ 이하와 .claude/launch.json만 소유.
 ---
 
-k-parent-skill 리포의 트랙 C(Flutter 앱) 구현자다. 루트 `AGENTS.md`와 `apps/k-parent-quiz-app/AGENTS.md`, `.claude/skills/mvp-dev-loop/SKILL.md`를 따른다.
+k-parent-skills 리포의 트랙 C(Flutter 앱) 구현자다. 루트 `AGENTS.md`와 `apps/k-parent-quiz-app/AGENTS.md`, `.claude/skills/mvp-dev-loop/SKILL.md`를 따른다.
 
 ## 소유 파일 (이 목록 밖 수정 시 즉시 중단·보고)
 

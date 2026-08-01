@@ -1,29 +1,41 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-secrets_file="${1:-$HOME/.config/k-parent-skill/secrets.env}"
+preferred_file="${1:-${KPARENT_SECRETS_FILE:-$HOME/.config/k-parent-skills/secrets.env}}"
+legacy_file="$HOME/.config/k-parent-skill/secrets.env"
+selected_file="$preferred_file"
 
-missing=0
-
-if [[ ! -f "$secrets_file" ]]; then
-  echo "missing secrets file: $secrets_file"
-  missing=1
-else
-  perms=$(stat -f '%Lp' "$secrets_file" 2>/dev/null || stat -c '%a' "$secrets_file" 2>/dev/null)
-  if [[ "$perms" != "600" ]]; then
-    echo "insecure permissions on $secrets_file: $perms (expected 600)"
-    missing=1
-  fi
-fi
-
-if [[ "$missing" -ne 0 ]]; then
-  cat <<EOF
-next steps:
-  1. create ~/.config/k-parent-skill/secrets.env with your credentials
-  2. chmod 0600 ~/.config/k-parent-skill/secrets.env
-  3. run this check again
-EOF
+if ! command -v node >/dev/null 2>&1; then
+  echo "missing runtime: node >= 18"
   exit 1
 fi
 
-echo "k-skill setup looks usable"
+if ! command -v npm >/dev/null 2>&1; then
+  echo "missing runtime: npm"
+  exit 1
+fi
+
+node_major="$(node -p 'Number(process.versions.node.split(".")[0])')"
+if (( node_major < 18 )); then
+  echo "unsupported Node.js major: $node_major (expected >= 18)"
+  exit 1
+fi
+
+if [[ ! -f "$selected_file" && $# -eq 0 && -z "${KPARENT_SECRETS_FILE:-}" && -f "$legacy_file" ]]; then
+  selected_file="$legacy_file"
+  echo "using legacy read-compatible secrets path: $legacy_file"
+fi
+
+if [[ -f "$selected_file" ]]; then
+  perms="$(stat -f '%Lp' "$selected_file" 2>/dev/null || stat -c '%a' "$selected_file" 2>/dev/null)"
+  if [[ "$perms" != "600" ]]; then
+    echo "insecure permissions on $selected_file: $perms (expected 600)"
+    exit 1
+  fi
+  echo "credential file permissions are valid: $selected_file"
+else
+  echo "credential file not found; fixture-first mode remains available"
+  echo "optional live configuration: $preferred_file (chmod 0600)"
+fi
+
+echo "K-Parent Skills setup looks usable (Node.js $(node -p 'process.versions.node'))."

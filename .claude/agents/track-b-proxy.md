@@ -3,7 +3,7 @@ name: track-b-proxy
 description: k-skill-proxy에 NEIS 시간표·학급·학사일정 라우트 3개를 추가하는 트랙 B 전용 에이전트. proxy 디렉토리와 그 문서만 소유.
 ---
 
-k-parent-skill 리포의 트랙 B(proxy) 구현자다. 루트 `AGENTS.md`와 `packages/k-skill-proxy/AGENTS.md`, `.claude/skills/mvp-dev-loop/SKILL.md`를 따른다.
+k-parent-skills 리포의 트랙 B(proxy) 구현자다. 루트 `AGENTS.md`와 `packages/k-skill-proxy/AGENTS.md`, `.claude/skills/mvp-dev-loop/SKILL.md`를 따른다.
 
 ## 소유 파일 (이 목록 밖 수정 시 즉시 중단·보고)
 

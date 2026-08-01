@@ -40,6 +40,7 @@ const enums = {
 
 const referenceArrays = ["backingPackages", "products", "crawlers", "apis", "skills", "datasets", "dependsOn", "related"];
 const referenceScalars = ["duplicateOf", "supersedes", "report"];
+const layers = new Set(["experience", "skill", "policy", "memory", "tool", "domain", "adapter", "data", "governance", "runtime", "archive"]);
 const idPattern = /^[a-z][a-z0-9-]*(\.[a-z0-9-]+)+$/;
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -63,18 +64,21 @@ for (const registryName of registryNames) {
   if (parsed.registry !== registryName) {
     errors.push(`${registryName}: registry field must match the filename`);
   }
+  if (!layers.has(parsed.defaultLayer)) {
+    errors.push(`${registryName}: invalid or missing defaultLayer`);
+  }
   if (!Array.isArray(parsed.items)) {
     errors.push(`${registryName}: items must be an array`);
     continue;
   }
 
-  registries.push({ name: registryName, items: parsed.items });
+  registries.push({ name: registryName, defaultLayer: parsed.defaultLayer, items: parsed.items });
 }
 
 const allItems = registries.flatMap(({ items }) => items);
 const ids = new Set();
 
-for (const { name: registryName, items } of registries) {
+for (const { name: registryName, defaultLayer, items } of registries) {
   for (const [index, item] of items.entries()) {
     const label = item?.id ?? `${registryName}[${index}]`;
 
@@ -105,6 +109,11 @@ for (const { name: registryName, items } of registries) {
       if (!allowed.has(item[field])) {
         errors.push(`${label}: invalid ${field} value ${JSON.stringify(item[field])}`);
       }
+    }
+
+    const resolvedLayer = item.layer || defaultLayer;
+    if (!layers.has(resolvedLayer)) {
+      errors.push(`${label}: invalid resolved layer ${JSON.stringify(resolvedLayer)}`);
     }
 
     if (typeof item.lastVerified !== "string" || !datePattern.test(item.lastVerified) || Number.isNaN(Date.parse(`${item.lastVerified}T00:00:00Z`))) {

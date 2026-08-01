@@ -2,7 +2,7 @@
 
 - 확인일: 2026-07-07
 - 목적: 아이가 학교에서 그날 배운 내용을 바탕으로 퀴즈를 출력해주는 안드로이드 앱을 이 저장소 자산 위에서 시작할 수 있는지 판단한다.
-- 선행 자산: `docs/neis_api_ref.md`(라이브 검증 완료), `docs/neis_parent_scenario_report.md`(300 시나리오 통과), `docs/edss_k_parent_sources.md`, `docs/data_portal_k_parent_api_specs.md`
+- 선행 자산: `docs/neis_api_ref.md`(라이브 검증 완료), SSOT `datasets.neis-parent-scenarios-report`의 archived report(300 시나리오 통과), `docs/edss_k_parent_sources.md`, `docs/data_portal_k_parent_api_specs.md`
 
 ## 한눈에 보기
 
@@ -37,7 +37,7 @@ Base `https://open.neis.go.kr/hub/<endpoint>`, 인증키 `KEDU_INFO_KEY`(발급 
 
 핵심 제약: 시간표의 `ITRT_CNTNT`는 **과목명 수준**이다(예: "수학", "공통수학1", "도덕"). 교과서 단원·차시 수준은 NEIS에 없다. 또한 시간표 4종은 2025학년도 이후 데이터만 제공되며, 학교·날짜 조합에 따라 `INFO-200`(데이터 없음)이 정상적으로 발생한다.
 
-기존 구현: `packages/k-parent-source-neis`(fixture-first 어댑터), 300개 부모 시나리오 라이브 통과 기록(`docs/neis_parent_scenario_report.md`).
+기존 구현: `packages/k-parent-source-neis`(fixture-first 어댑터), 300개 부모 시나리오 라이브 통과 기록(SSOT `datasets.neis-parent-scenarios-report`).
 
 ## 축 2. 공시 포털 — 키 발급·검증 완료 (2026-07-07)
 

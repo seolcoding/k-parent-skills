@@ -2,7 +2,7 @@
 
 ## Product goal
 
-`k-parent-skill` should become a Korea-focused parent assistant that turns official and public sources into timely decisions, reminders, and safe next actions.
+`k-parent-skills` should become a Korea-focused parent assistant that turns official and public sources into timely decisions, reminders, and safe next actions.
 
 The product is not another notice inbox and not an automatic government-application robot. It is a mobile, messenger, and voice-friendly assistant for parents who need to know:
 

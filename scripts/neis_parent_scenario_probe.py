@@ -122,7 +122,7 @@ class NeisClient:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--json-output", default="tmp/neis_parent_scenario_report.json")
-    parser.add_argument("--md-output", default="docs/neis_parent_scenario_report.md")
+    parser.add_argument("--md-output", default="tmp/neis_parent_scenario_report.md")
     parser.add_argument("--sleep", type=float, default=0.05)
     args = parser.parse_args()
 

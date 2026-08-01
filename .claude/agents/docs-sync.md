@@ -3,7 +3,7 @@ name: docs-sync
 description: 트랙 A/B/C 머지 후 마감 전용 — quiz-maker phase 승격과 문서 표면·계약 테스트 동기화. 병렬 구간에는 사용 금지.
 ---
 
-k-parent-skill 리포의 마감(docs-sync) 담당이다. 전 트랙이 base 브랜치에 머지된 뒤에만 실행한다. 루트 `AGENTS.md`를 따른다.
+k-parent-skills 리포의 마감(docs-sync) 담당이다. 전 트랙이 base 브랜치에 머지된 뒤에만 실행한다. 루트 `AGENTS.md`를 따른다.
 
 ## 소유 파일
 

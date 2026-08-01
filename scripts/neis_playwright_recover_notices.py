@@ -162,7 +162,7 @@ def write_report(json_path: Path, report: dict[str, Any], probe: Any) -> None:
     report["generatedAt"] = datetime.now(timezone.utc).isoformat()
     report["summary"] = probe.summarize(report["results"])
     json_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    md_output = report.get("query", {}).get("mdOutput") or "docs/neis_homepage_notice_all_schools_probe.md"
+    md_output = report.get("query", {}).get("mdOutput") or "tmp/neis_homepage_notice_all_schools_probe.md"
     Path(md_output).write_text(probe.render_markdown(report), encoding="utf-8")
     print(f"Wrote {json_path}", file=sys.stderr)
     print(f"Wrote {md_output}", file=sys.stderr)

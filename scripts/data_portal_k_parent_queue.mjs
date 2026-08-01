@@ -201,7 +201,7 @@ async function fetchDetail(candidate) {
   const timeout = setTimeout(() => controller.abort(), 4000);
   try {
     const response = await fetch(candidate.url, {
-      headers: { "user-agent": "k-parent-skill-queue" },
+      headers: { "user-agent": "k-parent-skills-queue" },
       signal: controller.signal,
     });
     const html = await response.text();
@@ -226,7 +226,7 @@ async function fetchDetail(candidate) {
 
 function renderMarkdown(items, summary) {
   const lines = [];
-  lines.push("# k-parent-skill data.go.kr 신청 큐");
+  lines.push("# k-parent-skills data.go.kr 신청 큐");
   lines.push("");
   lines.push("공공데이터포털 목록개방현황 스냅샷과 상세 페이지 공개 HTML을 기준으로 만든 신청/검토 큐다.");
   lines.push("");

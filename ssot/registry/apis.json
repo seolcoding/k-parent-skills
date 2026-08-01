@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "registry": "apis",
+  "defaultLayer": "adapter",
   "items": [
     {
       "id": "apis.neis-open-api",

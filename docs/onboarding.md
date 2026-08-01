@@ -1,19 +1,20 @@
 # 처음 사용자 온보딩 가이드
 
-이 문서는 `k-parent-skill`을 처음 보는 사람이 저장소의 목적, 기능 동작 방식, 설치 후 확인 방법을 빠르게 따라잡기 위한 가이드다. 세부 구현 규칙은 [아키텍처 컨벤션](architecture.md), 설치 명령은 [설치 방법](install.md), 기능별 상세 계약은 `docs/features/*.md`에서 확인한다.
+이 문서는 `k-parent-skills`를 처음 보는 사람이 저장소의 목적, 기능 동작 방식, 설치 후 확인 방법을 빠르게 따라잡기 위한 가이드다. 세부 구현 규칙은 [아키텍처 컨벤션](architecture.md), 설치 명령은 [설치 방법](install.md), 기능별 상세 계약은 `docs/features/*.md`에서 확인한다.
 
 ## 1. 이 저장소가 하는 일
 
-`k-parent-skill`은 대한민국 부모가 반복해서 확인하는 학교·학원·놀이·생활·쇼핑·영양 정보를 에이전트 스킬로 다루기 위한 저장소다. 핵심 단위는 `skills/<skill-name>/SKILL.md`이며, 반복 사용으로 경계가 명확해진 기능은 `packages/k-parent-*` 런타임 패키지로 승격한다.
+`k-parent-skills`는 대한민국 부모가 반복해서 확인하는 학교·학원·놀이·생활·쇼핑·영양 정보를 에이전트 스킬로 다루기 위한 저장소다. 핵심 단위는 `skills/<skill-name>/SKILL.md`이며, 반복 사용으로 경계가 명확해진 기능은 `packages/k-parent-*` 런타임 패키지로 승격한다.
 
 처음 볼 때는 아래 네 층으로 이해하면 된다.
 
 | 층 | 위치 | 역할 | 확인 방법 |
 | --- | --- | --- | --- |
-| 제품 스킬 | `skills/k-parent-*/SKILL.md` | 에이전트가 어떤 요청에서 어떤 순서로 질문·조회·요약할지 정의 | `npx --yes skills add <owner/repo> --list` 또는 파일 직접 확인 |
+| 제품 스킬 | `skills/k-parent-*/SKILL.md` | 에이전트가 어떤 요청에서 어떤 순서로 질문·조회·요약할지 정의 | `npx --yes skills add seolcoding/k-parent-skills --list` 또는 파일 직접 확인 |
 | 기능 문서 | `docs/features/k-parent-*.md` | 각 스킬의 데이터 소스, 환경변수, 출력 계약, 확장 후보 설명 | README의 스킬 표에서 기능 문서 링크 확인 |
 | 런타임 패키지 | `packages/k-parent-*` | 공식 API 정규화, 안내문 추출, 캘린더 후보, Today Brief 합성 | `npm run test --workspace <package>` |
 | 검증 스위트 | `scripts/skill-docs.test.js`, package tests | 문서 링크, 스킬 메타데이터, 패키지 계약, proxy route를 회귀 검증 | `npm run lint`, `npm run test`, `npm run ci` |
+| 생태계 SSOT | `ssot/registry/*.json` | 자산 ID, canonical 경로, 성숙도, 검증, 배포 상태 | `npm run ssot:check` |
 
 ## 2. 기능 지형도
 
@@ -43,13 +44,13 @@
 1. 설치 문서의 전체 설치 명령을 사용한다.
 
 ```bash
-npx --yes skills add <owner/repo> --all --full-depth -g
+npx --yes skills add seolcoding/k-parent-skills --all -g
 ```
 
 2. 공통 설정 스킬을 호출한다.
 
 ```text
-k-skill-setup 스킬을 사용해서 공통 설정을 진행해줘.
+k-parent-setup 스킬을 사용해서 공통 설정을 진행해줘.
 ```
 
 3. 사용자 쪽 API key 없이 바로 확인 가능한 기능부터 시도한다.
@@ -163,7 +164,7 @@ find . \( -name '*.tgz' -o -path './.playwright-mcp/*' -o -name '.DS_Store' \) -
 처음 30분 캐치업 순서는 아래를 권장한다.
 
 1. [README](../README.md): 제품 스킬 목록과 큰 구조
-2. [설치 방법](install.md): 에이전트 스킬 설치와 `k-skill-setup`
+2. [설치 방법](install.md): 에이전트 스킬 설치와 `k-parent-setup`
 3. [스킬 라우팅 인덱스](skill-routing.md): 사용자 질문을 어느 스킬로 보낼지
 4. [디파트먼트 인덱스](departments/README.md): 학교·놀이·생활 등 분류
 5. 관심 기능의 `docs/features/k-parent-*.md`: 패키지, 환경변수, 출력 계약
@@ -174,9 +175,9 @@ find . \( -name '*.tgz' -o -path './.playwright-mcp/*' -o -name '.DS_Store' \) -
 
 | 질문 | 답 |
 | --- | --- |
-| 제품 스킬과 예제 스킬은 무엇이 다른가? | `skills/k-parent-*`는 부모 제품 스킬이고, `examples/*`는 원본 k-skill에서 상속한 참고/조회형 예제다. |
+| 범용 k-skill은 어디에 있는가? | 부모 제품과 직접 관계없는 범용 한국 생활 스킬은 upstream `NomaDamas/k-skill`에 남겨 이 저장소에 복제하지 않는다. |
 | API key가 없으면 못 쓰는가? | 대부분의 패키지 테스트는 fixture로 오프라인 동작한다. 일부 live 조회나 fixture 갱신에만 key가 필요하다. |
-| 사용자가 upstream API key를 직접 넣어야 하는가? | hosted proxy 예제는 사용자 key가 불필요하다. self-host 운영자는 서버 환경변수에 upstream key를 둔다. |
+| 사용자가 API key를 직접 넣어야 하는가? | fixture 테스트에는 필요 없다. 라이브 조회·fixture 갱신 또는 self-host 프록시에만 공식 API 키를 사용한다. |
 | 스킬이 실제 행동을 실행하는가? | 기본은 정보 정리와 후보 생성이다. 신청·예약·결제·캘린더 쓰기는 사용자 승인 전 실행하지 않는다. |
 | 새 기능은 어디에 추가하는가? | 먼저 `skills/<name>/SKILL.md`와 `docs/features/<name>.md`로 시작하고, 반복 사용이 확인되면 `packages/*` 또는 `scripts/*`로 승격한다. |
 

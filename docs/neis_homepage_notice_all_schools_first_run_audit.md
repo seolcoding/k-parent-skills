@@ -6,7 +6,7 @@
 - 현재 체크포인트: 12,519개 검증 완료
 - 진행률: 100.00%
 - 원본 JSON: `tmp/neis_homepage_notice_all_schools_probe.json`
-- 상세 Markdown: `docs/neis_homepage_notice_all_schools_probe.md`
+- 상세 Markdown: `tmp/neis_homepage_notice_all_schools_probe.md`
 
 ## 현재 결과
 
@@ -110,7 +110,7 @@ uv run --with 'scrapling[fetchers]' python3 scripts/neis_homepage_notice_probe.p
   --resume \
   --quiet-skips \
   --json-output tmp/neis_homepage_notice_all_schools_probe.json \
-  --md-output docs/neis_homepage_notice_all_schools_probe.md
+  --md-output tmp/neis_homepage_notice_all_schools_probe.md
 ```
 
 특정 교육청 패턴 검증이 필요하면 `--office N10 --retry-status found_notice_page --retry-office N10`처럼 좁혀 재검증한다. 단, `retry-status`는 기존 결과를 먼저 제거하므로 `--stop-after-new`를 제거 대상 수보다 크게 잡아야 체크포인트 수가 줄지 않는다.
@@ -120,7 +120,7 @@ uv run --with 'scrapling[fetchers]' python3 scripts/neis_homepage_notice_probe.p
 - 확인일: 2026-05-31 KST
 - 재조사 원칙: `homepage_fetch_error`, `no_notice_candidates`, `found_notice_page`, `probe_error`를 반복 제거 후 재수집하고, Scrapling만으로 식별되지 않는 사이트는 Playwright 렌더링 DOM을 사용해 재검증했다.
 - 최종 JSON: `tmp/neis_homepage_notice_all_schools_probe.json`
-- 최종 Markdown: `docs/neis_homepage_notice_all_schools_probe.md`
+- 최종 Markdown: `tmp/neis_homepage_notice_all_schools_probe.md`
 - 다음 세션 handoff: `docs/neis_homepage_notice_handoff.md`
 - 2026-05-31 재조회 기준 NEIS `schoolInfo` 대상은 12,521개로 확인됐다. 1회차 백업 12,519개와 비교해 현행 NEIS 응답에 신규/추가 3개, 1회차에는 있었으나 현행 목록에서 빠진 1개가 있었다.
 
@@ -210,7 +210,7 @@ uv run --with 'scrapling[fetchers]' python3 scripts/neis_homepage_notice_probe.p
   --retry-status no_notice_candidates \
   --retry-status found_notice_page \
   --json-output tmp/neis_homepage_notice_all_schools_probe.json \
-  --md-output docs/neis_homepage_notice_all_schools_probe.md
+  --md-output tmp/neis_homepage_notice_all_schools_probe.md
 
 uv run --with playwright --with 'scrapling[fetchers]' python3 scripts/neis_playwright_recover_notices.py \
   --json-output tmp/neis_homepage_notice_all_schools_probe.json \

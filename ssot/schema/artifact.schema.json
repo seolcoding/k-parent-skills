@@ -3,7 +3,7 @@
   "$id": "https://github.com/seolcoding/k-parent-skills/ssot/schema/artifact.schema.json",
   "title": "K-Parent SSOT registry",
   "type": "object",
-  "required": ["schemaVersion", "registry", "items"],
+  "required": ["schemaVersion", "registry", "defaultLayer", "items"],
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {
@@ -19,6 +19,9 @@
         "products",
         "legacy"
       ]
+    },
+    "defaultLayer": {
+      "$ref": "#/$defs/layer"
     },
     "items": {
       "type": "array",
@@ -65,6 +68,9 @@
             "archive",
             "research"
           ]
+        },
+        "layer": {
+          "$ref": "#/$defs/layer"
         },
         "maturity": {
           "enum": [
@@ -127,6 +133,21 @@
           ]
         }
       }
+    },
+    "layer": {
+      "enum": [
+        "experience",
+        "skill",
+        "policy",
+        "memory",
+        "tool",
+        "domain",
+        "adapter",
+        "data",
+        "governance",
+        "runtime",
+        "archive"
+      ]
     }
   }
 }

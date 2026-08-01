@@ -17,7 +17,11 @@ const displayPath = (item) => {
 const registries = [];
 for (const name of registryNames) {
   const registry = JSON.parse(await readFile(path.join(ssotRoot, "registry", `${name}.json`), "utf8"));
-  registries.push({ name, items: [...registry.items].sort((a, b) => a.id.localeCompare(b.id)) });
+  registries.push({
+    name,
+    defaultLayer: registry.defaultLayer,
+    items: [...registry.items].sort((a, b) => a.id.localeCompare(b.id)),
+  });
 }
 
 const total = registries.reduce((sum, registry) => sum + registry.items.length, 0);
@@ -34,17 +38,17 @@ const lines = [
   "",
 ];
 
-for (const { name, items } of registries) {
+for (const { name, defaultLayer, items } of registries) {
   lines.push(
     `## ${name}`,
     "",
-    "| ID | Name | Maturity | Verification | Deployment | Canonical path |",
-    "| --- | --- | --- | --- | --- | --- |",
+    "| ID | Name | Layer | Maturity | Verification | Deployment | Canonical path |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
   );
 
   for (const item of items) {
     lines.push(
-      `| \`${escapeCell(item.id)}\` | ${escapeCell(item.name)} | \`${item.maturity}\` | \`${item.verification}\` | \`${item.deployment}\` | ${displayPath(item)} |`,
+      `| \`${escapeCell(item.id)}\` | ${escapeCell(item.name)} | \`${item.layer || defaultLayer}\` | \`${item.maturity}\` | \`${item.verification}\` | \`${item.deployment}\` | ${displayPath(item)} |`,
     );
   }
   lines.push("");

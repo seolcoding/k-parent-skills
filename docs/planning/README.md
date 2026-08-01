@@ -26,7 +26,7 @@ The current CLI surface exposes planning metadata and prompt validation, but doe
 
 ## Planning Rules
 
-- Keep product skill folders flat inside `skills/`, with inherited upstream demos isolated under `examples/`.
+- Keep parent product skill folders flat inside `skills/`; leave generic upstream demos in `NomaDamas/k-skill`.
 - Keep departments as taxonomy and ownership, not nested install paths.
 - Start with official data MVP before private scraping.
 - Treat government, booking, payment, and identity flows as official-site handoff.
