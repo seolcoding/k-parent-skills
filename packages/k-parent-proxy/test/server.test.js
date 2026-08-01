@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { createKParentProxyServer } = require("../src/server");
+const { createKParentProxyServer, safeErrorMessage } = require("../src/server");
 
 function fixtureEnvelope(dataset, rows) {
   return { [dataset]: [{ head: [{ list_total_count: rows.length }] }, { row: rows }] };
@@ -50,6 +50,13 @@ test("health is public but reports missing NEIS configuration", async () => {
     assert.equal(health.deployment.productionReady, false);
     assert.equal((await fetch(`${baseUrl}/v1/neis/school-search?schoolName=x`)).status, 503);
   });
+});
+
+test("error payload helper redacts credential-bearing diagnostics", () => {
+  assert.equal(
+    safeErrorMessage(new Error("Bearer example-upstream-token"), "The upstream request failed."),
+    "The upstream request failed.",
+  );
 });
 
 test("parent-only routes normalize schools, classes, timetable, and schedule", async () => {

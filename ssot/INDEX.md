@@ -1,17 +1,17 @@
 <!-- GENERATED FILE: run `npm run ssot:generate`; do not edit by hand. -->
 # K-Parent SSOT index
 
-This index contains **90 artifacts** from the machine-readable registries in [`ssot/registry/`](registry/).
+This index contains **92 artifacts** from the machine-readable registries in [`ssot/registry/`](registry/).
 Maturity, verification, and deployment are independent status axes.
 
 | Registry | Artifacts |
 | --- | ---: |
 | [skills](registry/skills.json) | 18 |
-| [packages](registry/packages.json) | 20 |
+| [packages](registry/packages.json) | 21 |
 | [apis](registry/apis.json) | 12 |
 | [crawlers](registry/crawlers.json) | 10 |
 | [datasets](registry/datasets.json) | 13 |
-| [products](registry/products.json) | 6 |
+| [products](registry/products.json) | 7 |
 | [legacy](registry/legacy.json) | 11 |
 
 ## skills
@@ -48,6 +48,7 @@ Maturity, verification, and deployment are independent status axes.
 | `packages.k-parent-memory` | k-parent-memory | `memory` | `implemented` | `offline-tested` | `not-applicable` | [`packages/k-parent-memory`](../packages/k-parent-memory) |
 | `packages.k-parent-proxy` | k-parent-proxy | `tool` | `implemented` | `offline-tested` | `not-applicable` | [`packages/k-parent-proxy`](../packages/k-parent-proxy) |
 | `packages.k-parent-quiz-core` | k-parent-quiz-core | `domain` | `implemented` | `offline-tested` | `not-applicable` | [`packages/k-parent-quiz-core`](../packages/k-parent-quiz-core) |
+| `packages.k-parent-redaction` | k-parent-redaction | `policy` | `implemented` | `offline-tested` | `not-applicable` | [`packages/k-parent-redaction`](../packages/k-parent-redaction) |
 | `packages.k-parent-source-childinfo` | k-parent-source-childinfo | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | [`packages/k-parent-source-childinfo`](../packages/k-parent-source-childinfo) |
 | `packages.k-parent-source-coupang` | k-parent-source-coupang | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | [`packages/k-parent-source-coupang`](../packages/k-parent-source-coupang) |
 | `packages.k-parent-source-culture` | k-parent-source-culture | `adapter` | `implemented` | `fixture-tested` | `not-applicable` | [`packages/k-parent-source-culture`](../packages/k-parent-source-culture) |
@@ -120,6 +121,7 @@ Maturity, verification, and deployment are independent status axes.
 | `products.k-parent-mobile-agent` | K-Parent mobile agent | `experience` | `concept` | `documented` | `not-deployed` | [`docs/features/k-parent-mobile-agent.md`](../docs/features/k-parent-mobile-agent.md) |
 | `products.k-parent-proxy` | K-Parent read-only NEIS proxy | `tool` | `implemented` | `offline-tested` | `local-only` | [`docs/features/k-parent-proxy.md`](../docs/features/k-parent-proxy.md) |
 | `products.k-parent-quiz-app` | K-Parent Quiz Flutter app | `experience` | `prototype` | `offline-tested` | `deployment-unverified` | [`apps/k-parent-quiz-app`](../apps/k-parent-quiz-app) |
+| `products.k-parent-refresh` | K-Parent local refresh scheduler | `runtime` | `implemented` | `offline-tested` | `local-only` | [`services/k-parent-refresh`](../services/k-parent-refresh) |
 | `products.k-parent-skills-collection` | K-Parent skill collection | `experience` | `implemented` | `offline-tested` | `repo-only` | [`README.md`](../README.md) |
 | `products.quiz-dev-mcp` | Quiz development MCP server | `tool` | `implemented` | `offline-tested` | `local-only` | [`tools/quiz-dev-mcp`](../tools/quiz-dev-mcp) |
 

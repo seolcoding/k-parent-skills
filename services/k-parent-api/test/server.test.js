@@ -1,12 +1,17 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const { mkdtempSync, rmSync } = require("node:fs");
+const { tmpdir } = require("node:os");
+const { join } = require("node:path");
 
 const {
   MAX_BODY_BYTES,
   assertLoopbackHost,
+  createEnvMemoryStoreConfig,
   createEnvTokenTenantResolver,
   createKParentApiServer,
   createTokenTenantResolver,
+  safeErrorMessage,
   toTenantStorageKey,
 } = require("../src/server");
 const { MEMORY_SCOPE, createInMemoryStore } = require("../../../packages/k-parent-memory");
@@ -44,6 +49,20 @@ test("token-to-tenant resolver supports injected and env-backed config without e
     (error) => !error.message.includes(secretInMalformedConfig),
   );
   assert.throws(() => createKParentApiServer(), /requires a bearer token-to-tenant resolver/);
+});
+
+test("error payload helper redacts credential-bearing diagnostics", () => {
+  assert.equal(
+    safeErrorMessage(
+      new Error("authorization: example-credential-value"),
+      "Request could not be processed.",
+    ),
+    "Request could not be processed.",
+  );
+  assert.equal(
+    safeErrorMessage(new Error("memory key is invalid."), "fallback"),
+    "memory key is invalid.",
+  );
 });
 
 async function withServer(run, options = {}) {
@@ -92,6 +111,50 @@ test("health is public and declares authenticated tenant isolation", async () =>
     assert.equal(body.tenantIsolation, "enabled");
     assert.equal(body.sideEffectExecution, "disabled");
   });
+});
+
+test("encrypted file memory is explicit, tenant-scoped, and survives server restart", async (t) => {
+  const directory = mkdtempSync(join(tmpdir(), "k-parent-api-memory-"));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  const env = {
+    KPARENT_MEMORY_FILE: join(directory, "memory.enc.json"),
+    KPARENT_MEMORY_KEY_BASE64: Buffer.alloc(32, 7).toString("base64"),
+  };
+
+  assert.throws(
+    () => createEnvMemoryStoreConfig({ KPARENT_MEMORY_FILE: env.KPARENT_MEMORY_FILE }),
+    /configured together/,
+  );
+  assert.throws(
+    () => createEnvMemoryStoreConfig({ ...env, KPARENT_MEMORY_KEY_BASE64: "not-a-key" }),
+    /exactly 32 bytes/,
+  );
+
+  const firstConfig = createEnvMemoryStoreConfig(env);
+  await withServer(async (baseUrl) => {
+    const health = await (await fetch(`${baseUrl}/health`)).json();
+    assert.equal(health.memory, "encrypted-file");
+    const stored = await fetch(`${baseUrl}/v1/memory/session`, {
+      method: "POST",
+      headers: authHeaders(TOKENS.alpha, true),
+      body: JSON.stringify({ key: "restart-state", value: { region: "서울" }, ttlSeconds: 60 }),
+    });
+    assert.equal(stored.status, 201);
+  }, firstConfig);
+
+  const restartedConfig = createEnvMemoryStoreConfig(env);
+  await withServer(async (baseUrl) => {
+    const read = await fetch(`${baseUrl}/v1/memory/session/restart-state`, {
+      headers: authHeaders(TOKENS.alpha),
+    });
+    assert.equal(read.status, 200);
+    assert.equal((await read.json()).value.region, "서울");
+
+    const crossTenant = await fetch(`${baseUrl}/v1/memory/session/restart-state`, {
+      headers: authHeaders(TOKENS.beta),
+    });
+    assert.equal(crossTenant.status, 404);
+  }, restartedConfig);
 });
 
 test("all action and memory paths reject missing, malformed, and invalid credentials", async () => {

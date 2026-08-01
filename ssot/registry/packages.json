@@ -31,7 +31,22 @@
       "tracking": "git",
       "lastVerified": "2026-08-01",
       "sensitivity": "synthetic",
-      "role": "Privacy-minimized session, profile-reference, public-knowledge, and approval-audit memory contracts"
+      "role": "Privacy-minimized memory contracts with in-memory and encrypted tenant-scoped local-file stores"
+    },
+    {
+      "id": "packages.k-parent-redaction",
+      "name": "k-parent-redaction",
+      "kind": "package",
+      "layer": "policy",
+      "maturity": "implemented",
+      "verification": "offline-tested",
+      "deployment": "not-applicable",
+      "availability": "current",
+      "canonicalPath": "packages/k-parent-redaction",
+      "tracking": "git",
+      "lastVerified": "2026-08-01",
+      "sensitivity": "synthetic",
+      "role": "Bounded structured redaction for credential, child/family identity, raw conversation/document, log, trace, and error payloads"
     },
     {
       "id": "packages.k-parent-proxy",
@@ -46,8 +61,8 @@
       "tracking": "git",
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
-      "role": "Parent-only read-only NEIS allowlist proxy for app clients",
-      "dependsOn": ["packages.k-parent-source-neis"]
+      "role": "Parent-only read-only NEIS allowlist proxy with bounded cache, rate limit, timeout, retry, and error redaction",
+      "dependsOn": ["packages.k-parent-redaction", "packages.k-parent-source-neis"]
     },
     {
       "id": "packages.k-parent-brief",

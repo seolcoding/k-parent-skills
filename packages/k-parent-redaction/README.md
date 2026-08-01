@@ -35,10 +35,11 @@ arguments so a standalone credential cannot be reconstructed by the sink.
 ## Redaction policy
 
 Keys are Unicode NFKC-normalized, lowercased, and stripped of punctuation and
-spacing before comparison. Credential keys and child/family identity keys are
-replaced with `[REDACTED]` without reading their values. Generic identity leaves
-such as `name` and `email` are also blocked inside a child/family container,
-while fields such as age and grade remain useful. Strings containing a
+spacing before comparison. Credential keys, child/family identity keys, raw
+family-dialogue/document/OCR keys, and request/response body keys are replaced
+with `[REDACTED]` without reading their values. Generic identity leaves such as
+`name` and `email` are also blocked inside a child/family container, while fields
+such as age and grade remain useful. Strings containing a
 Bearer value, JWT shape, cookie header, labeled API key or credential, or a
 well-known credential prefix are also replaced.
 

@@ -52,8 +52,23 @@
       "tracking": "git",
       "lastVerified": "2026-08-01",
       "sensitivity": "synthetic",
-      "dependsOn": ["packages.k-parent-core", "packages.k-parent-memory"],
-      "gap": "No authentication, durable storage, tenant isolation, execution worker, scheduler, or production deployment"
+      "dependsOn": ["packages.k-parent-core", "packages.k-parent-memory", "packages.k-parent-redaction"],
+      "gap": "Action state remains ephemeral; no execution worker, key rotation, backup/restore, public deployment, or production observability"
+    },
+    {
+      "id": "products.k-parent-refresh",
+      "name": "K-Parent local refresh scheduler",
+      "kind": "tool",
+      "layer": "runtime",
+      "maturity": "implemented",
+      "verification": "offline-tested",
+      "deployment": "local-only",
+      "availability": "current",
+      "canonicalPath": "services/k-parent-refresh",
+      "tracking": "git",
+      "lastVerified": "2026-08-01",
+      "sensitivity": "synthetic",
+      "gap": "Process-local timers only; no durable queue, distributed coordination, deployment pipeline, or production observability"
     },
     {
       "id": "products.k-parent-proxy",
@@ -69,7 +84,7 @@
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
       "apis": ["apis.k-parent-proxy-neis"],
-      "gap": "No public hosted endpoint, rate limit, durable cache, deploy pipeline, or production canary evidence"
+      "gap": "No authentication, tenant isolation, public hosted endpoint, durable cache, deploy pipeline, observability, or production canary evidence"
     },
     {
       "id": "products.quiz-dev-mcp",

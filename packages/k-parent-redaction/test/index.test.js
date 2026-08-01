@@ -57,6 +57,22 @@ test("recursively redacts forbidden keys without mutating the input", () => {
   assert.equal(input.request.headers.authorization, "example-auth-value");
 });
 
+test("blocks raw family dialogue, school documents, and transport payload bodies", () => {
+  const result = sanitize({
+    familyConversation: "synthetic dialogue fixture that must not reach logs",
+    학교_문서: "synthetic school notice body",
+    ocrText: "synthetic OCR output",
+    requestBody: { region: "서울" },
+    metadata: { status: "ready" },
+  });
+
+  assert.equal(result.familyConversation, REDACTED);
+  assert.equal(result.학교_문서, REDACTED);
+  assert.equal(result.ocrText, REDACTED);
+  assert.equal(result.requestBody, REDACTED);
+  assert.deepEqual(result.metadata, { status: "ready" });
+});
+
 test("blocks generic identity leaves inside child and family containers", () => {
   const result = sanitize({
     child: {

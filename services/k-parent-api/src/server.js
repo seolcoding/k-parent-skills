@@ -8,8 +8,13 @@ const {
 } = require("../../../packages/k-parent-core");
 const {
   MEMORY_SCOPE,
+  createEncryptedFileStore,
   createInMemoryStore,
 } = require("../../../packages/k-parent-memory");
+const {
+  REDACTED,
+  sanitizeError,
+} = require("../../../packages/k-parent-redaction");
 
 const MAX_BODY_BYTES = 64 * 1024;
 const BODY_TIMEOUT_MS = 5_000;
@@ -69,8 +74,39 @@ function createEnvTokenTenantResolver(env = process.env) {
   return createTokenTenantResolver({ tokenTenants });
 }
 
+function createEnvMemoryStoreConfig(env = process.env) {
+  const filePath = env.KPARENT_MEMORY_FILE;
+  const encodedKey = env.KPARENT_MEMORY_KEY_BASE64;
+
+  if (!filePath && !encodedKey) {
+    return { memoryMode: "ephemeral", memoryStoreForTenant: null };
+  }
+  if (!filePath || !encodedKey) {
+    throw new Error("KPARENT_MEMORY_FILE and KPARENT_MEMORY_KEY_BASE64 must be configured together.");
+  }
+
+  const encryptionKey = decodeMemoryEncryptionKey(encodedKey);
+  const stores = new Map();
+  return {
+    memoryMode: "encrypted-file",
+    memoryStoreForTenant(tenantId) {
+      if (!isTenantId(tenantId)) throw new Error("A valid tenant namespace is required.");
+      if (!stores.has(tenantId)) {
+        stores.set(tenantId, createEncryptedFileStore({
+          encryptionKey,
+          filePath,
+          namespace: "runtime",
+          tenantId,
+        }));
+      }
+      return stores.get(tenantId);
+    },
+  };
+}
+
 function createKParentApiServer(options = {}) {
-  const memory = options.memoryStore || createInMemoryStore({ now: options.now });
+  const defaultMemory = options.memoryStore || createInMemoryStore({ now: options.now });
+  const memoryStoreForTenant = options.memoryStoreForTenant || (() => defaultMemory);
   const actions = options.actionStore || new Map();
   const now = typeof options.now === "function" ? options.now : () => new Date();
   const resolveTenant = options.resolveTenant
@@ -79,6 +115,9 @@ function createKParentApiServer(options = {}) {
 
   if (typeof resolveTenant !== "function") {
     throw new Error("k-parent-api requires a bearer token-to-tenant resolver.");
+  }
+  if (typeof memoryStoreForTenant !== "function") {
+    throw new Error("memoryStoreForTenant must be a function when configured.");
   }
 
   return http.createServer(async (request, response) => {
@@ -90,7 +129,7 @@ function createKParentApiServer(options = {}) {
           ok: true,
           service: "k-parent-api",
           mode: "local-only",
-          memory: "ephemeral",
+          memory: options.memoryMode || "ephemeral",
           authentication: "bearer",
           tenantIsolation: "enabled",
           sideEffectExecution: "disabled",
@@ -103,6 +142,7 @@ function createKParentApiServer(options = {}) {
         tenantId = authenticateRequest(request, response, resolveTenant);
         if (!tenantId) return undefined;
       }
+      const memory = tenantId ? memoryStoreForTenant(tenantId) : defaultMemory;
 
       if (request.method === "POST" && url.pathname === "/v1/actions") {
         const body = await readJsonBody(request, { bodyTimeoutMs });
@@ -160,7 +200,12 @@ function createKParentApiServer(options = {}) {
       const status = error.code === "BODY_TOO_LARGE"
         ? 413
         : error.code === "BODY_TIMEOUT" ? 408 : 400;
-      return sendError(response, status, "invalid_request", error.message);
+      return sendError(
+        response,
+        status,
+        "invalid_request",
+        safeErrorMessage(error, "Request could not be processed."),
+      );
     }
   });
 }
@@ -362,6 +407,24 @@ function digestToken(token) {
   return createHash("sha256").update(token).digest("hex");
 }
 
+function decodeMemoryEncryptionKey(value) {
+  if (typeof value !== "string" || !/^[A-Za-z0-9+/]{43}=$/.test(value)) {
+    throw new Error("KPARENT_MEMORY_KEY_BASE64 must encode exactly 32 bytes.");
+  }
+  const key = Buffer.from(value, "base64");
+  if (key.length !== 32 || key.toString("base64") !== value) {
+    throw new Error("KPARENT_MEMORY_KEY_BASE64 must encode exactly 32 bytes.");
+  }
+  return key;
+}
+
+function safeErrorMessage(error, fallback) {
+  const sanitized = sanitizeError(error);
+  return typeof sanitized?.message === "string" && sanitized.message !== REDACTED
+    ? sanitized.message
+    : fallback;
+}
+
 function sendJson(response, status, body, headers = {}) {
   response.writeHead(status, {
     "content-type": "application/json; charset=utf-8",
@@ -385,7 +448,8 @@ if (require.main === module) {
   const host = assertLoopbackHost(process.env.KPARENT_API_HOST || "127.0.0.1");
   const port = Number(process.env.KPARENT_API_PORT || 4030);
   const resolveTenant = createEnvTokenTenantResolver(process.env);
-  createKParentApiServer({ resolveTenant }).listen(port, host, () => {
+  const memoryConfig = createEnvMemoryStoreConfig(process.env);
+  createKParentApiServer({ resolveTenant, ...memoryConfig }).listen(port, host, () => {
     console.log(`k-parent-api listening on http://${host}:${port}`);
   });
 }
@@ -398,12 +462,15 @@ module.exports = {
   assertBoundedJson,
   assertLoopbackHost,
   authenticateRequest,
+  createEnvMemoryStoreConfig,
   createEnvTokenTenantResolver,
   createKParentApiServer,
   createTokenTenantResolver,
+  decodeMemoryEncryptionKey,
   getAction,
   isProtectedPath,
   readJsonBody,
+  safeErrorMessage,
   storeAction,
   toAuditEnvelope,
   toTenantStorageKey,

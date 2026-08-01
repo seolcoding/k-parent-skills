@@ -13,8 +13,11 @@ GET /v1/neis/timetable
 GET /v1/neis/schedule
 ```
 
-`KEDU_INFO_KEY`는 서버에만 둔다. 성공·빈 결과는 process memory에서 기본 24시간
-cache하고, 입력 누락은 400, 키 미설정은 503, upstream 실패는 502로 구분한다.
+`KEDU_INFO_KEY`는 서버에만 둔다. 성공·빈 결과는 bounded LRU process cache에서
+기본 24시간 보관한다. client-address fixed-window rate limit, upstream
+timeout/capped retry/backoff, abort signal 전달, 오류 payload redaction을 적용한다.
+입력 누락은 400, rate limit은 429, 키 미설정은 503, timeout은 504, 기타 upstream
+실패는 502로 구분한다.
 
 ## 로컬 실행
 
@@ -29,8 +32,8 @@ Flutter Android emulator에서는 `--dart-define=PROXY_BASE_URL=http://10.0.2.2:
 
 ## 운영 승격 조건
 
-- rate limit과 abuse protection
-- durable/managed cache와 timeout/retry 정책
+- 인증·tenant isolation과 강화된 abuse protection
+- durable/managed cache
 - production secret store와 rotation
 - deploy pipeline, observability, live canary evidence
 

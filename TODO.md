@@ -5,17 +5,17 @@
 
 ## P0 — 운영 안전 경계
 
-- [ ] `k-parent-api`에 인증과 tenant별 namespace 격리를 설계한다.
-- [ ] durable memory adapter에 암호화, TTL 삭제, export/delete, 동의 철회를 구현한다.
+- [x] `k-parent-api`에 Bearer 인증과 tenant별 namespace 격리를 구현했다.
+- [x] local durable memory adapter에 AES-256-GCM, TTL 삭제, export/delete, 동의 철회를 구현했다.
 - [ ] HITL 승인 UI가 scope, 위험도, 만료, official-site handoff를 명확히 보여주게 한다.
 - [ ] 실행 worker를 추가할 때 approval digest 검증과 one-time consumption을 강제한다.
-- [ ] raw 가족 대화·학교 문서가 로그, trace, error payload에 남지 않는 redaction gate를 만든다.
+- [x] raw 가족 대화·학교 문서·credential을 막는 log/trace/error redaction gate를 구현했다.
 
 ## P1 — Runtime과 데이터 운영
 
-- [ ] crawler/adapter refresh scheduler, retry, provenance, freshness monitor를 설계한다.
-- [ ] `k-parent-proxy`의 부모용 NEIS·교육 route를 전용 `k-parent-proxy`로 추출한다.
-- [ ] 부모와 무관한 전환용 proxy route 제거 계획을 별도 변경으로 실행한다.
+- [x] local crawler/adapter refresh scheduler, retry, provenance, freshness 상태를 구현했다.
+- [x] 부모용 NEIS·교육 route를 전용 `k-parent-proxy`로 추출했다.
+- [x] 부모와 무관한 전환용 proxy route를 SSOT와 현재 구현 경계에서 제거했다.
 - [ ] 학교알리미·유치원알리미·data.go.kr 후보 endpoint를 live probe로 재확인한다.
 - [ ] 운영 관측성, rate limit, alert, backup/restore, incident runbook을 갖춘다.
 

@@ -2,7 +2,7 @@
   "name": "k-parent-api",
   "version": "0.1.0",
   "private": true,
-  "description": "Local-first K-Parent runtime API for HITL and ephemeral memory",
+  "description": "Local-first K-Parent runtime API for HITL and bounded memory",
   "license": "MIT",
   "main": "src/server.js",
   "engines": {

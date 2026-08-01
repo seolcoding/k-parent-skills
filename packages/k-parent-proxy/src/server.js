@@ -1,6 +1,7 @@
 const http = require("node:http");
 const { URL } = require("node:url");
 const defaultAdapter = require("k-parent-source-neis");
+const { REDACTED, sanitizeError } = require("../../k-parent-redaction");
 
 const DEFAULT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_CACHE_MAX_ENTRIES = 500;
@@ -173,11 +174,13 @@ function createKParentProxyServer(options = {}) {
       });
       return sendJson(response, 200, { ...body, cache: { hit: false, ttlMs } });
     } catch (error) {
-      if (error.code === "BAD_QUERY") return sendError(response, 400, "bad_request", error.message);
-      if (error.code === "UPSTREAM_TIMEOUT") {
-        return sendError(response, 504, "upstream_timeout", error.message);
+      if (error.code === "BAD_QUERY") {
+        return sendError(response, 400, "bad_request", safeErrorMessage(error, "Request query is invalid."));
       }
-      return sendError(response, 502, "upstream_error", error.message);
+      if (error.code === "UPSTREAM_TIMEOUT") {
+        return sendError(response, 504, "upstream_timeout", "The upstream request timed out.");
+      }
+      return sendError(response, 502, "upstream_error", "The upstream request failed.");
     }
   });
 }
@@ -423,6 +426,13 @@ function sendError(response, status, code, message, headers) {
   sendJson(response, status, { ok: false, error: code, message }, headers);
 }
 
+function safeErrorMessage(error, fallback) {
+  const sanitized = sanitizeError(error);
+  return typeof sanitized?.message === "string" && sanitized.message !== REDACTED
+    ? sanitized.message
+    : fallback;
+}
+
 if (require.main === module) {
   const host = process.env.KPARENT_PROXY_HOST || "127.0.0.1";
   const port = Number(process.env.KPARENT_PROXY_PORT || 4020);
@@ -440,4 +450,5 @@ module.exports = {
   DEFAULT_UPSTREAM_TIMEOUT_MS,
   createKParentProxyServer,
   normalizedCacheKey,
+  safeErrorMessage,
 };
