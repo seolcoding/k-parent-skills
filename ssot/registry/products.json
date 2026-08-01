@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "registry": "products",
+  "items": [
+    {
+      "id": "products.k-parent-skill-collection",
+      "name": "K-Parent skill collection",
+      "kind": "product",
+      "maturity": "implemented",
+      "verification": "offline-tested",
+      "deployment": "repo-only",
+      "availability": "current",
+      "canonicalPath": "README.md",
+      "tracking": "git",
+      "lastVerified": "2026-08-01",
+      "sensitivity": "public",
+      "skills": [
+        "skills.k-parent-school-info",
+        "skills.k-parent-meal-planner",
+        "skills.k-parent-play-finder",
+        "skills.k-parent-schedule-manager",
+        "skills.k-parent-content-recommender"
+      ]
+    },
+    {
+      "id": "products.k-parent-quiz-app",
+      "name": "K-Parent Quiz Flutter app",
+      "kind": "product",
+      "maturity": "prototype",
+      "verification": "offline-tested",
+      "deployment": "deployment-unverified",
+      "availability": "current",
+      "canonicalPath": "apps/k-parent-quiz-app",
+      "tracking": "git",
+      "lastVerified": "2026-08-01",
+      "sensitivity": "synthetic",
+      "skills": ["skills.k-parent-quiz-maker"],
+      "datasets": ["datasets.quiz-bank", "datasets.curriculum-achievement-standards"],
+      "gap": "No verified production mobile or web deployment"
+    },
+    {
+      "id": "products.k-skill-proxy",
+      "name": "K-Skill proxy parent API surface",
+      "kind": "product",
+      "maturity": "implemented",
+      "verification": "offline-tested",
+      "deployment": "deployment-unverified",
+      "availability": "current",
+      "canonicalPath": "packages/k-skill-proxy",
+      "tracking": "git",
+      "lastVerified": "2026-08-01",
+      "sensitivity": "public",
+      "apis": ["apis.k-skill-proxy-neis"],
+      "gap": "Hosted production exists for the upstream project, but this branch's parent routes were not canary-verified"
+    },
+    {
+      "id": "products.quiz-dev-mcp",
+      "name": "Quiz development MCP server",
+      "kind": "tool",
+      "maturity": "implemented",
+      "verification": "offline-tested",
+      "deployment": "local-only",
+      "availability": "current",
+      "canonicalPath": "tools/quiz-dev-mcp",
+      "tracking": "git",
+      "lastVerified": "2026-08-01",
+      "sensitivity": "synthetic",
+      "datasets": ["datasets.quiz-bank", "datasets.curriculum-achievement-standards"]
+    },
+    {
+      "id": "products.k-parent-mobile-agent",
+      "name": "K-Parent mobile agent",
+      "kind": "product",
+      "maturity": "concept",
+      "verification": "documented",
+      "deployment": "not-deployed",
+      "availability": "current",
+      "canonicalPath": "docs/features/k-parent-mobile-agent.md",
+      "tracking": "git",
+      "lastVerified": "2026-08-01",
+      "sensitivity": "public",
+      "skills": ["skills.k-parent-mobile-agent"]
+    }
+  ]
+}

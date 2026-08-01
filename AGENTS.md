@@ -1,4 +1,4 @@
-# k-parent-skill repository instructions
+# k-parent-skills repository instructions
 
 This repository inherits the broader oh-my-codex guidance from the parent environment.
 These rules are repo-specific and apply to everything under this directory.
@@ -6,7 +6,7 @@ These rules are repo-specific and apply to everything under this directory.
 ## Repository concept
 
 - This repository inherits the architecture pattern of `NomaDamas/k-skill`: container skill folders (product skills under `skills/*`, inherited upstream demo skills under `examples/*`), optional implementation packages under `packages/*`, shared scripts under `scripts/`, and feature docs under `docs/features/*`.
-- Keep the fork/concept as `k-parent-skill`: a 대한민국 부모 생활정보 skill collection.
+- Keep the repository concept as `k-parent-skills`: a 대한민국 부모 생활정보 skill collection.
 - Do not flatten the repository into a single app. Each parent-facing capability should remain an independently installable skill directory with its own `SKILL.md` under `skills/`.
 - Start new parent capabilities as `SKILL.md`-only concept docs unless deterministic code is clearly needed.
 - Promote a concept doc to `packages/*` or `scripts/*` only after the repeated workflow and source surface are clear.
@@ -24,10 +24,11 @@ These rules are repo-specific and apply to everything under this directory.
 
 ## Agent context conventions
 
-- Treat `README.md`, `AGENTS.md`, `docs/architecture.md`, and `docs/adding-a-skill.md` as the durable context set for future repository agents.
+- Treat `README.md`, `AGENTS.md`, `ssot/README.md`, `docs/architecture.md`, and `docs/adding-a-skill.md` as the durable context set for future repository agents.
 - Keep `CLAUDE.md` as a compatibility symlink to `AGENTS.md`; do not maintain a separate Claude-only instruction file.
 - Use `docs/productization-gstack.md` when work shifts from skill design to app surfaces, QA, deployment, commercialization, or affiliate funnel decisions.
 - When adding or changing a skill, update all relevant context surfaces in the same change: `SKILL.md`, `docs/features/<skill-name>.md`, `README.md`, and `docs/roadmap.md` when scope changes.
+- When artifact identity, canonical location, maturity, verification, deployment, or relationships change, update `ssot/registry/*.json`, regenerate `ssot/INDEX.md`, and run `npm run ssot:check` in the same change.
 - Preserve the original k-skill operational conventions unless they conflict with the parent-specific concept.
 - Do not execute login, application submission, cancellation, payment, or child-personal-data entry without explicit user approval.
 - For child-related facts, prefer current official/public sources and include the confirmation date. Do not answer from stale cached snippets when schedules, admissions, events, or application deadlines may have changed.

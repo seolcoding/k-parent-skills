@@ -1,5 +1,9 @@
 # 로드맵
 
+이 문서는 향후 방향과 우선순위를 설명한다. 현재 자산의 canonical 경로와
+`maturity`·`verification`·`deployment` 상태는 `ssot/registry/*.json`이
+SSOT이며, 사람이 읽는 통합 목록은 `ssot/INDEX.md`에서 생성한다.
+
 ## 디파트먼트 로드맵
 
 K-Parent Skills는 `학교`, `학원`, `놀이`, `생활`, `트렌드`, `쇼핑`, `영양` 디파트먼트로 확장한다.

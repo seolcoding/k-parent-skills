@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/seolcoding/k-parent-skills/ssot/schema/artifact.schema.json",
+  "title": "K-Parent SSOT registry",
+  "type": "object",
+  "required": ["schemaVersion", "registry", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "registry": {
+      "enum": [
+        "skills",
+        "packages",
+        "apis",
+        "crawlers",
+        "datasets",
+        "products",
+        "legacy"
+      ]
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/artifact"
+      }
+    }
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "maturity",
+        "verification",
+        "deployment",
+        "availability",
+        "canonicalPath",
+        "tracking",
+        "lastVerified",
+        "sensitivity"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*(\\.[a-z0-9-]+)+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "skill",
+            "package",
+            "api",
+            "crawler",
+            "dataset",
+            "product",
+            "tool",
+            "archive",
+            "research"
+          ]
+        },
+        "maturity": {
+          "enum": [
+            "concept",
+            "research",
+            "prototype",
+            "implemented",
+            "operational",
+            "archived",
+            "historical"
+          ]
+        },
+        "verification": {
+          "enum": [
+            "undocumented",
+            "documented",
+            "fixture-tested",
+            "offline-tested",
+            "live-probed",
+            "production-verified"
+          ]
+        },
+        "deployment": {
+          "enum": [
+            "not-applicable",
+            "repo-only",
+            "local-only",
+            "not-deployed",
+            "deployment-unverified",
+            "deployed",
+            "archived"
+          ]
+        },
+        "availability": {
+          "enum": [
+            "current",
+            "archived",
+            "historical-evidence",
+            "remote-pointer"
+          ]
+        },
+        "canonicalPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tracking": {
+          "enum": ["git", "ignored", "external", "git-history"]
+        },
+        "lastVerified": {
+          "type": "string",
+          "format": "date"
+        },
+        "sensitivity": {
+          "enum": [
+            "public",
+            "synthetic",
+            "internal",
+            "personal-pointer",
+            "restricted"
+          ]
+        }
+      }
+    }
+  }
+}

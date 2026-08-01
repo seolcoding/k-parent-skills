@@ -1,11 +1,11 @@
 # 아키텍처 컨벤션
 
-`k-parent-skill` keeps the repository architecture of `NomaDamas/k-skill` and changes the domain concept to 대한민국 부모 생활정보.
+`k-parent-skills` keeps the repository architecture of `NomaDamas/k-skill` and changes the domain concept to 대한민국 부모 생활정보.
 
 ## 저장소 구조
 
 ```text
-k-parent-skill/
+k-parent-skills/
 ├── skills/                  # product skills (install/trigger unit, flat)
 │   └── <skill-name>/
 │       └── SKILL.md
@@ -202,12 +202,25 @@ Parent-facing skills should normalize information into practical decision fields
 - Separate confirmed official information from recommendations, guesses, reviews, or stale search snippets.
 - Schedules, admissions, events, and applications are time-sensitive. Verify current sources before answering.
 
+## SSOT 경계
+
+`ssot/registry/*.json`은 저장소 안팎에 흩어진 스킬, 패키지, API, 크롤러,
+데이터셋, 제품, 레거시 자산의 ID와 canonical 경로, 성숙도, 검증 수준,
+배포 상태를 관리한다. 실제 동작 계약은 `skills/*/SKILL.md`, 구현은
+`packages/`, `apps/`, `scripts/`, `tools/`가 계속 소유한다. SSOT는 이를
+복사하지 않고 관계와 상태만 연결한다.
+
+상태는 `maturity`, `verification`, `deployment` 세 축으로 분리한다. fixture
+테스트를 통과한 구현을 라이브 검증 또는 배포 완료로 간주하지 않는다. 변경 후
+`npm run ssot:generate`와 `npm run ssot:check`를 실행한다.
+
 ## 에이전트 컨텍스트 표면
 
 Future agents should use these files as the standing repository context:
 
 - `AGENTS.md`: operational rules for coding agents
 - `CLAUDE.md`: compatibility symlink to `AGENTS.md`
+- `ssot/README.md`: cross-artifact identity, status, and canonical-path rules
 - `docs/architecture.md`: architecture and promotion conventions
 - `docs/adding-a-skill.md`: new skill workflow
 - `docs/departments/README.md`: department taxonomy and skill map

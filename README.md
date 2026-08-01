@@ -1,4 +1,4 @@
-# 대한민국 부모 생활정보 스킬
+# K-Parent Skills
 
 대한민국 부모가 매주 반복해서 확인하는 아이 관련 생활 정보를 모바일에서 에이전틱하게 사용할 수 있도록 만드는 스킬·데이터·상품화 실험 저장소입니다.
 
@@ -59,7 +59,7 @@ K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영합�
 ## 구조
 
 ```text
-k-parent-skill/
+k-parent-skills/
 ├── skills/                       # 제품 스킬 (설치·트리거 단위, 평면 배치)
 │   ├── k-parent-meal-planner/
 │   │   └── SKILL.md
@@ -70,6 +70,9 @@ k-parent-skill/
 │   └── …                         # hwp, lotto-results, daiso-product-search …
 ├── docs/features/
 │   └── k-parent-*.md
+├── ssot/                         # 생태계 자산·상태·경로의 기계 판독형 SSOT
+│   ├── registry/                 # skills, packages, APIs, crawlers, datasets, products, legacy
+│   └── INDEX.md                  # 레지스트리에서 자동 생성
 ├── docs/departments/
 │   └── school.md, academy.md, play.md, life.md, trend.md, shopping.md, nutrition.md
 ├── packages/
@@ -106,6 +109,8 @@ k-parent-skill/
 
 | 문서 | 설명 |
 | --- | --- |
+| [SSOT 운영 규칙](ssot/README.md) | 스킬·패키지·API·크롤러·데이터셋·제품·레거시의 canonical 경로와 상태 관리 규칙 |
+| [SSOT 인덱스](ssot/INDEX.md) | JSON 레지스트리에서 자동 생성한 전체 자산 목록 |
 | [소유자 작업·크레덴셜](OWNER-TASKS.md) | 발급해야 할 API 키, 가입 URL, 라이브 fixture 재생성 명령, 가드레일 |
 | [환경변수 템플릿](.env.example) | `KEDU_INFO_KEY` + 모든 `KSKILL_*` 변수 |
 | [처음 사용자 온보딩](docs/onboarding.md) | 저장소 목적, 기능 지형도, 설치 후 확인, fixture-first 동작, 검증 명령 |
