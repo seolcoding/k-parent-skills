@@ -110,6 +110,7 @@ k-parent-skills/
 | [HITL 레이어](docs/hitl.md) | 로그인·개인정보·신청·예약·캘린더·구매·결제의 공통 승인 상태와 런타임 계약 |
 | [메모리 레이어](docs/memory.md) | 세션·profile reference·공개 지식 cache·승인 감사의 저장·보존·금지 경계 |
 | [서버 런타임](services/README.md) | localhost HITL·메모리 API, refresh scheduler와 운영 승격 조건 |
+| [원격 개발](docs/remote-development.md) | Codespaces·클라우드 런타임에서 저장소를 그대로 개발 환경으로 쓰는 방법과 시크릿 정책 |
 | [레이어 모델](docs/layers.md) | Experience·Skill·Policy/HITL·Memory·Tool·Domain·Adapter·Data·Runtime·Governance 책임 경계 |
 | [소유자 작업·크레덴셜](OWNER-TASKS.md) | 발급해야 할 API 키, 가입 URL, 라이브 fixture 재생성 명령, 가드레일 |
 | [환경변수 템플릿](.env.example) | `KEDU_INFO_KEY` + 모든 `KSKILL_*` 변수 |

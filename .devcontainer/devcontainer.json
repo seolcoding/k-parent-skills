@@ -1,0 +1,10 @@
+{
+  "name": "k-parent-skills",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "postCreateCommand": "npm ci",
+  "forwardPorts": [4020, 4030],
+  "portsAttributes": {
+    "4020": { "label": "k-parent-proxy" },
+    "4030": { "label": "k-parent-api" }
+  }
+}
