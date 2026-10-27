@@ -2,6 +2,8 @@
 
 확인일: 2026-05-31
 
+> 2026-10-27 갱신: 플랫폼이 「교육데이터플랫폼」으로 확대됐다. 자체 OpenAPI 183개(전부 심의승인)와 외부 포털 연결 우선순위는 `docs/research/education-culture-data-sources-2026-10-27.md`를 본다.
+
 EDSS(`https://www.edmgr.kr/edss/`)는 data.go.kr의 `활용신청` 반복 대상이 아니라
 교육부·한국교육학술정보원 기반의 에듀데이터서비스다. 부모 스킬에서는 두 갈래로 다룬다.
 
