@@ -51,9 +51,9 @@ async function requestNeisJson(dataset, params, options = {}) {
   const response = await fetchImpl(url.toString(), {
     method: "GET",
     headers: {
-      // Keyless NEIS sample requests return HTTP 500 when `accept: application/json`
-      // is sent (verified 2026-10-27); `Type=json` already selects the format.
-      ...(apiKey ? { accept: "application/json" } : {}),
+      // No `accept: application/json`: NEIS answers HTTP 500 to it, keyed and keyless
+      // (verified 2026-10-27 on schoolInfo, mealServiceDietInfo, acaInsTiInfo).
+      // `Type=json` already selects the format.
       "accept-language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
       "user-agent": "k-parent-skills/neis",
       ...(options.headers || {}),

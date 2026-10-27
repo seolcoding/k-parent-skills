@@ -41,8 +41,8 @@ async function fetchJson(dataset, params) {
   }
 
   const response = await fetch(url.toString(), {
+    // No `accept: application/json` header: NEIS returns HTTP 500 to it.
     headers: {
-      accept: "application/json",
       "accept-language": "ko-KR,ko;q=0.9",
       "user-agent": "k-parent-skills/neis-refresh",
     },

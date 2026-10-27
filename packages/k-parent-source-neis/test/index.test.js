@@ -217,6 +217,8 @@ test("live NEIS request builds official URL with key and Korean headers", async 
     fetchImpl: async (url, options = {}) => {
       fetchedUrl = String(url);
       assert.ok(options.headers["accept-language"].includes("ko-KR"));
+      // NEIS answers HTTP 500 when this header is present.
+      assert.equal(options.headers.accept, undefined);
       return new Response(JSON.stringify(payload), { status: 200 });
     },
   });
