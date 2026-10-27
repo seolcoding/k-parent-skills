@@ -1,0 +1,102 @@
+{
+  "response": {
+    "header": {
+      "resultCode": "0000",
+      "resultMsg": "OK"
+    },
+    "body": {
+      "pageNo": "1",
+      "totalCount": "708",
+      "items": {
+        "item": [
+          {
+            "creator": "홈페이지",
+            "charge": "0",
+            "referenceIdentifier": "http://www.much.go.kr/cmm/fms/getFirstImage.do?atchFileId=FILE_000000000012962",
+            "description": "교육개요: ㅇ 교육내용: 3.1운동을 중심으로 우리 독립운동의 역사와 의미를 살펴보기   ㅇ 교육일시: 매주 목요일, 1회차: 14:30-15:10 / 2회차: 15:30-16:10    ㅇ 교육대상: 중학교 1~3학년  ←현 학년 기준   ㅇ 수업방법: 실시간 원격 교육 &#40;ZOOM 온라인 플랫폼 활용&#41;     ※ 교육 당첨자에 한해 교육 당일 교육 안내 문자&#40;참여 안내 및 URL 주소&#41; 발송   ​ㅇ 신청기간: 희망 교육일로부터 1주 전까지 신청 &#40;선착순&#41;   ㅇ 교재배송: 교육 담첨자에게 교구재 신청 링크 개별 발송      ※ 사전에 교구재를 받고, 당일 ZOOM&#40;줌&#41;을 활용하여 온라인 교육에 참여하는 방식     ★신청 전 반드시 읽어주세요★ - 교육 참여자 정보&#40;이름, 학년&#41;를 정확하게 입력해 주시기 바랍니다. - 동일 교육은 중복 참여가 불가하오니, 1회만 신청해주시기 바랍니다. - 한 신청자에 교구재 1세트가 제공됩니다. - 교구재 우편 발송을 위하여 이름, 주소 및 연락처를 정확하게 작성해주시기 바랍니다. - 교육 취소는 교육일 3일 전까지 해주시기 바랍니다.     ※ [교육·행사] → [나의 교육 확인/취소]에서 개별 취소 - 교육 신청 후, 무단 불참 시 향후 3개월간 교육 신청이 불가합니다. - 교육 당첨자에게 교육 안내 문자를 보내드리오니, 꼭 확인하시기 바랍니다.  ||교육일정:20210121~20210204",
+            "regDate": "2021-01-24 02:44:28",
+            "sourceTitle": "교육과 홍수연 02-3703-9350",
+            "title": "&#40;온라인&#41; 대한독립을 외치다",
+            "spatialCoverage": "온라인",
+            "url": "http://www.much.go.kr/museum/event/userEduInfoView.do?paraCodeId=¶Code=all00&eventId=EVENTS_0000000754",
+            "temporalCoverage": "20210121~20210204",
+            "grade": "중1~중3",
+            "collectionDb": "교육",
+            "subDescription": "접수기간:20210104~20210128||선정방법:선착순||정원:30",
+            "publisher": "1371480",
+            "state": null
+          },
+          {
+            "creator": "홈페이지",
+            "charge": "0",
+            "referenceIdentifier": "http://www.much.go.kr/cmm/fms/getFirstImage.do?atchFileId=FILE_000000000006029",
+            "description": null,
+            "regDate": "2022-01-04 06:00:11",
+            "sourceTitle": null,
+            "title": "서양에서 온 새로운 물건 이야기",
+            "spatialCoverage": "6층 제2강의실",
+            "url": "http://www.much.go.kr/museum/event/userEduInfoView.do?paraCodeId=¶Code=all00&eventId=EVENTS_0000000412",
+            "temporalCoverage": null,
+            "grade": "초등1학년,초등2학년,7세유아",
+            "collectionDb": "교육",
+            "subDescription": "접수기간:20170215~20170226||선정방법:추첨제||정원:20",
+            "publisher": "1371480",
+            "state": "진행상태:교육신청마감"
+          },
+          {
+            "creator": "홈페이지",
+            "charge": "0",
+            "referenceIdentifier": "http://www.much.go.kr/cmm/fms/getFirstImage.do?atchFileId=FILE_000000000006028",
+            "description": null,
+            "regDate": "2022-01-04 06:00:11",
+            "sourceTitle": null,
+            "title": "포스터에 담긴 대한민국 이야기",
+            "spatialCoverage": "6층 제1강의실",
+            "url": "http://www.much.go.kr/museum/event/userEduInfoView.do?paraCodeId=¶Code=all00&eventId=EVENTS_0000000411",
+            "temporalCoverage": null,
+            "grade": "초등1학년,초등2학년,7세유아",
+            "collectionDb": "교육",
+            "subDescription": "접수기간:20170215~20170226||선정방법:추첨제||정원:20",
+            "publisher": "1371480",
+            "state": "진행상태:교육신청마감"
+          },
+          {
+            "creator": "홈페이지",
+            "charge": "0",
+            "referenceIdentifier": "http://www.much.go.kr/cmm/fms/getFirstImage.do?atchFileId=FILE_000000000005887",
+            "description": null,
+            "regDate": "2022-01-04 06:00:11",
+            "sourceTitle": null,
+            "title": "개항의 물결 속에서",
+            "spatialCoverage": "6층 제1강의실",
+            "url": "http://www.much.go.kr/museum/event/userEduInfoView.do?paraCodeId=¶Code=all00&eventId=EVENTS_0000000410",
+            "temporalCoverage": null,
+            "grade": "초등5학년,초등6학년",
+            "collectionDb": "교육",
+            "subDescription": "접수기간:20170118~20170129||선정방법:추첨제||정원:20",
+            "publisher": "1371480",
+            "state": "진행상태:교육신청마감"
+          },
+          {
+            "creator": "홈페이지",
+            "charge": "0",
+            "referenceIdentifier": "http://www.much.go.kr/cmm/fms/getFirstImage.do?atchFileId=FILE_000000000005886",
+            "description": null,
+            "regDate": "2022-01-04 06:00:11",
+            "sourceTitle": null,
+            "title": "현대사 시간 속으로",
+            "spatialCoverage": "6층 제2강의실",
+            "url": "http://www.much.go.kr/museum/event/userEduInfoView.do?paraCodeId=¶Code=all00&eventId=EVENTS_0000000409",
+            "temporalCoverage": null,
+            "grade": "초등3학년,초등4학년",
+            "collectionDb": "교육",
+            "subDescription": "접수기간:20170118~20170129||선정방법:추첨제||정원:20",
+            "publisher": "1371480",
+            "state": "진행상태:교육신청마감"
+          }
+        ]
+      },
+      "numOfRows": "5"
+    }
+  }
+}

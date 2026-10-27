@@ -114,7 +114,9 @@
       "tracking": "external",
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
-      "backingPackages": ["packages.k-parent-source-culture"]
+      "backingPackages": ["packages.k-parent-source-culture"],
+      "operations": ["publicperformancedisplays/area", "API_CCA_145 (598)", "API_CNV_043 (540)", "meta/CHAheri (84)", "meta2020/getMCHBedu (495)", "API_CCA_164 (639)"],
+      "gap": "Legacy publicperformancedisplays endpoint redirects to an error page without a key (2026-10-27); kcisa experience datasets are fixture-tested only, live calls need KSKILL_CULTURE_KEY"
     },
     {
       "id": "apis.naver-search",

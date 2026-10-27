@@ -2,6 +2,7 @@
 
 const { ERROR_STATUS } = require("k-parent-core");
 const parse = require("./parse");
+const experience = require("./experience");
 
 const BASE_URL = "http://www.culture.go.kr/openapi/rest/publicperformancedisplays";
 
@@ -49,4 +50,5 @@ async function fetchCultureEvents(options = {}) {
 module.exports = {
   fetchCultureEvents,
   ...parse,
+  ...experience,
 };

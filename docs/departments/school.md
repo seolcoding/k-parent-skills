@@ -9,6 +9,7 @@
 - `k-parent-school-doc-capture`
 - `k-parent-data-collector`
 - `k-parent-content-recommender`
+- `k-parent-field-trip`
 
 ## Shared patterns
 

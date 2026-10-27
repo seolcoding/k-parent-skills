@@ -335,6 +335,22 @@
       "declaredPhase": "concept",
       "backingPackages": ["packages.k-parent-source-library"],
       "gap": "Uses NomaDamas/k-skill public proxy (data4library); no k-parent-proxy route"
+    },
+    {
+      "id": "skills.k-parent-field-trip",
+      "name": "k-parent-field-trip",
+      "kind": "skill",
+      "maturity": "prototype",
+      "verification": "fixture-tested",
+      "deployment": "repo-only",
+      "availability": "current",
+      "canonicalPath": "skills/k-parent-field-trip/SKILL.md",
+      "tracking": "git",
+      "lastVerified": "2026-10-28",
+      "sensitivity": "public",
+      "declaredPhase": "p0",
+      "backingPackages": ["packages.k-parent-source-culture"],
+      "gap": "No live api.kcisa.kr verification yet (needs KSKILL_CULTURE_KEY); heritage dataset (15k rows) has no local snapshot; no science museum source; music/art standards missing"
     }
   ]
 }

@@ -20,8 +20,9 @@
     "k-parent-core": "0.1.0"
   },
   "scripts": {
-    "lint": "node --check src/index.js && node --check src/parse.js && node --check scripts/refresh-fixtures.mjs && node --check test/index.test.js",
+    "lint": "node --check src/index.js && node --check src/parse.js && node --check src/experience.js && node --check scripts/refresh-fixtures.mjs && node --check scripts/refresh-experience-fixtures.mjs && node --check test/index.test.js && node --check test/experience.test.js",
     "test": "node --test",
-    "refresh:fixtures": "node scripts/refresh-fixtures.mjs"
+    "refresh:fixtures": "node scripts/refresh-fixtures.mjs",
+    "refresh:experience-fixtures": "node scripts/refresh-experience-fixtures.mjs"
   }
 }

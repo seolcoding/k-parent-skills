@@ -49,6 +49,7 @@ K-Parent Skills는 `학교`, `학원`, `놀이`, `생활`, `트렌드`, `쇼핑`
 - `k-parent-outdoor-check`: 미세먼지·날씨 기반 등원·바깥놀이 판단 컨셉 (k-skill 개작, 키 없이 공개 프록시)
 - `k-parent-child-health`: 아이 약·식품 안전과 야간·휴일 진료 경로 컨셉 (k-skill 개작, 위험 신호 우선)
 - `k-parent-library-finder`: 아이 책 검색과 동네 도서관 소장·대출 확인 컨셉 (k-skill 개작)
+- `k-parent-field-trip`: 성취기준과 이어지는 박물관 전시·교육프로그램·문화유산 추천 (`k-parent-source-culture` `searchExperiences`, 문화공공데이터광장 5개 API, 라이브 검증은 키 발급 후)
 
 k-skill 공개 프록시에 기대는 세 컨셉 스킬과 급식·공휴일 키 없는 경로는, 앱으로 배포하기 전에 같은 라우트를 우리 `k-parent-proxy`로 옮기거나 NomaDamas의 사용 허락을 받아야 한다(`docs/kskill-proxy.md`).
 

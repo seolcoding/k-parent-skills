@@ -12,7 +12,7 @@ K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영합�
 
 | 디파트먼트 | 범위 | 대표 스킬 |
 | --- | --- | --- |
-| 학교 | 학교 공지, 급식, 가정통신문, 방과후, 신청 마감 | `k-parent-school-info`, `k-parent-school-doc-capture` |
+| 학교 | 학교 공지, 급식, 가정통신문, 방과후, 신청 마감, 교과 연계 체험학습 | `k-parent-school-info`, `k-parent-school-doc-capture`, `k-parent-field-trip` |
 | 학원 | 학원 앱/API, 수업 일정, 숙제, 출결, 보강, 결제 | `k-parent-academy-connector` |
 | 놀이 | 실내외 놀거리, 체험, 축제, 문화센터, 행사, 이동 중 콘텐츠, 도서관 책 | `k-parent-play-finder`, `k-parent-festival-finder`, `k-parent-culture-center-events`, `k-parent-content-recommender`, `k-parent-library-finder` |
 | 생활 | 돌봄, 지원사업, 병원, 예방접종, 자녀 스케줄, 가족 일정, 행정 신청, 공기질·날씨, 약·식품 안전 | `k-parent-application-helper`, `k-parent-schedule-manager`, `k-parent-outdoor-check`, `k-parent-child-health` |
@@ -45,6 +45,7 @@ K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영합�
 | 생활 | 바깥활동 체크 | `k-parent-outdoor-check` | 미세먼지·날씨로 등원·바깥놀이 판단, 마스크·우산·겉옷 정리(키 없이 k-skill 공개 프록시) | 불필요 | [바깥활동 체크 컨셉 문서](docs/features/k-parent-outdoor-check.md) |
 | 생활 | 아이 건강·안전 | `k-parent-child-health` | 아이 약·식품 공식 안전 정보, 위험 신호 시 119·응급실 안내(키 없이 k-skill 공개 프록시) | 불필요 | [아이 건강·안전 컨셉 문서](docs/features/k-parent-child-health.md) |
 | 놀이 | 아이 책 도서관 | `k-parent-library-finder` | 아이 책 검색과 동네 도서관 소장·대출 가능 확인(키 없이 k-skill 공개 프록시) | 불필요 | [아이 책 도서관 컨셉 문서](docs/features/k-parent-library-finder.md) |
+| 학교 | 교과 연계 체험학습 | `k-parent-field-trip` | 배우는 단원(성취기준)과 이어지는 박물관 전시·교육프로그램·문화유산을 학년·지역·시대로 추천(문화공공데이터광장 5개 API) | 불필요 | [교과 연계 체험학습 기능 문서](docs/features/k-parent-field-trip.md) |
 | 학교 | 오늘 배운 퀴즈 | `k-parent-quiz-maker` | 나이스 시간표로 오늘 배운 과목을 확인하고 성취기준 기반 결정적 문항 은행으로 복습 퀴즈 생성(Flutter 앱 `apps/k-parent-quiz-app`) | 불필요 | [오늘 배운 퀴즈 기능 문서](docs/features/k-parent-quiz-maker.md) |
 
 공통 설치·환경 진단은 `k-parent-setup` 스킬이 담당합니다.
@@ -139,6 +140,7 @@ k-parent-skills/
 | [설치 방법](docs/install.md) | `seolcoding/k-parent-skills` 전체 또는 선택 설치 안내 |
 | [연구 기록](docs/research/k-parent-skills-architecture-ecosystem-2026-05-01.md) | k-skill 기반 부모 타깃 스킬 아키텍처와 연동 생태계 분석 |
 | [k-skill 공개 프록시 사용 규칙](docs/kskill-proxy.md) | 키 없이 부르는 라우트, 지켜야 할 것, 배포 전 남은 결정 |
+| [교육·문화 데이터 소스 조사](docs/research/education-culture-data-sources-2026-10-27.md) | 교육데이터플랫폼·교과서·에듀넷·문화데이터광장의 접근 방식, 교과 연계 체험학습 매칭 규칙 |
 | [외부 스킬 소싱 조사](docs/research/external-parent-skill-sources-2026-10-27.md) | k-skill·Anthropic·OpenAI·해외 커뮤니티 부모·아이 스킬의 라이선스와 차용/개작/참고 판정 |
 | [전환 전략 연구](docs/research/k-parent-skills-conversion-strategy-2026-05-01.md) | 부모용 보이스/어시스턴트 전환, API 우선순위, 딥링크형 신청 보조 전략 |
 | [스펙 인덱스](docs/specs/README.md) | 제품 스펙, 데이터 계약, 프로젝트 구조와 향후 계획 |

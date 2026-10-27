@@ -1,0 +1,145 @@
+{
+  "response": {
+    "header": {
+      "resultCode": 0,
+      "resultMsg": "OK"
+    },
+    "body": {
+      "pageNo": 1,
+      "totalCount": "",
+      "items": {
+        "item": [
+          {
+            "REG_DT": "2025-06-27 06:56:56",
+            "rnum": 1,
+            "COLLECTED_DATE": "2025-06-17 00:10:06",
+            "VIEW_COUNT": 1112,
+            "CONTACT_POINT": "02-2124-6424",
+            "AUDIENCE": "전체",
+            "TITLE": "2025년 ‘세종대왕 나신 날’ 기념 학술대회",
+            "LOCAL_ID": 1056,
+            "ISSUED_DATE": "2025-04-28",
+            "URL": "https://www.hangeul.go.kr/eduCul/event/onlineReservDetail.do?eventNo=1056",
+            "CHARGE": "무료"
+          },
+          {
+            "REG_DT": "2025-06-27 06:56:56",
+            "rnum": 2,
+            "COLLECTED_DATE": "2025-06-17 00:10:06",
+            "VIEW_COUNT": 11,
+            "AUDIENCE": "test",
+            "TITLE": "test",
+            "LOCAL_ID": 1054,
+            "ISSUED_DATE": "2025-04-10",
+            "URL": "https://www.hangeul.go.kr/eduCul/event/onlineReservDetail.do?eventNo=1054"
+          },
+          {
+            "REG_DT": "2025-06-27 06:56:53",
+            "rnum": 3,
+            "COLLECTED_DATE": "2025-06-17 00:10:05",
+            "VIEW_COUNT": 325,
+            "CONTACT_POINT": "02-2124-6429",
+            "AUDIENCE": "지역민 등",
+            "TITLE": "찾아가는 사투리 이야기 콘서트-말키 다 사투리로 이바구해보입시더",
+            "LOCAL_ID": 1053,
+            "ISSUED_DATE": "2025-03-27",
+            "URL": "https://www.hangeul.go.kr/eduCul/event/onlineReservDetail.do?eventNo=1053",
+            "CHARGE": "무료"
+          },
+          {
+            "REG_DT": "2025-06-27 06:56:53",
+            "rnum": 4,
+            "COLLECTED_DATE": "2025-06-17 00:10:05",
+            "VIEW_COUNT": 2106,
+            "CONTACT_POINT": "02-2124-6331",
+            "AUDIENCE": "5세 이상",
+            "TITLE": "사투리 이야기 마당극 <화개장터>",
+            "LOCAL_ID": 1051,
+            "ISSUED_DATE": "2024-09-30",
+            "URL": "https://www.hangeul.go.kr/eduCul/event/onlineReservDetail.do?eventNo=1051",
+            "CHARGE": "무료"
+          },
+          {
+            "REG_DT": "2025-06-27 06:56:52",
+            "rnum": 5,
+            "COLLECTED_DATE": "2025-06-17 00:10:05",
+            "VIEW_COUNT": 1784,
+            "CONTACT_POINT": "02-2124-6244",
+            "AUDIENCE": "제주 지역민 등",
+            "TITLE": "찾아가는 사투리 이야기 콘서트-모다들엉 제줏말 하영 ᄀᆞᆯ아보게마씸",
+            "LOCAL_ID": 1050,
+            "ISSUED_DATE": "2024-09-20",
+            "URL": "https://www.hangeul.go.kr/eduCul/event/onlineReservDetail.do?eventNo=1050",
+            "CHARGE": "무료"
+          },
+          {
+            "REG_DT": "2025-06-27 06:56:49",
+            "rnum": 6,
+            "COLLECTED_DATE": "2025-06-17 00:10:05",
+            "VIEW_COUNT": 2043,
+            "CONTACT_POINT": "02-2124-6461",
+            "AUDIENCE": "전체&#40;가족&#41;",
+            "TITLE": "한글도서관 책나눔장",
+            "LOCAL_ID": 1046,
+            "ISSUED_DATE": "2024-09-11",
+            "URL": "https://www.hangeul.go.kr/eduCul/event/onlineReservDetail.do?eventNo=1046",
+            "CHARGE": "무료"
+          },
+          {
+            "REG_DT": "2025-06-27 06:56:50",
+            "rnum": 7,
+            "COLLECTED_DATE": "2025-06-17 00:10:05",
+            "VIEW_COUNT": 1344,
+            "CONTACT_POINT": "02-2124-6423",
+            "AUDIENCE": "전체",
+            "TITLE": "<제2회 국제박물관포럼> 하늘, 땅, 사람 그리고 박물관: 지구환경과 언어 다양성을 위하여",
+            "LOCAL_ID": 1049,
+            "ISSUED_DATE": "2024-09-11",
+            "URL": "https://www.hangeul.go.kr/eduCul/event/onlineReservDetail.do?eventNo=1049",
+            "CHARGE": "무료"
+          },
+          {
+            "REG_DT": "2025-06-27 06:56:49",
+            "rnum": 8,
+            "COLLECTED_DATE": "2025-06-17 00:10:05",
+            "VIEW_COUNT": 829,
+            "CONTACT_POINT": "연구교육과 02-2124-6425, 6426",
+            "AUDIENCE": "초등학생 이상",
+            "TITLE": "2024 궁금한글",
+            "LOCAL_ID": 1045,
+            "ISSUED_DATE": "2024-08-20",
+            "URL": "https://www.hangeul.go.kr/eduCul/event/onlineReservDetail.do?eventNo=1045",
+            "CHARGE": "무료"
+          },
+          {
+            "REG_DT": "2025-06-27 06:56:49",
+            "rnum": 9,
+            "COLLECTED_DATE": "2025-06-17 00:10:05",
+            "VIEW_COUNT": 14757,
+            "CONTACT_POINT": "02-2124-6292",
+            "AUDIENCE": "5세 이상",
+            "TITLE": "팥죽 할멈과 호랑이",
+            "LOCAL_ID": 1043,
+            "ISSUED_DATE": "2024-08-08",
+            "URL": "https://www.hangeul.go.kr/eduCul/event/onlineReservDetail.do?eventNo=1043",
+            "CHARGE": "무료"
+          },
+          {
+            "REG_DT": "2025-06-27 06:56:49",
+            "rnum": 10,
+            "COLLECTED_DATE": "2025-06-17 00:10:05",
+            "VIEW_COUNT": 3013,
+            "CONTACT_POINT": "02-2124-6292",
+            "AUDIENCE": "8세 이상&#40;취학 아동 이상&#41;",
+            "TITLE": "시인 김소월, 재즈와 만나다",
+            "LOCAL_ID": 1044,
+            "ISSUED_DATE": "2024-08-08",
+            "URL": "https://www.hangeul.go.kr/eduCul/event/onlineReservDetail.do?eventNo=1044",
+            "CHARGE": "무료"
+          }
+        ]
+      },
+      "numOfRows": 10
+    }
+  }
+}
