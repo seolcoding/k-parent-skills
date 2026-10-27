@@ -18,7 +18,8 @@ const MAX_UPSTREAM_TIMEOUT_MS = 30_000;
 const MAX_UPSTREAM_RETRIES = 3;
 const MAX_RETRY_BACKOFF_MS = 2_000;
 const TIMETABLE_LEVELS = new Set(["els", "mis", "his", "sps"]);
-const ROUTE_NAMES = Object.freeze(["school-search", "classes", "timetable", "schedule"]);
+const ROUTE_NAMES = Object.freeze(["school-search", "classes", "timetable", "schedule", "academies"]);
+const ACADEMY_MAX_PAGE_SIZE = 100;
 const RETRYABLE_ERROR_CODES = new Set([
   "ECONNRESET",
   "ECONNREFUSED",
@@ -272,7 +273,66 @@ const ROUTES = Object.freeze({
     }));
     return emptyAware(rows, "학사일정이 아직 공개되지 않았습니다.");
   },
+
+  "/v1/neis/academies": async (query, context) => {
+    const educationOffice = optional(query, "educationOffice");
+    const educationOfficeCode = optional(query, "educationOfficeCode");
+    if (!educationOffice && !educationOfficeCode) throw badQuery("educationOffice or educationOfficeCode is required.");
+    const district = optional(query, "district");
+    const academyName = optional(query, "academyName");
+    const course = optional(query, "course");
+    // Parent lookups are local; refuse whole-office scans.
+    if (!district && !academyName) throw badQuery("district or academyName is required.");
+    const pageSize = boundedInteger(query.get("pageSize"), 20, 1, ACADEMY_MAX_PAGE_SIZE);
+    const pageIndex = boundedInteger(query.get("page"), 1, 1, 1_000);
+
+    const result = await context.adapter.searchAcademies({
+      educationOffice,
+      educationOfficeCode,
+      district,
+      academyName,
+      course,
+      pageSize,
+      pageIndex,
+      allowKeyless: false,
+      apiKey: context.apiKey,
+      now: context.now(),
+      signal: context.signal,
+    });
+    if (!result.ok) {
+      if (result.status === "not_found") return emptyAware([], "조건에 맞는 학원·교습소가 없습니다.");
+      return { rows: [], error: result.status, candidates: result.candidates || [] };
+    }
+    return {
+      total_count: result.totalCount,
+      page: pageIndex,
+      rows: result.academies.map((academy) => ({
+        academy_number: academy.academyNumber,
+        name: academy.name,
+        kind: academy.kind,
+        district: academy.district,
+        registration_status: academy.registrationStatus,
+        on_leave_today: academy.onLeaveToday,
+        leave: academy.leave ? { start: academy.leave.startDate, end: academy.leave.endDate } : null,
+        field: academy.field,
+        course: academy.course,
+        capacity: academy.capacity,
+        tuition_disclosed: academy.tuition.disclosed,
+        tuition: academy.tuition.items.map((item) => ({ course: item.course, amount_krw: item.amountKrw })),
+        address: academy.address,
+        telephone: academy.telephone,
+        updated_at: academy.updatedAt,
+      })),
+    };
+  },
 });
+
+function optional(query, key) {
+  const value = query.get(key)?.trim();
+  if (!value) return undefined;
+  if (value.length > 120 || /[\r\n]/.test(value)) throw badQuery(`${key} is invalid.`);
+  return value;
+}
 
 function emptyAware(rows, message) {
   return rows.length ? { rows } : { rows: [], info: { code: "INFO-200", message } };

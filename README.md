@@ -14,15 +14,15 @@ K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영합�
 | --- | --- | --- |
 | 학교 | 학교 공지, 급식, 가정통신문, 방과후, 신청 마감 | `k-parent-school-info`, `k-parent-school-doc-capture` |
 | 학원 | 학원 앱/API, 수업 일정, 숙제, 출결, 보강, 결제 | `k-parent-academy-connector` |
-| 놀이 | 실내외 놀거리, 체험, 축제, 문화센터, 행사, 이동 중 콘텐츠 | `k-parent-play-finder`, `k-parent-festival-finder`, `k-parent-culture-center-events`, `k-parent-content-recommender` |
-| 생활 | 돌봄, 지원사업, 병원, 예방접종, 자녀 스케줄, 가족 일정, 행정 신청 | `k-parent-application-helper`, `k-parent-schedule-manager` |
+| 놀이 | 실내외 놀거리, 체험, 축제, 문화센터, 행사, 이동 중 콘텐츠, 도서관 책 | `k-parent-play-finder`, `k-parent-festival-finder`, `k-parent-culture-center-events`, `k-parent-content-recommender`, `k-parent-library-finder` |
+| 생활 | 돌봄, 지원사업, 병원, 예방접종, 자녀 스케줄, 가족 일정, 행정 신청, 공기질·날씨, 약·식품 안전 | `k-parent-application-helper`, `k-parent-schedule-manager`, `k-parent-outdoor-check`, `k-parent-child-health` |
 | 트렌드 | 지역/육아 트렌드, 후기 흐름, 인기 행사, 시즌 이슈, 실제 크롤링 데이터 | `k-parent-data-collector` |
 | 쇼핑 | 준비물, 교재, 장난감, 육아용품, 가격 비교, 재고, 보조 어필리에이트 | `k-parent-shopping-recommender` |
 | 영양 | 급식, 유치원 식단, 알레르기, 집밥 보완, 영양 메모 | `k-parent-meal-planner` |
 
 ## 스킬 현황
 
-아래 스킬은 대부분 `packages/k-parent-source-*`(공식 API 어댑터) 또는 `packages/k-parent-*`(순수 로직) 패키지로 뒷받침됩니다. 각 소스 패키지는 **fixture-first**로 동작합니다: 공개 API 스펙 기반의 목 응답을 `test/fixtures/`에 캐시해 오프라인으로 정규화·테스트하고, 크레덴셜을 넣고 `npm run refresh:fixtures --workspace <package>`를 돌리면 라이브 데이터로 전환됩니다. 크레덴셜 발급은 [OWNER-TASKS.md](OWNER-TASKS.md)와 [.env.example](.env.example)을 참고하세요. `knowledge-helper`·`mobile-agent`는 아직 패키지 경계가 없는 컨셉(워크플로우) 스킬입니다.
+아래 스킬은 대부분 `packages/k-parent-source-*`(공식 API 어댑터) 또는 `packages/k-parent-*`(순수 로직) 패키지로 뒷받침됩니다. 각 소스 패키지는 **fixture-first**로 동작합니다: 공개 API 스펙 기반의 목 응답을 `test/fixtures/`에 캐시해 오프라인으로 정규화·테스트하고, 크레덴셜을 넣고 `npm run refresh:fixtures --workspace <package>`를 돌리면 라이브 데이터로 전환됩니다. 크레덴셜 발급은 [OWNER-TASKS.md](OWNER-TASKS.md)와 [.env.example](.env.example)을 참고하세요. `knowledge-helper`·`mobile-agent`·`outdoor-check`·`child-health`·`library-finder`는 아직 패키지 경계가 없는 컨셉(워크플로우) 스킬입니다. 뒤의 세 개는 k-skill 공개 프록시로 키 없이 조회합니다([사용 규칙](docs/kskill-proxy.md)).
 
 | 디파트먼트 | 할 수 있는 일 | 스킬 이름 | 설명 | 사용자 로그인 | 문서 |
 | --- | --- | --- | --- | --- | --- |
@@ -33,7 +33,7 @@ K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영합�
 | 놀이 | 축제 | `k-parent-festival-finder` | 지역 축제와 가족 동반 행사를 날짜·연령 기준으로 정리 | 불필요 | [축제 기능 문서](docs/features/k-parent-festival-finder.md) |
 | 놀이 | 문화센터, 행사 | `k-parent-culture-center-events` | 백화점·마트·도서관·공공기관 문화센터 강좌와 행사를 탐색 | 불필요 | [문화센터/행사 기능 문서](docs/features/k-parent-culture-center-events.md) |
 | 생활 | 각종 신청 | `k-parent-application-helper` | 돌봄, 방과후, 바우처, 체험 신청의 준비물과 마감일을 정리 | 필요할 수 있음 | [각종 신청 기능 문서](docs/features/k-parent-application-helper.md) |
-| 학원 | 학원 안내문 | `k-parent-academy-connector` | 학원 공지에서 수업, 보강, 숙제, 시험, 수강료 마감을 추출하고 일정 후보로 정리 | 필요할 수 있음 | [학원 안내문 기능 문서](docs/features/k-parent-academy-connector.md) |
+| 학원 | 학원 안내문·학원 정보 | `k-parent-academy-connector` | 학원 공지에서 수업, 보강, 숙제, 시험, 수강료 마감을 추출하고 일정 후보로 정리, NEIS 학원교습소정보로 등록·휴원·신고 교습비 확인(키 없으면 5건) | 필요할 수 있음 | [학원 안내문 기능 문서](docs/features/k-parent-academy-connector.md) |
 | 학교 | 학교문서 스캔 | `k-parent-school-doc-capture` | 학교 안내문 사진을 OCR로 저장하고 일정·준비물·신청 마감 캘린더 후보로 정리 | 필요할 수 있음 | [학교문서 스캔 기능 문서](docs/features/k-parent-school-doc-capture.md) |
 | 쇼핑 | 준비물 쇼핑 | `k-parent-shopping-recommender` | 준비물·교재·육아용품 구매 후보를 정리하고 쿠팡 어필리에이트 링크를 선택적으로 제공 | 필요할 수 있음 | [준비물 쇼핑 기능 문서](docs/features/k-parent-shopping-recommender.md) |
 | 생활 | 모바일 에이전트 | `k-parent-mobile-agent` | 서버 배포형 모바일 부모 에이전트 제품 표면 | 필요할 수 있음 | [모바일 에이전트 컨셉 문서](docs/features/k-parent-mobile-agent.md) |
@@ -42,6 +42,9 @@ K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영합�
 | 놀이 | 여행지 추천 | `k-parent-travel-recommender` | 아이 동반 여행지, 체험, 일정 추천 | 불필요 | [여행지 추천 기능 문서](docs/features/k-parent-travel-recommender.md) |
 | 생활 | 일반 지식 | `k-parent-knowledge-helper` | 부모가 묻는 일반 지식과 생활 판단 질문에 출처 기반 답변 | 불필요 | [일반 지식 컨셉 문서](docs/features/k-parent-knowledge-helper.md) |
 | 놀이 | 콘텐츠 추천 | `k-parent-content-recommender` | 차 안에서 듣기 좋은 유튜브 채널·영상, 교과 연계 콘텐츠, 부모-자녀 대화 주제 추천 | 불필요 | [콘텐츠 추천 기능 문서](docs/features/k-parent-content-recommender.md) |
+| 생활 | 바깥활동 체크 | `k-parent-outdoor-check` | 미세먼지·날씨로 등원·바깥놀이 판단, 마스크·우산·겉옷 정리(키 없이 k-skill 공개 프록시) | 불필요 | [바깥활동 체크 컨셉 문서](docs/features/k-parent-outdoor-check.md) |
+| 생활 | 아이 건강·안전 | `k-parent-child-health` | 아이 약·식품 공식 안전 정보, 위험 신호 시 119·응급실 안내(키 없이 k-skill 공개 프록시) | 불필요 | [아이 건강·안전 컨셉 문서](docs/features/k-parent-child-health.md) |
+| 놀이 | 아이 책 도서관 | `k-parent-library-finder` | 아이 책 검색과 동네 도서관 소장·대출 가능 확인(키 없이 k-skill 공개 프록시) | 불필요 | [아이 책 도서관 컨셉 문서](docs/features/k-parent-library-finder.md) |
 | 학교 | 오늘 배운 퀴즈 | `k-parent-quiz-maker` | 나이스 시간표로 오늘 배운 과목을 확인하고 성취기준 기반 결정적 문항 은행으로 복습 퀴즈 생성(Flutter 앱 `apps/k-parent-quiz-app`) | 불필요 | [오늘 배운 퀴즈 기능 문서](docs/features/k-parent-quiz-maker.md) |
 
 공통 설치·환경 진단은 `k-parent-setup` 스킬이 담당합니다.
@@ -100,6 +103,16 @@ k-parent-skills/
 - 로그인, 결제, 신청서 제출은 사용자의 명시적 승인 없이는 실행하지 않습니다.
 - 개인정보와 아동 정보는 사용자 소유 저장소의 참조로만 연결하고, 서버 메모리에 원문을 저장하지 않습니다.
 
+## 크레딧
+
+이 저장소는 [`NomaDamas/k-skill`](https://github.com/NomaDamas/k-skill)(MIT)에서 큰 영향을 받았습니다.
+
+- **구조:** 스킬 하나를 폴더 하나로 두고 따로 설치하게 하는 방식, `packages/`·`scripts/`·`docs/features/` 배치를 k-skill에서 가져왔습니다.
+- **프록시 발상:** 운영자가 키를 보관하고, 사용자는 인증정보 없이 공공 무료 API를 부르는 방식을 k-skill proxy에서 배웠습니다. 다만 k-skill proxy 코드(AGPL-3.0)는 복사하지 않았고, `k-parent-proxy`는 별도로 구현했습니다.
+- **차용·개작한 스킬:** 각 스킬의 `references/NOTICE.md`에 원본 경로와 바꾼 내용을 적습니다.
+
+자세한 고지는 [NOTICE](NOTICE)에 있습니다. k-skill을 만든 분들께 감사드립니다.
+
 ## 문서
 
 | 문서 | 설명 |
@@ -125,6 +138,8 @@ k-parent-skills/
 | [브리핑 HTML](docs/briefing.html) | 리포·리서치·기능 계획을 한 번에 설명하는 공유용 HTML |
 | [설치 방법](docs/install.md) | `seolcoding/k-parent-skills` 전체 또는 선택 설치 안내 |
 | [연구 기록](docs/research/k-parent-skills-architecture-ecosystem-2026-05-01.md) | k-skill 기반 부모 타깃 스킬 아키텍처와 연동 생태계 분석 |
+| [k-skill 공개 프록시 사용 규칙](docs/kskill-proxy.md) | 키 없이 부르는 라우트, 지켜야 할 것, 배포 전 남은 결정 |
+| [외부 스킬 소싱 조사](docs/research/external-parent-skill-sources-2026-10-27.md) | k-skill·Anthropic·OpenAI·해외 커뮤니티 부모·아이 스킬의 라이선스와 차용/개작/참고 판정 |
 | [전환 전략 연구](docs/research/k-parent-skills-conversion-strategy-2026-05-01.md) | 부모용 보이스/어시스턴트 전환, API 우선순위, 딥링크형 신청 보조 전략 |
 | [스펙 인덱스](docs/specs/README.md) | 제품 스펙, 데이터 계약, 프로젝트 구조와 향후 계획 |
 | [플래닝 인덱스](docs/planning/README.md) | OMC 기반 PRD, 스캐폴딩 계획, 기능별 플래닝, 에이전트 운용 계획 |

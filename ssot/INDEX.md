@@ -1,12 +1,12 @@
 <!-- GENERATED FILE: run `npm run ssot:generate`; do not edit by hand. -->
 # K-Parent SSOT index
 
-This index contains **92 artifacts** from the machine-readable registries in [`ssot/registry/`](registry/).
+This index contains **95 artifacts** from the machine-readable registries in [`ssot/registry/`](registry/).
 Maturity, verification, and deployment are independent status axes.
 
 | Registry | Artifacts |
 | --- | ---: |
-| [skills](registry/skills.json) | 18 |
+| [skills](registry/skills.json) | 21 |
 | [packages](registry/packages.json) | 21 |
 | [apis](registry/apis.json) | 12 |
 | [crawlers](registry/crawlers.json) | 10 |
@@ -20,14 +20,17 @@ Maturity, verification, and deployment are independent status axes.
 | --- | --- | --- | --- | --- | --- | --- |
 | `skills.k-parent-academy-connector` | k-parent-academy-connector | `skill` | `implemented` | `offline-tested` | `repo-only` | [`skills/k-parent-academy-connector/SKILL.md`](../skills/k-parent-academy-connector/SKILL.md) |
 | `skills.k-parent-application-helper` | k-parent-application-helper | `skill` | `implemented` | `offline-tested` | `repo-only` | [`skills/k-parent-application-helper/SKILL.md`](../skills/k-parent-application-helper/SKILL.md) |
+| `skills.k-parent-child-health` | k-parent-child-health | `skill` | `concept` | `documented` | `repo-only` | [`skills/k-parent-child-health/SKILL.md`](../skills/k-parent-child-health/SKILL.md) |
 | `skills.k-parent-content-recommender` | k-parent-content-recommender | `skill` | `prototype` | `fixture-tested` | `repo-only` | [`skills/k-parent-content-recommender/SKILL.md`](../skills/k-parent-content-recommender/SKILL.md) |
 | `skills.k-parent-culture-center-events` | k-parent-culture-center-events | `skill` | `implemented` | `fixture-tested` | `repo-only` | [`skills/k-parent-culture-center-events/SKILL.md`](../skills/k-parent-culture-center-events/SKILL.md) |
 | `skills.k-parent-data-collector` | k-parent-data-collector | `skill` | `implemented` | `offline-tested` | `repo-only` | [`skills/k-parent-data-collector/SKILL.md`](../skills/k-parent-data-collector/SKILL.md) |
 | `skills.k-parent-festival-finder` | k-parent-festival-finder | `skill` | `implemented` | `fixture-tested` | `repo-only` | [`skills/k-parent-festival-finder/SKILL.md`](../skills/k-parent-festival-finder/SKILL.md) |
 | `skills.k-parent-kindergarten-info` | k-parent-kindergarten-info | `skill` | `implemented` | `fixture-tested` | `repo-only` | [`skills/k-parent-kindergarten-info/SKILL.md`](../skills/k-parent-kindergarten-info/SKILL.md) |
 | `skills.k-parent-knowledge-helper` | k-parent-knowledge-helper | `skill` | `concept` | `documented` | `repo-only` | [`skills/k-parent-knowledge-helper/SKILL.md`](../skills/k-parent-knowledge-helper/SKILL.md) |
+| `skills.k-parent-library-finder` | k-parent-library-finder | `skill` | `concept` | `documented` | `repo-only` | [`skills/k-parent-library-finder/SKILL.md`](../skills/k-parent-library-finder/SKILL.md) |
 | `skills.k-parent-meal-planner` | k-parent-meal-planner | `skill` | `implemented` | `live-probed` | `repo-only` | [`skills/k-parent-meal-planner/SKILL.md`](../skills/k-parent-meal-planner/SKILL.md) |
 | `skills.k-parent-mobile-agent` | k-parent-mobile-agent | `skill` | `concept` | `documented` | `not-deployed` | [`skills/k-parent-mobile-agent/SKILL.md`](../skills/k-parent-mobile-agent/SKILL.md) |
+| `skills.k-parent-outdoor-check` | k-parent-outdoor-check | `skill` | `concept` | `documented` | `repo-only` | [`skills/k-parent-outdoor-check/SKILL.md`](../skills/k-parent-outdoor-check/SKILL.md) |
 | `skills.k-parent-play-finder` | k-parent-play-finder | `skill` | `implemented` | `fixture-tested` | `repo-only` | [`skills/k-parent-play-finder/SKILL.md`](../skills/k-parent-play-finder/SKILL.md) |
 | `skills.k-parent-quiz-maker` | k-parent-quiz-maker | `skill` | `implemented` | `offline-tested` | `deployment-unverified` | [`skills/k-parent-quiz-maker/SKILL.md`](../skills/k-parent-quiz-maker/SKILL.md) |
 | `skills.k-parent-schedule-manager` | k-parent-schedule-manager | `skill` | `implemented` | `offline-tested` | `repo-only` | [`skills/k-parent-schedule-manager/SKILL.md`](../skills/k-parent-schedule-manager/SKILL.md) |

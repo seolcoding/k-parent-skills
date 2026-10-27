@@ -9,6 +9,7 @@
 - `k-parent-culture-center-events`
 - `k-parent-travel-recommender`
 - `k-parent-content-recommender`
+- `k-parent-library-finder`
 
 ## Shared patterns
 

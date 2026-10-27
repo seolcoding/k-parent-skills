@@ -3,6 +3,8 @@ const {
   createErrorResult,
 } = require("k-parent-core");
 const {
+  extractTotalCount,
+  normalizeAcademyRows,
   normalizeDateInput,
   normalizeDateRange,
   normalizeMealRows,
@@ -15,10 +17,12 @@ const {
 } = require("./parse");
 
 const NEIS_BASE_URL = "https://open.neis.go.kr/hub";
+// NEIS serves keyless "sample" requests but caps them at 5 rows per page.
+const NEIS_KEYLESS_MAX_PAGE_SIZE = 5;
 
 async function requestNeisJson(dataset, params, options = {}) {
   const apiKey = options.apiKey || process.env.KEDU_INFO_KEY;
-  if (!apiKey) {
+  if (!apiKey && !options.allowKeyless) {
     const error = new Error("KEDU_INFO_KEY or options.apiKey is required for live NEIS requests.");
     error.status = ERROR_STATUS.MISSING_CONFIG;
     throw error;
@@ -30,10 +34,13 @@ async function requestNeisJson(dataset, params, options = {}) {
   }
 
   const url = new URL(`${NEIS_BASE_URL}/${dataset}`);
-  url.searchParams.set("KEY", apiKey);
+  if (apiKey) {
+    url.searchParams.set("KEY", apiKey);
+  }
+  const pageSize = options.pageSize || 100;
   url.searchParams.set("Type", "json");
   url.searchParams.set("pIndex", String(options.pageIndex || 1));
-  url.searchParams.set("pSize", String(options.pageSize || 100));
+  url.searchParams.set("pSize", String(apiKey ? pageSize : Math.min(pageSize, NEIS_KEYLESS_MAX_PAGE_SIZE)));
 
   for (const [key, value] of Object.entries(params || {})) {
     if (value !== undefined && value !== null && value !== "") {
@@ -44,7 +51,9 @@ async function requestNeisJson(dataset, params, options = {}) {
   const response = await fetchImpl(url.toString(), {
     method: "GET",
     headers: {
-      accept: "application/json",
+      // Keyless NEIS sample requests return HTTP 500 when `accept: application/json`
+      // is sent (verified 2026-10-27); `Type=json` already selects the format.
+      ...(apiKey ? { accept: "application/json" } : {}),
       "accept-language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
       "user-agent": "k-parent-skills/neis",
       ...(options.headers || {}),
@@ -215,9 +224,62 @@ async function getTimetable(options = {}) {
   };
 }
 
+async function searchAcademies(options = {}) {
+  const office = options.educationOfficeCode
+    ? { ok: true, code: options.educationOfficeCode, name: null, input: options.educationOfficeCode }
+    : resolveEducationOffice(options.region || options.educationOffice);
+
+  if (!office.ok) {
+    return createErrorResult(office.status || ERROR_STATUS.AMBIGUOUS, "교육청을 하나로 확정하지 못했습니다.", {
+      candidates: office.candidates || [],
+      academies: [],
+    });
+  }
+
+  const keyless = !(options.apiKey || process.env.KEDU_INFO_KEY);
+  if (keyless && options.allowKeyless === false && !options.payload) {
+    return createErrorResult(ERROR_STATUS.MISSING_CONFIG, "KEDU_INFO_KEY가 없어 학원 정보를 조회할 수 없습니다.", {
+      academies: [],
+    });
+  }
+
+  const payload = options.payload || await requestNeisJson("acaInsTiInfo", {
+    ATPT_OFCDC_SC_CODE: office.code,
+    ADMST_ZONE_NM: options.district,
+    ACA_NM: options.academyName,
+    REALM_SC_NM: options.field,
+    LE_ORD_NM: options.track,
+    LE_CRSE_NM: options.course,
+  }, { ...options, allowKeyless: true });
+
+  const academies = normalizeAcademyRows(payload, {
+    fetchedAt: options.fetchedAt,
+    now: options.now,
+  });
+  const totalCount = extractTotalCount(payload, "acaInsTiInfo");
+
+  if (academies.length === 0) {
+    return createErrorResult(ERROR_STATUS.NOT_FOUND, "조건에 맞는 학원·교습소를 찾지 못했습니다.", {
+      academies: [],
+      totalCount,
+    });
+  }
+
+  return {
+    ok: true,
+    status: "ok",
+    educationOffice: { input: office.input, code: office.code, name: office.name },
+    totalCount,
+    keyless: keyless && !options.payload,
+    truncated: totalCount > academies.length,
+    academies,
+  };
+}
+
 module.exports = {
   requestNeisJson,
   resolveSchool,
+  searchAcademies,
   searchSchools,
   getMeals,
   getSchedule,

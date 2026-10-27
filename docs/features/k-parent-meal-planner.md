@@ -31,6 +31,11 @@
 ## 환경변수
 
 - `KEDU_INFO_KEY` — NEIS open API 인증키. 미설정 시 `missing_config`.
+- `KSKILL_PROXY_BASE_URL` — 선택. 키 없는 급식 조회에 쓸 프록시 주소. 비우면 k-skill 공개 프록시(`docs/kskill-proxy.md`).
+
+## 키 없는 급식 조회
+
+`KEDU_INFO_KEY`가 없을 때 k-skill 공개 프록시의 `/v1/neis/school-search` → `/v1/neis/school-meal`로 급식을 본다. NEIS 원문을 그대로 받으므로 패키지의 정규화·freshness 봉투는 적용되지 않는다. 2026-10-27 키 없이 200 응답 확인. 원본은 NomaDamas/k-skill `k-schoollunch-menu`(MIT)이며 `skills/k-parent-meal-planner/references/NOTICE.md`에 개작 내역을 적었다.
 
 ## 픽스처 갱신
 

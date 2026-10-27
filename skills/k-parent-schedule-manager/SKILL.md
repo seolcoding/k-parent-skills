@@ -1,6 +1,6 @@
 ---
 name: k-parent-schedule-manager
-description: 학교·학원·기관 안내문에서 추출한 일정을 packages/k-parent-calendar로 캘린더 후보로 정리하고 중복을 제거하며 ICS로 내보낸다. 실제 캘린더 쓰기는 항상 사용자 확인이 필요하다. "일정 정리", "캘린더에 추가", "ICS 내보내기", "준비물·마감 챙겨줘" 같은 요청에 사용.
+description: 학교·학원·기관 안내문에서 추출한 일정을 packages/k-parent-calendar로 캘린더 후보로 정리하고 중복을 제거하며 ICS로 내보낸다. 공휴일·대체공휴일은 API 키 없이 k-skill 공개 프록시(한국천문연구원 특일 정보)로 확인한다. 실제 캘린더 쓰기는 항상 사용자 확인이 필요하다. "일정 정리", "캘린더에 추가", "ICS 내보내기", "준비물·마감 챙겨줘", "다음 달 공휴일이랑 겹치는 일정 있어?" 같은 요청에 사용. 학교 학사일정·재량휴업일 조회는 k-parent-school-info.
 license: MIT
 metadata:
   category: parenting
@@ -39,9 +39,29 @@ metadata:
 1. 안내문 텍스트(모델 OCR 결과 또는 사용자 입력)에서 일정/준비물/마감을 추출
    (`packages/k-parent-doc-extract` 참고).
 2. 각 일정을 `calendarCandidate`로 변환.
-3. `dedupeCandidates`로 중복 제거.
-4. 후보 목록을 사용자에게 표시하고 확인 요청.
-5. 사용자가 원하면 `toICS`로 내보내거나, 사용자가 직접 캘린더에 등록.
+3. 일정이 걸친 달의 공휴일을 확인해, 공휴일·대체공휴일과 겹치는 후보에
+   "공휴일과 겹침, 기관 공지 확인" 메모를 붙인다 (아래 공휴일 확인).
+4. `dedupeCandidates`로 중복 제거.
+5. 후보 목록을 사용자에게 표시하고 확인 요청.
+6. 사용자가 원하면 `toICS`로 내보내거나, 사용자가 직접 캘린더에 등록.
+
+## 공휴일 확인
+
+부모에게 API 키가 필요 없다. 프록시 규칙은 `docs/kskill-proxy.md`.
+
+```bash
+BASE="${KSKILL_PROXY_BASE_URL:-https://k-skill-proxy.nomadamas.org}"; BASE="${BASE%/}"
+curl -fsS --get "${BASE}/v1/korean-holiday/calendar" \
+  --data-urlencode "operation=rest" --data-urlencode "year=2026" --data-urlencode "month=12"
+```
+
+- 응답은 XML이다. `item`마다 `locdate`(YYYYMMDD), `dateName`, `isHoliday`(Y/N)를 읽는다.
+- `isHoliday=Y`만 쉬는 날로 본다. 대체공휴일도 `rest`에 들어온다.
+- 날짜 비교는 KST 기준이다.
+- 학교 재량휴업일·방학은 공휴일 API에 없다. `k-parent-school-info`(NEIS 학사일정)로 따로 본다.
+- 프록시가 `503`/`5xx`면 실패를 알리고, 겹침 메모 없이 후보를 그대로 보여 준다.
+
+원본: NomaDamas/k-skill `korean-holiday-calendar` (MIT). 출처와 바꾼 내용은 `references/NOTICE.md`.
 
 ## 출력 형식
 

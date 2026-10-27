@@ -1,0 +1,24 @@
+k-parent-skills
+Copyright (c) 2026 k-parent-skills contributors
+Licensed under the MIT License (see LICENSE).
+
+This project is inspired by and structurally derived from:
+
+  NomaDamas/k-skill
+  https://github.com/NomaDamas/k-skill
+  Copyright (c) 2026 NomaDamas/k-skill contributors
+  License: MIT (repository root)
+  Note: packages/k-skill-proxy/ and infra/k-skill-proxy-dashboard/ in that
+  repository are AGPL-3.0-only. No code from those directories is copied
+  into this repository; k-parent-proxy follows the same design idea
+  (operator-held keys, allowlisted read-only routes, cache, rate limit)
+  but is an independent implementation.
+
+What was taken from k-skill:
+  - Collection layout: one installable skill per directory, optional
+    implementation packages under packages/, shared scripts/, docs/features/.
+  - Proxy pattern for calling free public APIs without user-side API keys.
+  - Skill authoring conventions (frontmatter routing, Korean trigger examples).
+
+Skills adapted from k-skill record their original path and what was
+rewritten in skills/<skill>/references/NOTICE.md.

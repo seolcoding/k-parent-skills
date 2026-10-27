@@ -33,4 +33,7 @@ K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영한�
 | `k-parent-knowledge-helper` | `life` | `school`, `academy`, `nutrition` |
 | `k-parent-content-recommender` | `play` | `school`, `trend`, `life` |
 | `k-parent-quiz-maker` | `school` | `life` |
+| `k-parent-outdoor-check` | `life` | `play`, `school` |
+| `k-parent-child-health` | `life` | `nutrition` |
+| `k-parent-library-finder` | `play` | `school` |
 | `k-parent-setup` | `life` | all departments |

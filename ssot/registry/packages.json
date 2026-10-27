@@ -133,7 +133,7 @@
       "tracking": "git",
       "lastVerified": "2026-05-30",
       "sensitivity": "public",
-      "role": "NEIS school, meal, schedule, class, and timetable normalization"
+      "role": "NEIS school, meal, schedule, class, timetable, and academy (acaInsTiInfo) normalization"
     },
     {
       "id": "packages.k-parent-source-childinfo",

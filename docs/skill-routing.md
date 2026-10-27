@@ -20,8 +20,12 @@ frontmatter `description`이며, 이 문서는 겹침 해소 규칙을 한곳에
 | "차에서 들려줄 거", "교과 연계 영상", "대화 주제" | `k-parent-content-recommender` | 놀이 |
 | "아동수당 자격", "부모급여 신청 서류", "아이돌봄 마감" | `k-parent-application-helper` | 생활 |
 | "자녀 일정 정리", "가족 캘린더", "ICS로 내보내기" | `k-parent-schedule-manager` | 생활 |
-| "학원 휴강/보강", "학원 숙제·시험 정리" | `k-parent-academy-connector` | 학원 |
+| "학원 휴강/보강", "학원 숙제·시험 정리", "동네 영어학원 신고 교습비", "교육청 등록 학원이야" | `k-parent-academy-connector` | 학원 |
 | "초등 입학 준비물", "교재 가격 비교", "장난감 추천" | `k-parent-shopping-recommender` | 쇼핑 |
+| "오늘 놀이터 가도 돼", "등원할 때 우산 챙겨야 해", "미세먼지 괜찮아" | `k-parent-outdoor-check` | 생활 |
+| "어린이 해열제 주의사항", "먹은 과자 회수됐어", "밤에 문 연 소아 응급실" | `k-parent-child-health` | 생활 |
+| "구름빵 동네 도서관에 있어", "2학년 공룡 책", "이 책 대출 가능한 곳" | `k-parent-library-finder` | 놀이 |
+| "다음 달 공휴일이랑 겹치는 일정" | `k-parent-schedule-manager` | 생활 |
 | "예방접종 일반 정보", "입학 전 준비", 분류 안 되는 질문 | `k-parent-knowledge-helper` | 생활 |
 | 여러 소스 데이터 수집·정규화(내부) | `k-parent-data-collector` | 트렌드 |
 | 모바일 부모 에이전트 설계·라우팅 | `k-parent-mobile-agent` | 생활 |
@@ -37,6 +41,13 @@ frontmatter `description`이며, 이 문서는 겹침 해소 규칙을 한곳에
 - **접수기간이 있는 강좌·체험·예약형 프로그램** → `k-parent-culture-center-events`
 
 판단이 애매하면 사용자에게 "당일 vs 여행", "상시 vs 접수형"을 되물어 분기한다.
+
+## 겹침 해소 규칙 (k-skill 개작 계열)
+
+- **밖에 나가도 되나(공기질·날씨)** → `k-parent-outdoor-check`. 실내 대안 장소가 필요하면 이어서 `k-parent-play-finder`.
+- **아이 약·식품 안전, 야간·휴일 진료 경로** → `k-parent-child-health`. 예방접종·발달 같은 일반 육아 지식은 `k-parent-knowledge-helper`. 위험 신호가 보이면 어떤 스킬에서든 119·응급실 안내를 먼저 한다.
+- **책 소장·대출** → `k-parent-library-finder`. 도서관 강좌·프로그램 신청은 `k-parent-culture-center-events`.
+- **급식** → `k-parent-meal-planner` (키 없으면 k-skill 공개 프록시 경로). 학사일정·재량휴업일은 `k-parent-school-info`, 공휴일 겹침은 `k-parent-schedule-manager`.
 
 ## 공통 출력 신호
 

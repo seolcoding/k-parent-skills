@@ -46,6 +46,11 @@ K-Parent Skills는 `학교`, `학원`, `놀이`, `생활`, `트렌드`, `쇼핑`
 - `k-parent-content-recommender`: 유튜브 채널·영상, 교과 연계, 차 안 오디오형 콘텐츠, 대화 주제 추천
 - `k-parent-quiz-maker`: 나이스 시간표로 오늘 배운 과목을 확인하고 성취기준 기반 결정적 복습 퀴즈 생성(`packages/k-parent-quiz-core`, 앱 표면 `apps/k-parent-quiz-app`)
 - `k-parent-setup`: fixture-first 실행 환경과 부모 API 시크릿 파일 권한 진단
+- `k-parent-outdoor-check`: 미세먼지·날씨 기반 등원·바깥놀이 판단 컨셉 (k-skill 개작, 키 없이 공개 프록시)
+- `k-parent-child-health`: 아이 약·식품 안전과 야간·휴일 진료 경로 컨셉 (k-skill 개작, 위험 신호 우선)
+- `k-parent-library-finder`: 아이 책 검색과 동네 도서관 소장·대출 확인 컨셉 (k-skill 개작)
+
+k-skill 공개 프록시에 기대는 세 컨셉 스킬과 급식·공휴일 키 없는 경로는, 앱으로 배포하기 전에 같은 라우트를 우리 `k-parent-proxy`로 옮기거나 NomaDamas의 사용 허락을 받아야 한다(`docs/kskill-proxy.md`).
 
 공통 HITL 레이어는 `k-parent-core`에 구현되어 있다. 다음 제품 단계는 Experience,
 Skill, Policy/HITL, Tool, Domain, Adapter, Data 경계를 앱과 서버 표면에도 일관되게

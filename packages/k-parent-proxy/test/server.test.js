@@ -78,6 +78,36 @@ test("parent-only routes normalize schools, classes, timetable, and schedule", a
   assert.equal(calls.filter((call) => call === "elsTimetable").length, 1);
 });
 
+test("academies route returns parent fields from NEIS acaInsTiInfo without client keys", async () => {
+  const real = require("k-parent-source-neis");
+  const academyPayload = require("../../k-parent-source-neis/test/fixtures/academy.json");
+  const received = [];
+  const adapter = {
+    ...real,
+    async searchAcademies(options) {
+      received.push(options);
+      return real.searchAcademies({ ...options, payload: academyPayload });
+    },
+  };
+
+  await withServer({ apiKey: "fixture-key", adapter }, async (baseUrl) => {
+    const body = await (await fetch(`${baseUrl}/v1/neis/academies?educationOffice=서울&district=강남구&academyName=수학&pageSize=500`)).json();
+    assert.equal(body.total_count, 514);
+    assert.equal(body.rows.length, 5);
+    const ig = body.rows.find((row) => row.name === "IG수학교습소");
+    assert.deepEqual(ig.tuition.map((item) => item.amount_krw), [540000, 800000, 400000]);
+    assert.equal(ig.on_leave_today, false);
+    assert.equal(body.rows.find((row) => row.name === "BT수학전문수학교습소").telephone, null);
+    assert.equal(JSON.stringify(body).includes("fixture-key"), false);
+
+    assert.equal((await fetch(`${baseUrl}/v1/neis/academies?district=강남구`)).status, 400);
+    assert.equal((await fetch(`${baseUrl}/v1/neis/academies?educationOfficeCode=B10`)).status, 400);
+  });
+
+  assert.equal(received[0].pageSize, 100);
+  assert.equal(received[0].allowKeyless, false);
+});
+
 test("proxy rejects invalid or non-allowlisted routes", async () => {
   await withServer({ apiKey: "fixture-key", adapter: fixtureAdapter([]) }, async (baseUrl) => {
     assert.equal((await fetch(`${baseUrl}/v1/korean-stock/search?q=x`)).status, 404);

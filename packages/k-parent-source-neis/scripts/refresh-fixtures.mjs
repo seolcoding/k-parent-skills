@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Regenerate NEIS fixtures (school-info, meal, schedule, timetable) from the live API.
+// Regenerate NEIS fixtures (school-info, meal, schedule, timetable, academy) from the live API.
 // Requires KEDU_INFO_KEY (NEIS open API key). Run from this package:
 //   KEDU_INFO_KEY=... npm run refresh:fixtures
 import { writeFile } from "node:fs/promises";
@@ -88,6 +88,16 @@ async function main() {
     TI_TO_YMD: SAMPLE_DATE,
   });
   await writeFixture("timetable.json", timetable);
+
+  const academy = await fetchJson("acaInsTiInfo", {
+    ATPT_OFCDC_SC_CODE: ATPT,
+    ADMST_ZONE_NM: process.env.NEIS_ACA_ZONE || "강남구",
+    ACA_NM: process.env.NEIS_ACA_NM || "수학",
+  });
+  // Tests expect the first page of 5 rows; keep the fixture small.
+  const rowBlock = academy.acaInsTiInfo?.find((item) => Array.isArray(item?.row));
+  if (rowBlock) rowBlock.row = rowBlock.row.slice(0, 5);
+  await writeFixture("academy.json", academy);
 }
 
 main().catch((error) => {

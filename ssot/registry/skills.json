@@ -16,8 +16,8 @@
       "lastVerified": "2026-08-01",
       "sensitivity": "public",
       "declaredPhase": "implemented",
-      "backingPackages": ["packages.k-parent-doc-extract", "packages.k-parent-calendar"],
-      "gap": "No academy application or authenticated API connector"
+      "backingPackages": ["packages.k-parent-doc-extract", "packages.k-parent-calendar", "packages.k-parent-source-neis"],
+      "gap": "No academy application or authenticated API connector; NEIS academy lookup is keyless-sample (5 rows) without KEDU_INFO_KEY"
     },
     {
       "id": "skills.k-parent-application-helper",
@@ -287,6 +287,54 @@
       "sensitivity": "public",
       "declaredPhase": "p0",
       "backingPackages": ["packages.k-parent-source-tourapi"]
+    },
+    {
+      "id": "skills.k-parent-outdoor-check",
+      "name": "k-parent-outdoor-check",
+      "kind": "skill",
+      "maturity": "concept",
+      "verification": "documented",
+      "deployment": "repo-only",
+      "availability": "current",
+      "canonicalPath": "skills/k-parent-outdoor-check/SKILL.md",
+      "tracking": "git",
+      "lastVerified": "2026-10-27",
+      "sensitivity": "public",
+      "declaredPhase": "concept",
+      "backingPackages": [],
+      "gap": "Uses NomaDamas/k-skill public proxy (fine-dust, korea-weather); no k-parent-proxy route or deterministic judgment package yet"
+    },
+    {
+      "id": "skills.k-parent-child-health",
+      "name": "k-parent-child-health",
+      "kind": "skill",
+      "maturity": "concept",
+      "verification": "documented",
+      "deployment": "repo-only",
+      "availability": "current",
+      "canonicalPath": "skills/k-parent-child-health/SKILL.md",
+      "tracking": "git",
+      "lastVerified": "2026-10-27",
+      "sensitivity": "public",
+      "declaredPhase": "concept",
+      "backingPackages": ["packages.k-parent-source-emergency"],
+      "gap": "Uses NomaDamas/k-skill public proxy (MFDS drug/food); red-flag triage is documentation only, not tested code; no pediatric clinical review"
+    },
+    {
+      "id": "skills.k-parent-library-finder",
+      "name": "k-parent-library-finder",
+      "kind": "skill",
+      "maturity": "concept",
+      "verification": "documented",
+      "deployment": "repo-only",
+      "availability": "current",
+      "canonicalPath": "skills/k-parent-library-finder/SKILL.md",
+      "tracking": "git",
+      "lastVerified": "2026-10-27",
+      "sensitivity": "public",
+      "declaredPhase": "concept",
+      "backingPackages": ["packages.k-parent-source-library"],
+      "gap": "Uses NomaDamas/k-skill public proxy (data4library); no k-parent-proxy route"
     }
   ]
 }

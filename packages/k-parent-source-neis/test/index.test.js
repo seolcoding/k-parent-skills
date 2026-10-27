@@ -11,15 +11,19 @@ const {
   getMeals,
   getSchedule,
   getTimetable,
+  normalizeAcademyRows,
   normalizeDateInput,
   normalizeMealRows,
   normalizeSchoolRows,
   normalizeTimetableRows,
+  parseAcademyLeave,
+  parseAcademyTuition,
   parseDishName,
   requestNeisJson,
   resolveEducationOffice,
   resolveSchool,
   resolveTimetableDataset,
+  searchAcademies,
 } = require("../src/index");
 
 const fixturesDir = path.join(__dirname, "fixtures");
@@ -27,6 +31,7 @@ const schoolPayload = readFixture("school-info.json");
 const mealPayload = readFixture("meal.json");
 const schedulePayload = readFixture("schedule.json");
 const timetablePayload = readFixture("timetable.json");
+const academyPayload = readFixture("academy.json");
 
 test("normalizeDateInput accepts NEIS compact and dashed dates", () => {
   assert.equal(normalizeDateInput("20260501").isoDate, "2026-05-01");
@@ -221,6 +226,127 @@ test("live NEIS request builds official URL with key and Korean headers", async 
   assert.ok(fetchedUrl.includes("KEY=test-key"));
   assert.ok(fetchedUrl.includes("ATPT_OFCDC_SC_CODE=B10"));
   assert.ok(decodeURIComponent(fetchedUrl).includes("SCHUL_NM=미래초"));
+});
+
+test("academy rows normalize registration, tuition, and placeholder phones", () => {
+  const academies = normalizeAcademyRows(academyPayload, {
+    fetchedAt: "2026-10-27T00:00:00.000Z",
+    now: "2026-10-27T01:00:00.000Z",
+  });
+
+  assert.equal(academies.length, 5);
+  const ig = academies.find((academy) => academy.name === "IG수학교습소");
+  assert.equal(ig.type, "academy");
+  assert.equal(ig.academyNumber, "3000012510");
+  assert.equal(ig.kind, "교습소");
+  assert.equal(ig.district, "강남구");
+  assert.equal(ig.registrationStatus, "개원");
+  assert.equal(ig.leave, null);
+  assert.equal(ig.onLeaveToday, false);
+  assert.deepEqual(ig.courseList, ["수학"]);
+  assert.equal(ig.tuition.disclosed, true);
+  assert.deepEqual(ig.tuition.items.map((item) => item.amountKrw), [540000, 800000, 400000]);
+  assert.equal(ig.telephone, "02-558-6799");
+  assert.equal(ig.updatedAt, "2025-06-08");
+  assert.equal(ig.source.sourceName, "NEIS acaInsTiInfo");
+  assert.equal(ig.source.freshness.status, SOURCE_FRESHNESS.FRESH);
+
+  const bt = academies.find((academy) => academy.name === "BT수학전문수학교습소");
+  assert.equal(bt.telephone, null);
+  assert.deepEqual(bt.tuition.items, []);
+});
+
+test("academy leave and tuition parsing handles NEIS sentinels", () => {
+  assert.equal(parseAcademyLeave("        ", "99991231"), null);
+  const open = parseAcademyLeave("20261001", "99991231");
+  assert.equal(open.startDate, "2026-10-01");
+  assert.equal(open.endDate, null);
+  const bounded = parseAcademyLeave("20261001", "20261031");
+  assert.equal(bounded.endDate, "2026-10-31");
+
+  assert.deepEqual(parseAcademyTuition("수학:540000", "N").items, []);
+  assert.equal(parseAcademyTuition("수학:540000", "N").disclosed, false);
+  assert.equal(parseAcademyTuition("상담 후 결정", "Y").items[0].amountKrw, null);
+
+  // Live NEIS course names carry commas inside parentheses.
+  const live = parseAcademyTuition(
+    "초등주1회(4.2주)(주1회, 회당215분):170000, 초등영어A(4.2주)(주2회, 회당150분):240000",
+    "Y",
+  );
+  assert.deepEqual(live.items.map((item) => item.course), [
+    "초등주1회(4.2주)(주1회, 회당215분)",
+    "초등영어A(4.2주)(주2회, 회당150분)",
+  ]);
+  assert.deepEqual(live.items.map((item) => item.amountKrw), [170000, 240000]);
+});
+
+test("academy on-leave flag uses the KST calendar date", () => {
+  const row = { ...academyPayload.acaInsTiInfo[1].row[0], CAA_BEGIN_YMD: "20261027", CAA_END_YMD: "20261031" };
+  const payload = { acaInsTiInfo: [academyPayload.acaInsTiInfo[0], { row: [row] }] };
+  // 2026-10-26T16:00Z is 2026-10-27 01:00 KST.
+  const [academy] = normalizeAcademyRows(payload, { now: "2026-10-26T16:00:00.000Z" });
+  assert.equal(academy.onLeaveToday, true);
+  const [before] = normalizeAcademyRows(payload, { now: "2026-10-26T14:00:00.000Z" });
+  assert.equal(before.onLeaveToday, false);
+});
+
+test("searchAcademies resolves the education office and reports truncation", async () => {
+  const result = await searchAcademies({
+    region: "서울",
+    district: "강남구",
+    academyName: "수학",
+    payload: academyPayload,
+    now: "2026-10-27T01:00:00.000Z",
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.educationOffice.code, "B10");
+  assert.equal(result.totalCount, 514);
+  assert.equal(result.truncated, true);
+  assert.equal(result.keyless, false);
+  assert.equal(result.academies.length, 5);
+});
+
+test("searchAcademies refuses ambiguous offices and reports empty results", async () => {
+  const ambiguous = await searchAcademies({ region: "경상", payload: academyPayload });
+  assert.equal(ambiguous.ok, false);
+  assert.equal(ambiguous.status, ERROR_STATUS.AMBIGUOUS);
+
+  const empty = await searchAcademies({
+    educationOfficeCode: "B10",
+    payload: { RESULT: { CODE: "INFO-200", MESSAGE: "해당하는 데이터가 없습니다." } },
+  });
+  assert.equal(empty.ok, false);
+  assert.equal(empty.status, ERROR_STATUS.NOT_FOUND);
+});
+
+test("searchAcademies falls back to keyless NEIS sample requests capped at 5 rows", async () => {
+  const savedKey = process.env.KEDU_INFO_KEY;
+  delete process.env.KEDU_INFO_KEY;
+  try {
+    let fetchedUrl = "";
+    const result = await searchAcademies({
+      educationOfficeCode: "B10",
+      district: "강남구",
+      pageSize: 100,
+      fetchImpl: async (url) => {
+        fetchedUrl = String(url);
+        return new Response(JSON.stringify(academyPayload), { status: 200 });
+      },
+    });
+
+    assert.equal(result.ok, true);
+    assert.equal(result.keyless, true);
+    assert.ok(!fetchedUrl.includes("KEY="));
+    assert.ok(fetchedUrl.includes("pSize=5"));
+    assert.ok(fetchedUrl.includes("open.neis.go.kr/hub/acaInsTiInfo"));
+    assert.ok(decodeURIComponent(fetchedUrl).includes("ADMST_ZONE_NM=강남구"));
+
+    const refused = await searchAcademies({ educationOfficeCode: "B10", allowKeyless: false });
+    assert.equal(refused.status, ERROR_STATUS.MISSING_CONFIG);
+  } finally {
+    if (savedKey !== undefined) process.env.KEDU_INFO_KEY = savedKey;
+  }
 });
 
 function readFixture(fileName) {

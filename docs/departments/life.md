@@ -8,6 +8,8 @@
 - `k-parent-mobile-agent`
 - `k-parent-schedule-manager`
 - `k-parent-knowledge-helper`
+- `k-parent-outdoor-check`
+- `k-parent-child-health`
 
 ## Related skills
 
@@ -27,7 +29,7 @@
 ## Next candidates
 
 - 예방접종·건강검진 일정 확인
-- 어린이 병원·약국 야간/휴일 진료 확인
+- 어린이 병원·약국 야간/휴일 진료 확인 (컨셉: `k-parent-child-health`)
 - 육아종합지원센터/장난감도서관 프로그램 확인
 - 정부24/복지로/돌봄 신청 준비물과 공식 링크 가이던스
 - 모바일 홈과 에이전틱 명령 입력

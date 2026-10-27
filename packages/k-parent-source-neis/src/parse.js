@@ -321,6 +321,132 @@ function parseDishName(value) {
   };
 }
 
+const NO_LEAVE_END_DATE = "99991231";
+const PLACEHOLDER_TELEPHONE = /^0\d{1,2}-0{3,4}-0{4}$/;
+
+function normalizeAcademyRows(payload, options = {}) {
+  const source = makeNeisSource("acaInsTiInfo", {
+    ...options,
+    maxAgeHours: options.maxAgeHours == null ? 7 * 24 : options.maxAgeHours,
+  });
+  const today = compactToday(options.now);
+
+  return extractRows(payload, "acaInsTiInfo").map((row) => {
+    const academy = normalizeInstitution({
+      id: row.ACA_ASNUM,
+      type: "academy",
+      officialCode: row.ACA_ASNUM,
+      educationOfficeCode: row.ATPT_OFCDC_SC_CODE,
+      name: row.ACA_NM,
+      address: [cleanText(row.FA_RDNMA), cleanText(row.FA_RDNDA)].filter(Boolean).join(" ") || null,
+      source,
+      updatedAt: compactDateToIso(row.LOAD_DTM),
+    });
+    const leave = parseAcademyLeave(row.CAA_BEGIN_YMD, row.CAA_END_YMD);
+
+    return {
+      ...academy,
+      academyNumber: row.ACA_ASNUM,
+      kind: cleanText(row.ACA_INSTI_SC_NM),
+      educationOfficeName: cleanText(row.ATPT_OFCDC_SC_NM),
+      district: cleanText(row.ADMST_ZONE_NM),
+      registrationStatus: cleanText(row.REG_STTUS_NM),
+      establishedDate: compactDateToIso(row.ESTBL_YMD),
+      registeredDate: compactDateToIso(row.REG_YMD),
+      leave,
+      onLeaveToday: Boolean(leave && today && leave.startCompact <= today && today <= leave.endCompact),
+      field: cleanText(row.REALM_SC_NM),
+      track: cleanText(row.LE_ORD_NM),
+      course: cleanText(row.LE_CRSE_NM),
+      courseList: splitList(row.LE_CRSE_LIST_NM),
+      capacity: finiteNumberOrNull(row.TOFOR_SMTOT),
+      tuition: parseAcademyTuition(row.PSNBY_THCC_CNTNT, row.THCC_OTHBC_YN),
+      dormitory: row.BRHS_ACA_YN === "Y",
+      postalCode: cleanText(row.FA_RDNZC),
+      telephone: PLACEHOLDER_TELEPHONE.test(cleanText(row.FA_TELNO) || "") ? null : cleanText(row.FA_TELNO),
+      raw: row,
+    };
+  });
+}
+
+function parseAcademyLeave(begin, end) {
+  const startCompact = String(begin || "").trim();
+  const endCompact = String(end || "").trim();
+  if (!/^\d{8}$/.test(startCompact)) {
+    return null;
+  }
+  const hasEnd = /^\d{8}$/.test(endCompact) && endCompact !== NO_LEAVE_END_DATE;
+  return {
+    startDate: compactDateToIso(startCompact),
+    endDate: hasEnd ? compactDateToIso(endCompact) : null,
+    startCompact,
+    endCompact: hasEnd ? endCompact : NO_LEAVE_END_DATE,
+  };
+}
+
+function parseAcademyTuition(text, disclosedFlag) {
+  const disclosed = disclosedFlag === "Y";
+  const items = splitList(text)
+    .map((part) => {
+      const match = part.match(/^(.*?):\s*([\d]+)$/);
+      if (!match) {
+        return { course: null, amountKrw: null, text: part };
+      }
+      return { course: match[1].trim() || null, amountKrw: Number(match[2]), text: part };
+    });
+  return { disclosed, items: disclosed ? items : [] };
+}
+
+function extractTotalCount(payload, datasetName) {
+  const block = payload?.[datasetName];
+  if (!Array.isArray(block)) {
+    return 0;
+  }
+  const head = block.find((item) => Array.isArray(item?.head))?.head || [];
+  const countEntry = head.find((item) => item && ("list_total_count" in item || "LIST_TOTAL_COUNT" in item));
+  return Number(countEntry?.list_total_count ?? countEntry?.LIST_TOTAL_COUNT ?? 0) || 0;
+}
+
+function compactToday(now) {
+  const date = now ? new Date(now) : new Date();
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  // NEIS dates are KST calendar dates.
+  const kst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  return kst.toISOString().slice(0, 10).replace(/-/g, "");
+}
+
+function cleanText(value) {
+  const text = String(value ?? "").trim();
+  return text || null;
+}
+
+// Splits on commas outside parentheses: course names look like
+// "초등영어A(4.2주)(주2회, 회당150분):240000".
+function splitList(value) {
+  const parts = [];
+  let depth = 0;
+  let current = "";
+  for (const char of String(value || "")) {
+    if (char === "(") depth += 1;
+    if (char === ")") depth = Math.max(0, depth - 1);
+    if (char === "," && depth === 0) {
+      parts.push(current);
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+  parts.push(current);
+  return parts.map((item) => item.trim()).filter(Boolean);
+}
+
+function finiteNumberOrNull(value) {
+  const number = Number(value);
+  return value === null || value === undefined || value === "" || !Number.isFinite(number) ? null : number;
+}
+
 function makeNeisSource(dataset, options = {}) {
   const endpoint = options.sourceUrl || `https://open.neis.go.kr/hub/${dataset}`;
   return normalizeSourceMetadata({
@@ -364,12 +490,16 @@ module.exports = {
   EDUCATION_OFFICES,
   compactDateToIso,
   extractRows,
+  extractTotalCount,
+  normalizeAcademyRows,
   normalizeDateInput,
   normalizeDateRange,
   normalizeMealRows,
   normalizeScheduleRows,
   normalizeSchoolRows,
   normalizeTimetableRows,
+  parseAcademyLeave,
+  parseAcademyTuition,
   parseDishName,
   resolveEducationOffice,
   resolveSchoolFromRows,

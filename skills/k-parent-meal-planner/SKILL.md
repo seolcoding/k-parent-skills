@@ -74,6 +74,24 @@ const brief = composeTodayBrief({
 
 각 급식 항목은 `menuItems`, `allergens`(라벨), `allergyNumbers`(1~19), `origin`, `calories`, `nutrition`, `source`를 포함한다. 알레르기 번호 전체 코드표는 `references/allergen-codes.md`를 본다.
 
+### 3-0. 키 없이 급식만 빨리 볼 때
+
+`KEDU_INFO_KEY`가 없으면 k-skill 공개 프록시로 학교를 찾고 급식을 조회한다. 프록시 규칙은 `docs/kskill-proxy.md`.
+
+```bash
+BASE="${KSKILL_PROXY_BASE_URL:-https://k-skill-proxy.nomadamas.org}"; BASE="${BASE%/}"
+curl -fsS --get "${BASE}/v1/neis/school-search" \
+  --data-urlencode "educationOffice=서울" --data-urlencode "schoolName=미래초등학교"
+curl -fsS --get "${BASE}/v1/neis/school-meal" \
+  --data-urlencode "educationOfficeCode=B10" --data-urlencode "schoolCode=SCHOOL_CODE" \
+  --data-urlencode "mealDate=20261027"
+```
+
+- 학교가 여러 개 나오면 이름·주소를 보여 주고 고르게 한다.
+- 응답은 NEIS 원문(`mealServiceDietInfo[].row[]`)이다. `DDISH_NM`의 `<br/>`를 줄바꿈으로 바꾸고, 메뉴 뒤 괄호 숫자를 알레르기 번호로 읽는다(`references/allergen-codes.md`).
+- 이 경로는 `k-parent-source-neis`의 정규화·freshness 봉투를 거치지 않는다. 답변에 조회 시각과 "NEIS 원문 기준"을 직접 적는다.
+- 원본: NomaDamas/k-skill `k-schoollunch-menu` (MIT). 출처와 바꾼 내용은 `references/NOTICE.md`.
+
 ### 3-1. 데이터 계약 봉투
 
 - 성공: `{ ok: true, status: "ok", meals: [...] }`
@@ -131,7 +149,7 @@ const brief = composeTodayBrief({
 - 건강·의학 판단처럼 말하지 말고, 필요하면 보호자와 의료진 확인을 권한다.
 - 로그인, 신청 제출, 취소, 결제, 아이 개인정보 입력은 사용자의 명시적 승인 없이 실행하지 않는다.
 - 캘린더 등록 후보(`calendarCandidates`)는 `packages/k-parent-core` guardrail로 `requiresConfirmation: true`, `executable: false` 상태이며 부모 확인 전 실행하지 않는다.
-- NEIS 인증키는 `KEDU_INFO_KEY` 환경변수로 주입한다. 키가 없으면 `missing_config`로 실패한다.
+- NEIS 인증키는 `KEDU_INFO_KEY` 환경변수로 주입한다. 키가 없으면 패키지는 `missing_config`로 실패하고, 급식 조회만 필요하면 3-0의 키 없는 경로를 쓴다.
 
 ## 관련 문서
 

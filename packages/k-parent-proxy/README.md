@@ -8,6 +8,9 @@ K-Parent Quiz 앱이 사용하는 NEIS 읽기 전용 allowlist proxy다. 이전
 - `GET /v1/neis/classes`
 - `GET /v1/neis/timetable`
 - `GET /v1/neis/schedule`
+- `GET /v1/neis/academies` — 학원·교습소(NEIS `acaInsTiInfo`). `educationOffice` 또는
+  `educationOfficeCode`와 함께 `district`나 `academyName` 중 하나가 필요하다(교육청 전체
+  스캔 거부). 선택: `course`, `pageSize`(최대 100), `page`.
 
 서버에 `KEDU_INFO_KEY`가 필요하고 성공·빈 결과는 기본 24시간 process memory에
 cache한다. client에는 API key를 노출하지 않는다. `/health`를 제외한 allowlist

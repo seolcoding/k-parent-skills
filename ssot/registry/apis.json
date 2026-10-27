@@ -16,7 +16,7 @@
       "lastVerified": "2026-05-30",
       "sensitivity": "public",
       "backingPackages": ["packages.k-parent-source-neis"],
-      "operations": ["school-search", "school-meal", "schedule", "classes", "timetable"]
+      "operations": ["school-search", "school-meal", "schedule", "classes", "timetable", "academies"]
     },
     {
       "id": "apis.schoolinfo-open-api",
@@ -175,7 +175,8 @@
         "/v1/neis/school-search",
         "/v1/neis/timetable",
         "/v1/neis/classes",
-        "/v1/neis/schedule"
+        "/v1/neis/schedule",
+        "/v1/neis/academies"
       ],
       "gap": "No authentication, tenant isolation, public hosted endpoint, durable cache, observability, or production canary evidence"
     }
