@@ -9,6 +9,13 @@ const {
   normalizeSourceMetadata,
 } = require("k-parent-core");
 
+const {
+  applyHeritageDetail,
+  fetchHeritageDetail,
+  fetchHeritageList,
+  parseHeritageList,
+} = require("./heritage");
+
 const KCISA_BASE_URL = "https://api.kcisa.kr/openapi";
 
 const EXPERIENCE_DATASETS = Object.freeze({
@@ -402,7 +409,8 @@ function parseGrades(text) {
   }
   if (/유아|미취학/.test(source) && !grades.some((g) => g.level === "유아")) push("유아");
   if (/가족|보호자\s*동반/.test(source)) push("가족");
-  if (/^\s*(전체|전체관람가|누구나)\s*$/.test(source)) push("전체");
+  // 라이브 598에서 본 표기: "전체관람", "모든 연령"
+  if (/^\s*(전체|전체\s?관람가?|누구나|모든\s?연령|전\s?연령)\s*$/.test(source)) push("전체");
   return grades;
 }
 
@@ -458,38 +466,146 @@ function kstToday(now) {
   return new Date(date.getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
-// 여러 데이터셋을 받아 지역·학년·시대·키워드로 거른다.
-// 데이터셋 대부분이 서버 쪽 필터가 없어, 가져온 페이지 안에서만 거른다(partial 표시).
+// 라이브 조회 페이지 계획 (캐시 없음). 2026-10-28 실측 기준:
+// - 598: 진행 중·예정 전시가 1~5페이지에 몰려 있다 → 앞에서 3페이지
+// - 540: 29만 건, 정렬이 섞여 있고 뒤쪽이 최근에 가깝다, 100건 요청은 504가 잦다 → 끝에서 50건씩 2페이지
+// - 495: 708건 → 앞에서 2페이지
+// - 639: 100건 안쪽 → 1페이지
+// - 84: 서버 필터가 없다 → 기본 목록에서 빼고 국가유산청(khs)을 쓴다
+const PAGE_PLANS = Object.freeze({
+  598: { from: "start", pages: 3, rows: 100 },
+  540: { from: "end", pages: 2, rows: 50 },
+  84: { from: "start", pages: 1, rows: 100 },
+  495: { from: "start", pages: 2, rows: 100 },
+  639: { from: "start", pages: 1, rows: 100 },
+});
+const DEFAULT_DATASETS = Object.freeze(["598", "540", "khs", "495", "639"]);
+
+async function fetchWithRetry(fn, options = {}) {
+  try {
+    return await fn();
+  } catch (error) {
+    if (options.retries === 0 || !/status 50[234]/.test(error.message)) throw error;
+    await (options.sleep || defaultSleep)(options.retryDelayMs ?? 1500);
+    return fn();
+  }
+}
+
+function defaultSleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// 계획에 따라 여러 페이지를 받아 합친다. 테스트는 options.payloads[dataset]에 페이지 배열(또는 한 페이지)을 넣는다.
+async function fetchPlannedItems(dataset, options) {
+  const injected = options.payloads?.[dataset];
+  if (injected) {
+    const pages = Array.isArray(injected) ? injected : [injected];
+    return mergePages(dataset, pages, options);
+  }
+  const plan = { ...PAGE_PLANS[dataset], ...(options.pagePlans?.[dataset] || {}) };
+  let pageNumbers = Array.from({ length: plan.pages }, (_, index) => index + 1);
+  if (plan.from === "end") {
+    const head = await fetchWithRetry(() => fetchExperienceDataset(dataset, { ...options, numOfRows: 1, pageNo: 1 }), options);
+    const total = Number(head?.response?.body?.totalCount) || 0;
+    const last = Math.max(1, Math.ceil(total / plan.rows));
+    pageNumbers = Array.from({ length: plan.pages }, (_, index) => last - index).filter((page) => page >= 1);
+  }
+  const pages = [];
+  for (const pageNo of pageNumbers) {
+    try {
+      pages.push(await fetchWithRetry(() => fetchExperienceDataset(dataset, { ...options, numOfRows: plan.rows, pageNo }), options));
+    } catch (error) {
+      if (!pages.length && pageNo === pageNumbers[pageNumbers.length - 1]) throw error;
+    }
+  }
+  if (!pages.length) {
+    const err = new Error(`No pages fetched for ${dataset}`);
+    err.status = ERROR_STATUS.UPSTREAM_ERROR;
+    throw err;
+  }
+  return mergePages(dataset, pages, options);
+}
+
+function mergePages(dataset, pages, options) {
+  const parsed = pages.map((page) => parseExperiences(dataset, page, options));
+  return {
+    items: parsed.flatMap((entry) => entry.items),
+    totalCount: parsed.find((entry) => entry.totalCount)?.totalCount ?? null,
+  };
+}
+
+// 국가유산청: 시도로 서버에서 거른다. 시대 조건이 있으면 상세를 detailLimit건까지 순차로 받는다.
+async function fetchHeritageItems(sido, options) {
+  if (!sido) {
+    const err = new Error("Heritage search needs sido");
+    err.status = ERROR_STATUS.AMBIGUOUS;
+    throw err;
+  }
+  const listXml = options.payloads?.khs?.list
+    ?? await fetchWithRetry(() => fetchHeritageList({ ...options, sido, kind: options.heritageKind, name: options.keyword, pageUnit: options.heritageRows || 30 }), options);
+  const parsed = parseHeritageList(listXml, { ...options, requestedSido: sido });
+  if (!options.eras?.length) return { items: parsed.items, totalCount: parsed.totalCount };
+
+  const limit = options.detailLimit ?? 15;
+  const enriched = [];
+  for (const [index, item] of parsed.items.slice(0, limit).entries()) {
+    try {
+      const detailXml = options.payloads?.khs?.details?.[item.id]
+        ?? await fetchHeritageDetail(item, options);
+      enriched.push(applyHeritageDetail(item, detailXml, detectEras));
+    } catch {
+      enriched.push(item);
+    }
+    if (!options.payloads && index < limit - 1) await (options.sleep || defaultSleep)(options.detailDelayMs ?? 300);
+  }
+  return { items: enriched, totalCount: parsed.totalCount, detailed: enriched.length };
+}
+
+// 여러 데이터셋을 실시간으로 받아 지역·학년·시대·키워드로 거른다(캐시 없음).
+// 서버 쪽 필터가 없는 데이터셋은 계획한 페이지 안에서만 찾는다(partial 표시).
 async function searchExperiences(options = {}) {
-  const datasets = (options.datasets || Object.keys(EXPERIENCE_DATASETS)).map(String);
+  const datasets = (options.datasets || DEFAULT_DATASETS).map(String);
   const sido = normalizeSido(options.sido);
   const results = [];
   const datasetStatus = [];
 
-  for (const dataset of datasets) {
-    let payload;
+  // 데이터셋끼리는 동시에, 한 데이터셋 안의 페이지는 순서대로 부른다.
+  const settled = await Promise.all(datasets.map(async (dataset) => {
     try {
-      payload = await fetchExperienceDataset(dataset, {
-        ...options,
-        payload: options.payloads?.[dataset],
-      });
+      const fetched = dataset === "khs"
+        ? await fetchHeritageItems(sido, options)
+        : await fetchPlannedItems(dataset, options);
+      return { dataset, fetched };
     } catch (error) {
-      datasetStatus.push({ dataset: Number(dataset), ok: false, status: error.status || ERROR_STATUS.UPSTREAM_ERROR });
+      return { dataset, error };
+    }
+  }));
+
+  for (const { dataset, fetched, error } of settled) {
+    if (error) {
+      datasetStatus.push({ dataset, ok: false, status: error.status || ERROR_STATUS.UPSTREAM_ERROR });
       continue;
     }
-    const parsed = parseExperiences(dataset, payload, options);
     datasetStatus.push({
-      dataset: Number(dataset),
+      dataset,
       ok: true,
-      fetched: parsed.items.length,
-      totalCount: parsed.totalCount,
-      partial: Boolean(parsed.totalCount && parsed.totalCount > parsed.items.length),
+      fetched: fetched.items.length,
+      totalCount: fetched.totalCount,
+      partial: Boolean(fetched.totalCount && fetched.totalCount > fetched.items.length),
+      ...(fetched.detailed != null ? { detailed: fetched.detailed } : {}),
     });
-    results.push(...parsed.items);
+    results.push(...fetched.items);
   }
 
-  const filtered = results.filter((item) => {
+  const today = kstToday(options.now);
+  const seen = new Set();
+  const filtered = results.map((item) => withRecentStatus(item, today)).filter((item) => {
+    const key = `${item.title}|${item.institution || ""}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
     if (!options.includeEnded && item.status === "ended") return false;
+    // 기간 없는 전시·행사는 대부분 지난 기록이라 기본으로 뺀다. 문화재(heritage)는 원래 기간이 없다.
+    if (!options.includeUndated && item.status === "unknown" && item.kind !== "heritage") return false;
     if (sido && item.sido && item.sido !== sido) return false;
     if (sido && !item.sido && options.requireSido) return false;
     if (options.eras?.length && !options.eras.some((era) => item.eras.includes(era))) return false;
@@ -506,6 +622,16 @@ async function searchExperiences(options = {}) {
   return { ok: true, status: "ok", items: filtered, datasets: datasetStatus };
 }
 
+const RECENT_ISSUED_DAYS = 90;
+
+// 기간 필드가 없는 행사(639)는 등록일이 최근이면 "recent"로 남긴다. 일정은 원문에서 확인해야 한다.
+function withRecentStatus(item, today) {
+  if (item.status !== "unknown" || !item.issuedDate || !today) return item;
+  const issued = Date.parse(`${String(item.issuedDate).slice(0, 10)}T00:00:00Z`);
+  const days = (Date.parse(`${today}T00:00:00Z`) - issued) / 86_400_000;
+  return Number.isFinite(days) && days >= 0 && days <= RECENT_ISSUED_DAYS ? { ...item, status: "recent" } : item;
+}
+
 // 학년 정보가 없는 항목은 통과시키고(대상 미표기), 명시된 경우만 맞춰 본다.
 function matchesGrade(grades, level, grade) {
   if (!grades.length) return true;
@@ -518,8 +644,10 @@ function matchesGrade(grades, level, grade) {
 }
 
 module.exports = {
+  DEFAULT_DATASETS,
   ERA_KEYWORDS,
   EXPERIENCE_DATASETS,
+  PAGE_PLANS,
   INSTITUTION_SIDO,
   detectEras,
   fetchExperienceDataset,

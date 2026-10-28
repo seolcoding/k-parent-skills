@@ -25,7 +25,7 @@ Maturity, verification, and deployment are independent status axes.
 | `skills.k-parent-culture-center-events` | k-parent-culture-center-events | `skill` | `implemented` | `fixture-tested` | `repo-only` | [`skills/k-parent-culture-center-events/SKILL.md`](../skills/k-parent-culture-center-events/SKILL.md) |
 | `skills.k-parent-data-collector` | k-parent-data-collector | `skill` | `implemented` | `offline-tested` | `repo-only` | [`skills/k-parent-data-collector/SKILL.md`](../skills/k-parent-data-collector/SKILL.md) |
 | `skills.k-parent-festival-finder` | k-parent-festival-finder | `skill` | `implemented` | `fixture-tested` | `repo-only` | [`skills/k-parent-festival-finder/SKILL.md`](../skills/k-parent-festival-finder/SKILL.md) |
-| `skills.k-parent-field-trip` | k-parent-field-trip | `skill` | `prototype` | `fixture-tested` | `repo-only` | [`skills/k-parent-field-trip/SKILL.md`](../skills/k-parent-field-trip/SKILL.md) |
+| `skills.k-parent-field-trip` | k-parent-field-trip | `skill` | `prototype` | `live-probed` | `repo-only` | [`skills/k-parent-field-trip/SKILL.md`](../skills/k-parent-field-trip/SKILL.md) |
 | `skills.k-parent-kindergarten-info` | k-parent-kindergarten-info | `skill` | `implemented` | `fixture-tested` | `repo-only` | [`skills/k-parent-kindergarten-info/SKILL.md`](../skills/k-parent-kindergarten-info/SKILL.md) |
 | `skills.k-parent-knowledge-helper` | k-parent-knowledge-helper | `skill` | `concept` | `documented` | `repo-only` | [`skills/k-parent-knowledge-helper/SKILL.md`](../skills/k-parent-knowledge-helper/SKILL.md) |
 | `skills.k-parent-library-finder` | k-parent-library-finder | `skill` | `concept` | `documented` | `repo-only` | [`skills/k-parent-library-finder/SKILL.md`](../skills/k-parent-library-finder/SKILL.md) |

@@ -25,11 +25,12 @@ const result = await searchExperiences({ sido: "서울", gradeLevel: "초등", g
 | --- | --- | --- |
 | 598 | 전시정보(통합) | `/openapi/API_CCA_145/request` |
 | 540 | 국립지방박물관 문화행사 통합 | `/openapi/service/CNV/API_CNV_043/request` |
-| 84 | 문화재청_문화재정보 | `/openapi/service/rest/meta/CHAheri` |
+| 84 | 문화재청_문화재정보 (searchExperiences 기본 목록 제외) | `/openapi/service/rest/meta/CHAheri` |
+| khs | 국가유산청 국가유산 검색 (키 없음, XML) | `https://www.khs.go.kr/cha/SearchKindOpenapiList.do`, `SearchKindOpenapiDt.do` |
 | 495 | 대한민국역사박물관 교육프로그램 | `/openapi/service/rest/meta2020/getMCHBedu` |
 | 639 | 국립한글박물관 문화행사 | `/openapi/API_CCA_164/request` |
 
-Fixtures(`test/fixtures/experience-*.json`) are real responses captured from the culture.go.kr API preview on 2026-10-27. Live calls are not verified yet.
+Live, uncached: each call fetches the pages in `PAGE_PLANS` (datasets in parallel, one retry on 50x). Fixtures(`test/fixtures/experience-*.json`, `heritage-*.xml`) are real responses captured 2026-10-27/28. All five kcisa datasets and the heritage API were verified live on 2026-10-28.
 
 ```bash
 KSKILL_CULTURE_KEY=... npm run refresh:experience-fixtures

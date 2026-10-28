@@ -1,6 +1,6 @@
 ---
 name: k-parent-field-trip
-description: 대한민국 초등 부모가 아이가 학교에서 배우는 단원(2022 개정 성취기준)과 이어지는 박물관 전시·교육프로그램·문화유산 체험을 찾는 교과 연계 체험학습 스킬. 문화공공데이터광장 5개 API(국립 박물관·미술관 전시 통합, 국립지방박물관 교육·행사, 문화재정보, 대한민국역사박물관 교육프로그램, 국립한글박물관 행사)를 packages/k-parent-source-culture searchExperiences로 조회해 학년·지역·시대로 거른다. "4학년 우리 지역 문화유산 단원인데 주말에 갈 곳", "6학년 고려 시대 배우는데 관련 전시 있어?", "독립운동 단원이랑 연결되는 박물관 교육" 같은 요청에 사용. 단원과 무관한 놀거리는 k-parent-play-finder, 축제는 k-parent-festival-finder, 접수형 강좌 전반은 k-parent-culture-center-events.
+description: 대한민국 초등 부모가 아이가 학교에서 배우는 단원(2022 개정 성취기준)과 이어지는 박물관 전시·교육프로그램·문화유산 체험을 찾는 교과 연계 체험학습 스킬. 문화공공데이터광장 API(국립 박물관·미술관 전시 통합, 국립지방박물관 교육·행사, 대한민국역사박물관 교육프로그램, 국립한글박물관 행사)와 국가유산청 국가유산 검색 API를 packages/k-parent-source-culture searchExperiences로 매번 실시간 조회해 학년·지역·시대로 거른다. "4학년 우리 지역 문화유산 단원인데 주말에 갈 곳", "6학년 고려 시대 배우는데 관련 전시 있어?", "독립운동 단원이랑 연결되는 박물관 교육" 같은 요청에 사용. 단원과 무관한 놀거리는 k-parent-play-finder, 축제는 k-parent-festival-finder, 접수형 강좌 전반은 k-parent-culture-center-events.
 license: MIT
 metadata:
   category: parenting
@@ -24,7 +24,7 @@ metadata:
 
 ## 준비 사항
 
-- 문화공공데이터광장 서비스키: `KSKILL_CULTURE_KEY` (API별로 다르면 `KSKILL_CULTURE_KEY_598`, `_540`, `_84`, `_495`, `_639`)
+- 문화공공데이터광장 서비스키는 **API별로 따로 발급된다**(598 키로 다른 API를 부르면 401, 2026-10-28 확인). `KSKILL_CULTURE_KEY_598`, `_540`, `_84`, `_495`, `_639`에 각각 넣는다. `KSKILL_CULTURE_KEY`는 공통 기본값.
   - 키 없이는 조회되지 않는다(401). 키 신청은 부모가 직접 한다: culture.go.kr 각 API 상세 → 활용신청 → 이메일 발급. 개발계정은 하루 1,000건.
 - 성취기준 데이터: `skills/k-parent-quiz-maker/references/achievement-standards-elementary.json` (2022 개정 초등, 국어·수학·사회·과학·영어)
 
@@ -46,17 +46,19 @@ const result = await searchExperiences({
   gradeLevel: "초등",
   grade: 6,
   eras: ["고려"],            // 매핑표의 eras
-  datasets: ["598", "540", "84", "495"], // 매핑표의 datasets
-  numOfRows: 100,
+  datasets: ["598", "540", "khs", "495"], // 매핑표의 datasets (기본: 598, 540, khs, 495, 639)
+  detailLimit: 15,           // khs: 시대 확인용 상세를 몇 건까지 받을지
 });
 // result.items[]: title, institution, sido, place, startDate, endDate, status,
 //   grades, charge, eras, eraSource, application(495), designation(84), url, source
 // result.datasets[]: dataset별 ok / fetched / totalCount / partial
 ```
 
-- 기본으로 끝난 전시·프로그램(`status: "ended"`)은 뺀다. 날짜가 없는 항목(`unknown`: 문화재, 한글박물관 행사)은 남기고 "일정 확인 필요"라고 적는다.
+- **캐시 없이 매번 실시간으로 조회한다.** 데이터셋끼리는 동시에, 페이지는 정해진 계획(`PAGE_PLANS`)만큼만 부른다. 한 번 조회에 20초 안팎 걸릴 수 있다.
+- 끝난 항목(`ended`)과 기간이 없는 전시·행사(`unknown`)는 기본으로 뺀다. 한글박물관 행사는 등록일이 90일 안이면 `recent`로 남기고 "일정은 원문 확인"이라고 적는다. 문화재는 원래 기간이 없어 남긴다.
 - 학년 표기가 없는 항목은 통과시킨다. 표기가 있으면 맞는 학년만 남는다.
-- `partial: true`면 그 데이터셋 전체가 아니라 가져온 페이지 안에서만 찾은 것이다. 문화재(84)는 15,000건이 넘어 한 번에 다 볼 수 없다고 알린다.
+- `partial: true`면 그 데이터셋 전체가 아니라 계획한 페이지 안에서만 찾은 것이다. 540은 29만 건 중 최근 쪽 100건만 본다고 알린다.
+- 문화재(`khs`)는 시도가 있어야 조회한다. 시대 조건이 있으면 상세를 `detailLimit`건까지 받아 시대 필드로 거른다. 국가유산청은 요청이 몰리면 연결을 끊으므로 상세 사이에 간격을 둔다.
 
 ### 3. 연결 이유와 함께 정리
 
@@ -93,12 +95,14 @@ const result = await searchExperiences({
 | --- | --- | --- | --- |
 | 598 | 전시정보(통합), 국립 박물관·미술관 등 23개 기관 | `/API_CCA_145/request` | 기관→시도, PERIOD, AUDIENCE, CHARGE, 제목·설명 시대 |
 | 540 | 국립지방박물관 문화행사 통합 | `/service/CNV/API_CNV_043/request` | 기관→시도, period, 설명 속 학년·시대 |
-| 84 | 문화재청_문화재정보 | `/service/rest/meta/CHAheri` | spatial→시도, extent(시대), subjectKeyword(지정종목) |
+| khs | 국가유산청 국가유산 검색 (키 없음, XML) | `https://www.khs.go.kr/cha/SearchKindOpenapiList.do`, `SearchKindOpenapiDt.do` | ccbaCtcd(시도, 서버 필터), ccmaName(종목), 상세 ccceName(시대), 좌표 |
+| 84 | 문화재청_문화재정보 (기본 목록에서 제외) | `/service/rest/meta/CHAheri` | 서버 필터가 없어 실시간 지역 검색에 부적합 |
 | 495 | 대한민국역사박물관 교육프로그램 | `/service/rest/meta2020/getMCHBedu` | grade, temporalCoverage, 접수기간·정원 |
 | 639 | 국립한글박물관 문화행사 | `/API_CCA_164/request` | AUDIENCE, CHARGE |
 
-함수: `searchExperiences(options)`, `fetchExperienceDataset(dataset, options)`, `parseExperiences(dataset, payload, options)`, `detectEras(text)`, `parseGrades(text)`.
-환경변수: `KSKILL_CULTURE_KEY`, `KSKILL_CULTURE_KEY_<dataset>`.
+함수: `searchExperiences(options)`, `fetchExperienceDataset(dataset, options)`, `parseExperiences(dataset, payload, options)`, `fetchHeritageList`, `fetchHeritageDetail`, `parseHeritageList`, `detectEras(text)`, `parseGrades(text)`.
+옵션: `sido`, `gradeLevel`, `grade`, `eras`, `keyword`, `datasets`, `detailLimit`, `includeEnded`, `includeUndated`, `pagePlans`.
+환경변수: `KSKILL_CULTURE_KEY_<598|540|495|639>` (API별 키), `KSKILL_CULTURE_KEY`(기본값). 국가유산청은 키가 없다.
 
 ## 참고
 

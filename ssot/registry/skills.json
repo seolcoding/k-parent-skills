@@ -341,7 +341,7 @@
       "name": "k-parent-field-trip",
       "kind": "skill",
       "maturity": "prototype",
-      "verification": "fixture-tested",
+      "verification": "live-probed",
       "deployment": "repo-only",
       "availability": "current",
       "canonicalPath": "skills/k-parent-field-trip/SKILL.md",
@@ -350,7 +350,7 @@
       "sensitivity": "public",
       "declaredPhase": "p0",
       "backingPackages": ["packages.k-parent-source-culture"],
-      "gap": "No live api.kcisa.kr verification yet (needs KSKILL_CULTURE_KEY); heritage dataset (15k rows) has no local snapshot; no science museum source; music/art standards missing"
+      "gap": "Live uncached search only scans planned pages (540: newest 100 of 294k rows); 540/495 often return 504; heritage sido codes 38/50 unverified; no science museum source; music/art standards missing"
     }
   ]
 }

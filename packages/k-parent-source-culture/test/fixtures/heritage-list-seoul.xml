@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+
+
+
+
+
+<result>
+<totalCnt>2332</totalCnt>
+<pageUnit>5</pageUnit>
+<pageIndex>1</pageIndex>	
+
+<item>
+<sn>1</sn>
+<no>1</no>
+<ccmaName><![CDATA[국보]]></ccmaName>
+<ccbaMnm1><![CDATA[서울 숭례문]]></ccbaMnm1>
+<ccbaMnm2><![CDATA[서울 崇禮門]]></ccbaMnm2>
+<ccbaCtcdNm><![CDATA[서울]]></ccbaCtcdNm>
+<ccsiName><![CDATA[중구]]></ccsiName>
+<ccbaAdmin><![CDATA[국가유산청 덕수궁관리소]]></ccbaAdmin>
+<ccbaKdcd>11</ccbaKdcd>
+<ccbaCtcd>11</ccbaCtcd>
+<ccbaAsno>0000010000000</ccbaAsno>
+<ccbaCncl>N</ccbaCncl>
+<ccbaCpno>1111100010000</ccbaCpno>
+<longitude>126.975312652739</longitude>
+<latitude>37.559975221378</latitude>
+<regDt>2025-06-26 18:46:08</regDt>
+
+</item>
+
+<item>
+<sn>2</sn>
+<no>2</no>
+<ccmaName><![CDATA[국보]]></ccmaName>
+<ccbaMnm1><![CDATA[서울 원각사지 십층석탑]]></ccbaMnm1>
+<ccbaMnm2><![CDATA[서울 圓覺寺址 十層石塔]]></ccbaMnm2>
+<ccbaCtcdNm><![CDATA[서울]]></ccbaCtcdNm>
+<ccsiName><![CDATA[종로구]]></ccsiName>
+<ccbaAdmin><![CDATA[종로구]]></ccbaAdmin>
+<ccbaKdcd>11</ccbaKdcd>
+<ccbaCtcd>11</ccbaCtcd>
+<ccbaAsno>0000020000000</ccbaAsno>
+<ccbaCncl>N</ccbaCncl>
+<ccbaCpno>1111100020000</ccbaCpno>
+<longitude>126.988207994364</longitude>
+<latitude>37.5715461695449</latitude>
+<regDt>2025-09-27 00:25:02</regDt>
+
+</item>
+
+<item>
+<sn>3</sn>
+<no>3</no>
+<ccmaName><![CDATA[국보]]></ccmaName>
+<ccbaMnm1><![CDATA[서울 북한산 신라 진흥왕 순수비]]></ccbaMnm1>
+<ccbaMnm2><![CDATA[서울 北漢山 新羅 眞興王 巡狩碑]]></ccbaMnm2>
+<ccbaCtcdNm><![CDATA[서울]]></ccbaCtcdNm>
+<ccsiName><![CDATA[용산구]]></ccsiName>
+<ccbaAdmin><![CDATA[국립중앙박물관]]></ccbaAdmin>
+<ccbaKdcd>11</ccbaKdcd>
+<ccbaCtcd>11</ccbaCtcd>
+<ccbaAsno>0000030000000</ccbaAsno>
+<ccbaCncl>N</ccbaCncl>
+<ccbaCpno>1111100030000</ccbaCpno>
+<longitude>126.980350241652</longitude>
+<latitude>37.5240413763397</latitude>
+<regDt>2025-06-26 18:46:08</regDt>
+
+</item>
+
+<item>
+<sn>4</sn>
+<no>4</no>
+<ccmaName><![CDATA[국보]]></ccmaName>
+<ccbaMnm1><![CDATA[청자 사자형뚜껑 향로]]></ccbaMnm1>
+<ccbaMnm2><![CDATA[靑磁 獅子形蓋 香爐]]></ccbaMnm2>
+<ccbaCtcdNm><![CDATA[서울]]></ccbaCtcdNm>
+<ccsiName><![CDATA[용산구]]></ccsiName>
+<ccbaAdmin><![CDATA[국립중앙박물관]]></ccbaAdmin>
+<ccbaKdcd>11</ccbaKdcd>
+<ccbaCtcd>11</ccbaCtcd>
+<ccbaAsno>0000600000000</ccbaAsno>
+<ccbaCncl>N</ccbaCncl>
+<ccbaCpno>1111100600000</ccbaCpno>
+<longitude>126.980350241652</longitude>
+<latitude>37.5240413763397</latitude>
+<regDt>2025-06-26 18:46:08</regDt>
+
+</item>
+
+<item>
+<sn>5</sn>
+<no>5</no>
+<ccmaName><![CDATA[국보]]></ccmaName>
+<ccbaMnm1><![CDATA[청자 어룡형 주전자]]></ccbaMnm1>
+<ccbaMnm2><![CDATA[靑磁 魚龍形 注子]]></ccbaMnm2>
+<ccbaCtcdNm><![CDATA[서울]]></ccbaCtcdNm>
+<ccsiName><![CDATA[용산구]]></ccsiName>
+<ccbaAdmin><![CDATA[국립중앙박물관]]></ccbaAdmin>
+<ccbaKdcd>11</ccbaKdcd>
+<ccbaCtcd>11</ccbaCtcd>
+<ccbaAsno>0000610000000</ccbaAsno>
+<ccbaCncl>N</ccbaCncl>
+<ccbaCpno>1111100610000</ccbaCpno>
+<longitude>126.980350241652</longitude>
+<latitude>37.5240413763397</latitude>
+<regDt>2025-06-26 18:46:08</regDt>
+
+</item>
+	
+</result>

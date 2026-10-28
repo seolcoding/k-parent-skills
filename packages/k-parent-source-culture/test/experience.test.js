@@ -6,7 +6,11 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const {
+  DEFAULT_DATASETS,
   EXPERIENCE_DATASETS,
+  PAGE_PLANS,
+  applyHeritageDetail,
+  parseHeritageList,
   detectEras,
   fetchExperienceDataset,
   matchesGrade,
@@ -22,6 +26,10 @@ const {
 // Fixtures are real api.kcisa.kr responses captured from the culture.go.kr preview (2026-10-27).
 function readFixture(dataset) {
   return JSON.parse(fs.readFileSync(path.join(__dirname, "fixtures", `experience-${dataset}.json`), "utf8"));
+}
+
+function readText(name) {
+  return fs.readFileSync(path.join(__dirname, "fixtures", name), "utf8");
 }
 
 const NOW = "2026-10-28T00:00:00.000Z";
@@ -95,6 +103,8 @@ test("period, grade, charge, and application parsers handle observed formats", (
   assert.deepEqual(parseGrades("초3~초6"), [{ level: "초등", from: 3, to: 6 }]);
   assert.deepEqual(parseGrades("7세유아"), [{ level: "유아", from: 7, to: 7 }]);
   assert.deepEqual(parseGrades("전체관람가"), [{ level: "전체", from: null, to: null }]);
+  assert.deepEqual(parseGrades("전체관람"), [{ level: "전체", from: null, to: null }]);
+  assert.deepEqual(parseGrades("모든 연령"), [{ level: "전체", from: null, to: null }]);
   assert.deepEqual(parseGrades("초등학생 및 보호자 동반"), [
     { level: "초등", from: null, to: null },
     { level: "가족", from: null, to: null },
@@ -124,12 +134,13 @@ test("sido and grade matching", () => {
 });
 
 test("searchExperiences filters by sido, grade, era and hides ended items by default", async () => {
-  const all = await searchExperiences({ payloads, now: NOW, includeEnded: true });
+  const kcisa = ["598", "540", "84", "495", "639"];
+  const all = await searchExperiences({ payloads, datasets: kcisa, now: NOW, includeEnded: true });
   assert.equal(all.ok, true);
   assert.equal(all.datasets.length, 5);
-  assert.ok(all.datasets.find((entry) => entry.dataset === 84).partial);
+  assert.ok(all.datasets.find((entry) => entry.dataset === "84").partial);
 
-  const joseonSeoul = await searchExperiences({ payloads, now: NOW, sido: "서울특별시", eras: ["조선"], includeEnded: true });
+  const joseonSeoul = await searchExperiences({ payloads, datasets: kcisa, now: NOW, sido: "서울특별시", eras: ["조선"], includeEnded: true });
   assert.ok(joseonSeoul.items.length >= 1);
   assert.ok(joseonSeoul.items.every((item) => item.sido === "서울" || item.sido === null));
   assert.ok(joseonSeoul.items.every((item) => item.eras.includes("조선")));
@@ -139,6 +150,95 @@ test("searchExperiences filters by sido, grade, era and hides ended items by def
 
   const current = await searchExperiences({ payloads, now: NOW, datasets: ["598", "540", "495"] });
   assert.deepEqual(current.items, [], "all fixture exhibitions and programs are in the past");
+});
+
+test("undated exhibitions are hidden, recent 639 events kept, duplicates merged", async () => {
+  const page = JSON.parse(JSON.stringify(payloads[639]));
+  const rows = page.response.body.items.item;
+  rows[0].ISSUED_DATE = "2026-10-01";
+  rows.push({ ...rows[0] });
+  const result = await searchExperiences({ payloads: { 639: page }, datasets: ["639"], now: NOW });
+  assert.deepEqual(result.items.map((item) => [item.title, item.status]), [[rows[0].TITLE.replace(/&#(\d+);/g, (_, c) => String.fromCodePoint(c)), "recent"]]);
+
+  const undated = await searchExperiences({ payloads: { 639: page }, datasets: ["639"], now: NOW, includeUndated: true });
+  assert.equal(undated.items.length, 9, "duplicate row merged, undated rows kept on request");
+});
+
+test("default live datasets swap 84 for keyless heritage search and skip it without sido", async () => {
+  assert.deepEqual(DEFAULT_DATASETS, ["598", "540", "khs", "495", "639"]);
+  const noSido = await searchExperiences({ payloads, datasets: ["639", "khs"], now: NOW });
+  assert.equal(noSido.datasets.find((entry) => entry.dataset === "khs").ok, false);
+  assert.equal(noSido.datasets.find((entry) => entry.dataset === "639").ok, true);
+});
+
+test("heritage list and detail parse real 국가유산청 XML", () => {
+  const list = parseHeritageList(readText("heritage-list-seoul.xml"), { requestedSido: "서울" });
+  assert.equal(list.totalCount, 2332);
+  assert.equal(list.items.length, 5);
+  const gate = list.items[0];
+  assert.equal(gate.title, "서울 숭례문");
+  assert.equal(gate.designation, "국보");
+  assert.equal(gate.sido, "서울");
+  assert.equal(gate.id, "khs:11-0000010000000-11");
+  assert.ok(gate.latitude > 37 && gate.longitude > 126);
+
+  const stele = applyHeritageDetail(list.items[2], readText("heritage-detail-11-0000030000000-11.xml"), detectEras);
+  assert.equal(stele.eraText, "신라 진흥왕대");
+  assert.deepEqual(stele.eras, ["삼국"]);
+  assert.equal(stele.eraSource, "field");
+  assert.match(stele.category, /기록유산/);
+});
+
+test("searchExperiences enriches heritage details only when eras are requested", async () => {
+  const khs = {
+    list: readText("heritage-list-seoul.xml"),
+    details: {
+      "khs:11-0000010000000-11": readText("heritage-detail-11-0000010000000-11.xml"),
+      "khs:11-0000030000000-11": readText("heritage-detail-11-0000030000000-11.xml"),
+    },
+  };
+  const plain = await searchExperiences({ payloads: { khs }, datasets: ["khs"], sido: "서울", now: NOW });
+  assert.equal(plain.items.length, 5);
+  assert.equal(plain.datasets[0].detailed, undefined);
+
+  const threeKingdoms = await searchExperiences({ payloads: { khs }, datasets: ["khs"], sido: "서울", eras: ["삼국"], detailLimit: 3, now: NOW });
+  assert.deepEqual(threeKingdoms.items.map((item) => item.title), ["서울 북한산 신라 진흥왕 순수비"]);
+  assert.equal(threeKingdoms.datasets[0].detailed, 3);
+});
+
+test("live page plan reads from the end for 540 and retries once on 504", async () => {
+  assert.deepEqual(PAGE_PLANS[540], { from: "end", pages: 2, rows: 50 });
+  const saved = process.env.KSKILL_CULTURE_KEY;
+  process.env.KSKILL_CULTURE_KEY = "test-key";
+  const calls = [];
+  let failedOnce = false;
+  try {
+    const result = await searchExperiences({
+      datasets: ["540"],
+      now: NOW,
+      includeEnded: true,
+      sleep: async () => {},
+      fetchImpl: async (url) => {
+        const parsed = new URL(url);
+        const pageNo = parsed.searchParams.get("pageNo");
+        const rows = parsed.searchParams.get("numOfRows");
+        calls.push(`${rows}@${pageNo}`);
+        if (rows === "50" && pageNo === "3" && !failedOnce) {
+          failedOnce = true;
+          return new Response("", { status: 504 });
+        }
+        const body = JSON.parse(JSON.stringify(payloads[540]));
+        body.response.body.totalCount = 120;
+        return new Response(JSON.stringify(body), { status: 200 });
+      },
+    });
+    assert.deepEqual(calls, ["1@1", "50@3", "50@3", "50@2"]);
+    assert.equal(result.ok, true);
+    assert.equal(result.datasets[0].fetched, 8);
+  } finally {
+    if (saved !== undefined) process.env.KSKILL_CULTURE_KEY = saved;
+    else delete process.env.KSKILL_CULTURE_KEY;
+  }
 });
 
 test("fetchExperienceDataset uses per-dataset key override and the kcisa path", async () => {

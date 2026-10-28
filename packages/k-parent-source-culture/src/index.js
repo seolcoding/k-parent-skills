@@ -3,6 +3,7 @@
 const { ERROR_STATUS } = require("k-parent-core");
 const parse = require("./parse");
 const experience = require("./experience");
+const heritage = require("./heritage");
 
 const BASE_URL = "http://www.culture.go.kr/openapi/rest/publicperformancedisplays";
 
@@ -51,4 +52,5 @@ module.exports = {
   fetchCultureEvents,
   ...parse,
   ...experience,
+  ...heritage,
 };
