@@ -1,12 +1,12 @@
 <!-- GENERATED FILE: run `npm run ssot:generate`; do not edit by hand. -->
 # K-Parent SSOT index
 
-This index contains **96 artifacts** from the machine-readable registries in [`ssot/registry/`](registry/).
+This index contains **97 artifacts** from the machine-readable registries in [`ssot/registry/`](registry/).
 Maturity, verification, and deployment are independent status axes.
 
 | Registry | Artifacts |
 | --- | ---: |
-| [skills](registry/skills.json) | 22 |
+| [skills](registry/skills.json) | 23 |
 | [packages](registry/packages.json) | 21 |
 | [apis](registry/apis.json) | 12 |
 | [crawlers](registry/crawlers.json) | 10 |
@@ -39,6 +39,7 @@ Maturity, verification, and deployment are independent status axes.
 | `skills.k-parent-school-info` | k-parent-school-info | `skill` | `implemented` | `live-probed` | `deployment-unverified` | [`skills/k-parent-school-info/SKILL.md`](../skills/k-parent-school-info/SKILL.md) |
 | `skills.k-parent-setup` | k-parent-setup | `skill` | `implemented` | `offline-tested` | `repo-only` | [`skills/k-parent-setup/SKILL.md`](../skills/k-parent-setup/SKILL.md) |
 | `skills.k-parent-shopping-recommender` | k-parent-shopping-recommender | `skill` | `implemented` | `fixture-tested` | `repo-only` | [`skills/k-parent-shopping-recommender/SKILL.md`](../skills/k-parent-shopping-recommender/SKILL.md) |
+| `skills.k-parent-study-coach` | k-parent-study-coach | `skill` | `concept` | `documented` | `repo-only` | [`skills/k-parent-study-coach/SKILL.md`](../skills/k-parent-study-coach/SKILL.md) |
 | `skills.k-parent-travel-recommender` | k-parent-travel-recommender | `skill` | `implemented` | `fixture-tested` | `repo-only` | [`skills/k-parent-travel-recommender/SKILL.md`](../skills/k-parent-travel-recommender/SKILL.md) |
 
 ## packages

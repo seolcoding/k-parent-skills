@@ -274,6 +274,22 @@
       "backingPackages": ["packages.k-parent-core"]
     },
     {
+      "id": "skills.k-parent-study-coach",
+      "name": "k-parent-study-coach",
+      "kind": "skill",
+      "maturity": "concept",
+      "verification": "documented",
+      "deployment": "repo-only",
+      "availability": "current",
+      "canonicalPath": "skills/k-parent-study-coach/SKILL.md",
+      "tracking": "git",
+      "lastVerified": "2026-10-28",
+      "sensitivity": "public",
+      "declaredPhase": "concept",
+      "backingPackages": [],
+      "gap": "Socratic coaching loop and spaced-review scheduling are concept-only; no deterministic package or app surface yet"
+    },
+    {
       "id": "skills.k-parent-travel-recommender",
       "name": "k-parent-travel-recommender",
       "kind": "skill",

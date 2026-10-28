@@ -80,3 +80,5 @@ metadata:
 ## 관련 문서
 
 - `docs/features/k-parent-quiz-maker.md`
+- `references/achievement-standards.md`
+- `references/mastery-review-plan.md` — 문항 은행·숙달 게이트·예정된 반복 다음 단계 설계(DeepTutor 구조 참고, 식별 없는 로컬 상태만 사용)

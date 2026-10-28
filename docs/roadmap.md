@@ -45,6 +45,7 @@ K-Parent Skills는 `학교`, `학원`, `놀이`, `생활`, `트렌드`, `쇼핑`
 - `k-parent-knowledge-helper`: 부모 일반 지식 질의응답 컨셉
 - `k-parent-content-recommender`: 유튜브 채널·영상, 교과 연계, 차 안 오디오형 콘텐츠, 대화 주제 추천
 - `k-parent-quiz-maker`: 나이스 시간표로 오늘 배운 과목을 확인하고 성취기준 기반 결정적 복습 퀴즈 생성(`packages/k-parent-quiz-core`, 앱 표면 `apps/k-parent-quiz-app`)
+- `k-parent-study-coach`: 숙제를 대신 해주지 않고 소크라틱 질문으로 함께 풀게 돕는 숙제 코치·간격 반복 컨셉(DeepTutor 구조 참고, `docs/research/deeptutor-idea-integration-2026-10-28.md`)
 - `k-parent-setup`: fixture-first 실행 환경과 부모 API 시크릿 파일 권한 진단
 - `k-parent-outdoor-check`: 미세먼지·날씨 기반 등원·바깥놀이 판단 컨셉 (k-skill 개작, 키 없이 공개 프록시)
 - `k-parent-child-health`: 아이 약·식품 안전과 야간·휴일 진료 경로 컨셉 (k-skill 개작, 위험 신호 우선)

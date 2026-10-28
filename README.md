@@ -36,6 +36,7 @@ K-Parent Skills는 개별 스킬을 아래 디파트먼트로 묶어 운영합�
 | 학원 | 학원 안내문·학원 정보 | `k-parent-academy-connector` | 학원 공지에서 수업, 보강, 숙제, 시험, 수강료 마감을 추출하고 일정 후보로 정리, NEIS 학원교습소정보로 등록·휴원·신고 교습비 확인(키 없으면 5건) | 필요할 수 있음 | [학원 안내문 기능 문서](docs/features/k-parent-academy-connector.md) |
 | 학교 | 학교문서 스캔 | `k-parent-school-doc-capture` | 학교 안내문 사진을 OCR로 저장하고 일정·준비물·신청 마감 캘린더 후보로 정리 | 필요할 수 있음 | [학교문서 스캔 기능 문서](docs/features/k-parent-school-doc-capture.md) |
 | 쇼핑 | 준비물 쇼핑 | `k-parent-shopping-recommender` | 준비물·교재·육아용품 구매 후보를 정리하고 쿠팡 어필리에이트 링크를 선택적으로 제공 | 필요할 수 있음 | [준비물 쇼핑 기능 문서](docs/features/k-parent-shopping-recommender.md) |
+| 학교 | 숙제 코치 | `k-parent-study-coach` | 숙제를 대신 해주지 않고 소크라틱 질문으로 함께 풀게 돕고 간격 반복 복습 후보를 안내 (컨셉) | 불필요 | [숙제 코치 기능 문서](docs/features/k-parent-study-coach.md) |
 | 생활 | 모바일 에이전트 | `k-parent-mobile-agent` | 서버 배포형 모바일 부모 에이전트 제품 표면 | 필요할 수 있음 | [모바일 에이전트 컨셉 문서](docs/features/k-parent-mobile-agent.md) |
 | 트렌드 | 데이터 수집 | `k-parent-data-collector` | 학교데이터, 시간표, 평생교육, 축제, 행사, 트렌드 크롤링 | 불필요 | [데이터 수집 기능 문서](docs/features/k-parent-data-collector.md) |
 | 생활 | 자녀 스케줄 | `k-parent-schedule-manager` | 자녀 스케줄, 가족 캘린더, 리마인더 후보 관리 | 필요할 수 있음 | [스케줄 관리 기능 문서](docs/features/k-parent-schedule-manager.md) |
